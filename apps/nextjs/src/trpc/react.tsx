@@ -14,6 +14,7 @@ import SuperJSON from "superjson";
 import type { AppRouter } from "@acme/api";
 
 import { env } from "~/env";
+import { getAccessToken } from "~/lib/client-auth";
 import { createQueryClient } from "./query-client";
 
 let browserQueryClient: QueryClient | undefined;
@@ -63,7 +64,10 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
           url: getTrpcBatchHttpUrl(),
           headers() {
             const headers = new Headers();
-            headers.set("x-trpc-source", "nextjs-static");
+            const token = getAccessToken();
+            if (token) {
+              headers.set("Authorization", `Bearer ${token}`);
+            }
             return headers;
           },
         }),
