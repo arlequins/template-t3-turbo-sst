@@ -28,9 +28,9 @@
     "ui-add": "turbo run ui-add",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "sst:dev": "pnpm --filter @acme/nextjs sst:dev",
-    "sst:deploy": "pnpm --filter @acme/nextjs sst:deploy",
-    "sst:types": "pnpm --filter @acme/nextjs sst:install"
+    "frontend:sst:dev": "pnpm -F @acme/nextjs sst:dev",
+    "frontend:sst:deploy": "pnpm -F @acme/nextjs sst:deploy",
+    "frontend:sst:types": "pnpm -F @acme/nextjs sst:install"
   },
   "devDependencies": {
     "@acme/prettier-config": "workspace:*",

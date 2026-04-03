@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
-/// <reference path="./.sst/platform/config.d.ts" />
+/// <reference path="./sst-globals.d.ts" />
 
 /**
  * Static Next.js (`next build` + `output: "export"`) → S3 + CloudFront via SST `StaticSite`.
@@ -12,11 +11,17 @@
  */
 export default $config({
   app(input) {
+    // Local machines only: set `SST_AWS_PROFILE` in shell or `apps/nextjs/.env` (do not set in CI/prod).
+    const localAwsProfile = process.env.SST_AWS_PROFILE?.trim();
+
     return {
       name: "template-t3-turbo-sst",
       removal: input?.stage === "production" ? "retain" : "remove",
-      protect: ["production"].includes(input?.stage),
+      protect: input?.stage === "production",
       home: "aws",
+      ...(localAwsProfile
+        ? { providers: { aws: { profile: localAwsProfile } } }
+        : {}),
     };
   },
   async run() {
