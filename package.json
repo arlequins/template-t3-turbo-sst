@@ -17,7 +17,7 @@
     "db:seed": "turbo -F @acme/db seed",
     "db:studio": "turbo -F @acme/db studio",
     "dev": "turbo watch dev --continue",
-    "dev:next": "turbo watch dev -F @acme/nextjs...",
+    "dev:next": "turbo watch dev -F @acme/frontend...",
     "format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
     "format:fix": "turbo run format --continue -- --write --cache --cache-location .cache/.prettiercache",
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
@@ -28,9 +28,9 @@
     "ui-add": "turbo run ui-add",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "frontend:sst:dev": "pnpm -F @acme/nextjs sst:dev",
-    "frontend:sst:deploy": "pnpm -F @acme/nextjs sst:deploy",
-    "frontend:sst:types": "pnpm -F @acme/nextjs sst:install"
+    "frontend:sst:dev": "pnpm -F @acme/frontend sst:dev",
+    "frontend:sst:deploy": "pnpm -F @acme/frontend sst:deploy",
+    "frontend:sst:types": "pnpm -F @acme/frontend sst:install"
   },
   "devDependencies": {
     "@acme/prettier-config": "workspace:*",

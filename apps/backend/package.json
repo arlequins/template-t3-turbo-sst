@@ -1,5 +1,5 @@
 {
-  "name": "@acme/tanstack-start",
+  "name": "@acme/backend",
   "private": true,
   "sideEffects": false,
   "type": "module",

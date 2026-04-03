@@ -1,5 +1,5 @@
 {
-  "name": "@acme/nextjs",
+  "name": "@acme/frontend",
   "private": true,
   "type": "module",
   "scripts": {
