@@ -6,9 +6,9 @@ import { loadMainDatabaseEnv } from "./src/main-database-env";
 const dbEnv = loadMainDatabaseEnv();
 
 export default {
-  schema: "./src/schema.ts",
+  schema: ["./src/schema.ts"],
   dialect: "postgresql",
-  schemaFilter: ["temp"],
+  schemaFilter: ["sample"],
   dbCredentials: {
     host: dbEnv.host,
     port: dbEnv.port,

@@ -20,3 +20,8 @@ const client = postgres({
 });
 
 export const db = drizzle({ client, schema, casing: "snake_case" });
+
+/** Call after one-off scripts/tests so pooled DB connections do not delay process exit. */
+export async function closeMainDatabasePool(): Promise<void> {
+  await client.end({ timeout: 5 });
+}

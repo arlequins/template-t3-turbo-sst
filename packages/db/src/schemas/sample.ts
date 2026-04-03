@@ -3,9 +3,9 @@ import { pgSchema } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-const temp = pgSchema("temp");
+export const sample = pgSchema("sample");
 
-export const Post = temp.table("post", (t) => ({
+export const Post = sample.table("post", (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   title: t.varchar({ length: 256 }).notNull(),
   content: t.text().notNull(),

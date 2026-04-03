@@ -1,31 +1,37 @@
 /// <reference types="node" />
-import { readFile, readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-
 import { sql } from "drizzle-orm";
 
-import { db } from "../src/client";
+import { closeMainDatabasePool, db } from "../src/client";
+
+const Config = {
+  schema: "drizzle",
+  table: "__drizzle_seeds",
+} as const;
+
+const ledgerTable = sql.raw(`"${Config.schema}"."${Config.table}"`);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const seedsRoot = join(__dirname, "seeds");
 
 async function ensureSeedsLedgerTable() {
-  await db.execute(sql`CREATE SCHEMA IF NOT EXISTS drizzle`);
-  await db.execute(sql`
-    CREATE TABLE IF NOT EXISTS drizzle.__drizzle_seeds (
+  await db.execute(sql.raw(`CREATE SCHEMA IF NOT EXISTS "${Config.schema}"`));
+  await db.execute(
+    sql.raw(`
+    CREATE TABLE IF NOT EXISTS "${Config.schema}"."${Config.table}" (
       id serial PRIMARY KEY NOT NULL,
       name text NOT NULL,
       applied_at timestamptz DEFAULT now() NOT NULL,
-      CONSTRAINT __drizzle_seeds_name_unique UNIQUE (name)
+      CONSTRAINT "${Config.table}_name_unique" UNIQUE (name)
     )
-  `);
+  `),
+  );
 }
 
 async function loadAppliedSeedNames(): Promise<Set<string>> {
-  const rows = await db.execute(
-    sql`SELECT name FROM drizzle.__drizzle_seeds`,
-  );
+  const rows = await db.execute(sql`SELECT name FROM ${ledgerTable}`);
   const names = new Set<string>();
   for (const row of rows) {
     const name = (row as Record<string, unknown>).name;
@@ -68,7 +74,7 @@ async function main() {
     await db.transaction(async (tx) => {
       await tx.execute(sql.raw(body));
       await tx.execute(
-        sql`INSERT INTO drizzle.__drizzle_seeds (name) VALUES (${fileName})`,
+        sql`INSERT INTO ${ledgerTable} (name) VALUES (${fileName})`,
       );
     });
     console.log(`Seeded: ${fileName}`);
@@ -77,4 +83,8 @@ async function main() {
   console.log("All seeds completed.");
 }
 
-await main();
+try {
+  await main();
+} finally {
+  await closeMainDatabasePool();
+}

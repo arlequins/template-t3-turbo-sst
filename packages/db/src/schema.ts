@@ -1,1 +1,1 @@
-export * from "./schemas/temp";
+export * from "./schemas/sample";
