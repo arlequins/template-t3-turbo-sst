@@ -32,9 +32,23 @@
     "//#clean": {
       "cache": false
     },
+    "pull": {
+      "cache": false,
+      "interactive": true
+    },
     "push": {
       "cache": false,
       "interactive": true
+    },
+    "create-migration": {
+      "cache": false,
+      "interactive": true
+    },
+    "migrate": {
+      "cache": false
+    },
+    "seed": {
+      "cache": false
     },
     "studio": {
       "cache": false,

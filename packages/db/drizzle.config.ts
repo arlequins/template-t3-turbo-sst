@@ -8,6 +8,7 @@ const dbEnv = loadMainDatabaseEnv();
 export default {
   schema: "./src/schema.ts",
   dialect: "postgresql",
+  schemaFilter: ["temp"],
   dbCredentials: {
     host: dbEnv.host,
     port: dbEnv.port,
