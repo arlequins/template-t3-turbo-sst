@@ -18,6 +18,7 @@
     "db:studio": "turbo -F @acme/db studio",
     "dev": "turbo watch dev --continue",
     "dev:next": "turbo watch dev -F @acme/web...",
+    "dev:sst": "turbo run sst:dev --continue -F @acme/web -F @acme/api",
     "format": "turbo run format --continue -- --cache --cache-location .cache/.prettiercache",
     "format:fix": "turbo run format --continue -- --write --cache --cache-location .cache/.prettiercache",
     "lint": "turbo run lint --continue -- --cache --cache-location .cache/.eslintcache",
@@ -26,10 +27,7 @@
     "postinstall": "pnpm lint:ws",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
-    "sst:ws": "node ./scripts/sst-workspace.mjs",
-    "sst:dev": "turbo run sst:dev --continue -F @acme/web -F @acme/api"
+    "sst:ws": "node ./scripts/sst-workspace.mjs"
   },
   "devDependencies": {
     "@acme/prettier-config": "workspace:*",
