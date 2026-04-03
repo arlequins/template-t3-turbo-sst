@@ -1,5 +1,5 @@
 {
-  "name": "@acme/backend",
+  "name": "@acme/api",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -13,7 +13,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/api": "workspace:*",
+    "@acme/trpc": "workspace:*",
     "@acme/auth": "workspace:*",
     "@acme/db": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",

@@ -15,7 +15,7 @@ export default $config({
     const localAwsProfile = process.env.SST_AWS_PROFILE?.trim();
 
     return {
-      name: "template-t3-turbo-sst",
+      name: "nextjs",
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: input?.stage === "production",
       home: "aws",

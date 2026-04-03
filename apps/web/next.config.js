@@ -12,7 +12,7 @@ const config = {
 
   poweredByHeader: false,
 
-  transpilePackages: ["@acme/api", "@acme/ui", "@acme/validators"],
+  transpilePackages: ["@acme/trpc", "@acme/ui", "@acme/validators"],
 
   trailingSlash: true,
 

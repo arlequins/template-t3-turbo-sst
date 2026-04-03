@@ -7,7 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import type { RouterOutputs } from "@acme/api";
+import type { RouterOutputs } from "../../../../packages/trpc/src";
 import { createPostInputSchema } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
