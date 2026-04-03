@@ -1,9 +1,7 @@
 {
   "extends": "@acme/tsconfig/base.json",
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
     "types": ["node"]
   },
-  "include": ["src", "*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["drizzle.config.ts", "src/main-database-env.ts"]
 }

@@ -16,18 +16,36 @@ import type { AppRouter } from "@acme/api";
 import { env } from "~/env";
 import { createQueryClient } from "./query-client";
 
-let clientQueryClientSingleton: QueryClient | undefined = undefined;
-const getQueryClient = () => {
+let browserQueryClient: QueryClient | undefined;
+
+function getQueryClient() {
   if (typeof window === "undefined") {
-    // Server: always make a new query client
     return createQueryClient();
-  } else {
-    // Browser: use singleton pattern to keep the same query client
-    return (clientQueryClientSingleton ??= createQueryClient());
   }
-};
+  return (browserQueryClient ??= createQueryClient());
+}
 
 export const { useTRPC, TRPCProvider } = createTRPCContext<AppRouter>();
+
+/** Base URL (e.g. `http://localhost:5000`) or full batch URL ending in `/api/trpc`. */
+function getTrpcBatchHttpUrl(): string {
+  const raw = env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
+  try {
+    const u = new URL(raw);
+    const path = u.pathname.replace(/\/+$/, "") ?? "";
+    if (path.endsWith("/api/trpc")) {
+      return `${u.origin}${path}`;
+    }
+    const base = path ? `${u.origin}${path}` : u.origin;
+    return new URL("/api/trpc", `${base}/`).href.replace(/\/$/, "");
+  } catch {
+    return "http://localhost:5000/api/trpc";
+  }
+}
+
+function getNodeEnv(): string {
+  return process.env.NODE_ENV ?? "development";
+}
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
@@ -37,15 +55,15 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
       links: [
         loggerLink({
           enabled: (op) =>
-            env.NODE_ENV === "development" ||
+            getNodeEnv() === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,
-          url: getBaseUrl() + "/api/trpc",
+          url: getTrpcBatchHttpUrl(),
           headers() {
             const headers = new Headers();
-            headers.set("x-trpc-source", "nextjs-react");
+            headers.set("x-trpc-source", "nextjs-static");
             return headers;
           },
         }),
@@ -61,10 +79,3 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     </QueryClientProvider>
   );
 }
-
-const getBaseUrl = () => {
-  if (typeof window !== "undefined") return window.location.origin;
-  if (env.VERCEL_URL) return `https://${env.VERCEL_URL}`;
-  // eslint-disable-next-line no-restricted-properties
-  return `http://localhost:${process.env.PORT ?? 3000}`;
-};

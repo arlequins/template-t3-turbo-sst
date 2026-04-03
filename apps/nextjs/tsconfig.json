@@ -8,6 +8,11 @@
     },
     "plugins": [{ "name": "next" }]
   },
-  "include": [".", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "next.config.js",
+    "eslint.config.ts",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", ".next", "out"]
 }

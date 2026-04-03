@@ -7,14 +7,18 @@ await jiti.import("./src/env");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  /** Enables hot reloading for local packages without a build step */
-  transpilePackages: [
-    "@acme/api",
-    "@acme/auth",
-    "@acme/db",
-    "@acme/ui",
-    "@acme/validators",
-  ],
+  /** Static HTML export for S3 + CloudFront (no OpenNext / Node server in AWS for this app) */
+  output: "export",
+
+  poweredByHeader: false,
+
+  transpilePackages: ["@acme/api", "@acme/ui", "@acme/validators"],
+
+  trailingSlash: true,
+
+  images: {
+    unoptimized: true,
+  },
 
   /** We already do linting and typechecking as separate tasks in CI */
   typescript: { ignoreBuildErrors: true },

@@ -13,6 +13,10 @@ coverage
 out/
 next-env.d.ts
 
+# sst / open-next
+.sst/
+.open-next/
+
 # nitro
 .nitro/
 .output/
@@ -53,3 +57,6 @@ dist/
 
 # tanstack
 .tanstack
+
+# pnpm
+.pnpm-store

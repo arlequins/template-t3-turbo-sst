@@ -1,14 +1,20 @@
+/// <reference types="node" />
 import type { Config } from "drizzle-kit";
 
-if (!process.env.POSTGRES_URL) {
-  throw new Error("Missing POSTGRES_URL");
-}
+import { loadMainDatabaseEnv } from "./src/main-database-env";
 
-const nonPoolingUrl = process.env.POSTGRES_URL.replace(":6543", ":5432");
+const dbEnv = loadMainDatabaseEnv();
 
 export default {
   schema: "./src/schema.ts",
   dialect: "postgresql",
-  dbCredentials: { url: nonPoolingUrl },
+  dbCredentials: {
+    host: dbEnv.host,
+    port: dbEnv.port,
+    user: dbEnv.user,
+    password: dbEnv.password,
+    database: dbEnv.database,
+    ssl: dbEnv.ssl,
+  },
   casing: "snake_case",
 } satisfies Config;

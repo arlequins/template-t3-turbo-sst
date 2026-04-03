@@ -1,38 +1,41 @@
 import { createEnv } from "@t3-oss/env-nextjs";
-import { vercel } from "@t3-oss/env-nextjs/presets-zod";
 import { z } from "zod/v4";
 
-import { authEnv } from "@acme/auth/env";
+const fallbackSite = "http://localhost:3000";
+const fallbackApiUrl = "http://localhost:5000";
 
+/**
+ * Public env vars for the client bundle and build time.
+ * For SST `StaticSite` builds: inject via `environment` in `sst.config.ts`, or export in the shell before `sst deploy`.
+ */
 export const env = createEnv({
-  extends: [authEnv(), vercel()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])
       .default("development"),
   },
-  /**
-   * Specify your server-side environment variables schema here.
-   * This way you can ensure the app isn't built with invalid env vars.
-   */
-  server: {
-    POSTGRES_URL: z.url(),
-  },
-
-  /**
-   * Specify your client-side environment variables schema here.
-   * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
-   */
+  server: {},
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_SITE_URL: z.preprocess(
+      (v) => (typeof v === "string" && v.length > 0 ? v : fallbackSite),
+      z.string().url(),
+    ),
+    NEXT_PUBLIC_API_URL: z.preprocess(
+      (v) => (typeof v === "string" && v.length > 0 ? v : fallbackApiUrl),
+      z.string().url(),
+    ),
   },
-  /**
-   * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
+  /*
+   * Specify what values should be validated by your schemas above.
+   *
+   * If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
+   * For Next.js >= 13.4.4, you can use the experimental__runtimeEnv option and
+   * only specify client-side variables.
    */
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
   skipValidation:
     !!process.env.CI || process.env.npm_lifecycle_event === "lint",

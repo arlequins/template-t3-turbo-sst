@@ -3,12 +3,12 @@
 import { useForm } from "@tanstack/react-form";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
-  useSuspenseQuery,
 } from "@tanstack/react-query";
 
 import type { RouterOutputs } from "@acme/api";
-import { CreatePostSchema } from "@acme/db/schema";
+import { createPostInputSchema } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import {
@@ -49,7 +49,7 @@ export function CreatePostForm() {
       title: "",
     },
     validators: {
-      onSubmit: CreatePostSchema,
+      onSubmit: createPostInputSchema,
     },
     onSubmit: (data) => createPost.mutate(data.value),
   });
@@ -119,9 +119,19 @@ export function CreatePostForm() {
 
 export function PostList() {
   const trpc = useTRPC();
-  const { data: posts } = useSuspenseQuery(trpc.post.all.queryOptions());
+  const { data: posts, isPending } = useQuery(trpc.post.all.queryOptions());
 
-  if (posts.length === 0) {
+  if (isPending) {
+    return (
+      <div className="flex w-full flex-col gap-4">
+        <PostCardSkeleton />
+        <PostCardSkeleton />
+        <PostCardSkeleton />
+      </div>
+    );
+  }
+
+  if (!posts?.length) {
     return (
       <div className="relative flex w-full flex-col gap-4">
         <PostCardSkeleton pulse={false} />
