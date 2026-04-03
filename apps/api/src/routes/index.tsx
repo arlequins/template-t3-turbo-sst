@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       GET: () => {
         return json({
           message:
-            "welcome to root route",
+            "welcome to root",
         });
       },
     },

@@ -1,10 +1,10 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { loadMainDatabaseEnv } from "./main-database-env";
+import { loadDatabaseEnv } from "./env";
 import * as schema from "./schema";
 
-const dbEnv = loadMainDatabaseEnv();
+const dbEnv = loadDatabaseEnv();
 
 /** RDS / long-lived Node: tune via POSTGRES_POOL_MAX (default 10). */
 const client = postgres({

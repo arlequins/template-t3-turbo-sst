@@ -54,6 +54,10 @@
       "cache": false,
       "persistent": true
     },
+    "sst:dev": {
+      "cache": false,
+      "persistent": true
+    },
     "ui-add": {
       "cache": false,
       "interactive": true

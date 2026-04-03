@@ -26,7 +26,7 @@ function parseSsl(value: string): MainDatabaseSsl {
 }
 
 /** Shared by `client.ts` and `drizzle.config.ts`. */
-export function loadMainDatabaseEnv(): MainDatabaseEnv {
+export function loadDatabaseEnv(): MainDatabaseEnv {
   const host = process.env.MAIN_DATABASE_HOST;
   const portStr = process.env.MAIN_DATABASE_PORT;
   const user = process.env.MAIN_DATABASE_USER;

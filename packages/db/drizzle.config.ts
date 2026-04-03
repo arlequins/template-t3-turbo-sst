@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import type { Config } from "drizzle-kit";
 
-import { loadMainDatabaseEnv } from "./src/main-database-env";
+import { loadDatabaseEnv } from "./src/env";
 
-const dbEnv = loadMainDatabaseEnv();
+const dbEnv = loadDatabaseEnv();
 
 export default {
   schema: ["./src/schema.ts"],

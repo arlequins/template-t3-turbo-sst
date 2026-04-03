@@ -21,4 +21,11 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  // SST TanStack Start + AWS: https://sst.dev/docs/start/aws/tanstack/
+  nitro: {
+    preset: process.env.NITRO_PRESET ?? "aws-lambda",
+    awsLambda: {
+      streaming: true,
+    },
+  },
 });
