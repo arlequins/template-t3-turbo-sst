@@ -3,25 +3,30 @@
 /**
  * Static Next.js (`next build` + `output: "export"`) → S3 + CloudFront via SST `StaticSite`.
  *
- * Run all SST commands from this package (cwd = `apps/nextjs`).
+ * Run all SST commands from this package (cwd = `apps/web`).
  *
  * First-time setup: `pnpm sst:install` (here) or `pnpm sst:types` from repo root
  * Local: `pnpm sst:dev` (here) or root `pnpm sst:dev`
  * Deploy: set `NEXT_PUBLIC_*` then `pnpm sst:deploy -- --stage production`
+ *
+ * AWS: default region Tokyo (`ap-northeast-1`) for S3/StaticSite. Override with `SST_AWS_REGION`.
  */
 export default $config({
   app(input) {
-    // Local machines only: set `SST_AWS_PROFILE` in shell or `apps/nextjs/.env` (do not set in CI/prod).
     const localAwsProfile = process.env.SST_AWS_PROFILE?.trim();
+    const region = process.env.SST_AWS_REGION?.trim() ?? "us-east-1";
 
     return {
-      name: "nextjs",
+      name: "web",
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: input?.stage === "production",
       home: "aws",
-      ...(localAwsProfile
-        ? { providers: { aws: { profile: localAwsProfile } } }
-        : {}),
+      providers: {
+        aws: {
+          region,
+          ...(localAwsProfile ? { profile: localAwsProfile } : {}),
+        },
+      },
     };
   },
   async run() {

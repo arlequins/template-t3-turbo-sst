@@ -30,7 +30,8 @@
     "ios": "expo run:ios",
     "web:sst:dev": "pnpm -F @acme/web sst:dev",
     "web:sst:deploy": "pnpm -F @acme/web sst:deploy",
-    "web:sst:types": "pnpm -F @acme/web sst:install"
+    "web:sst:types": "pnpm -F @acme/web sst:install",
+    "web:sst:remove": "pnpm -F @acme/web sst:remove"
   },
   "devDependencies": {
     "@acme/prettier-config": "workspace:*",

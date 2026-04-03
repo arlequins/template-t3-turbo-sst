@@ -10,6 +10,7 @@
     "sst:dev": "sst dev",
     "sst:deploy": "sst deploy",
     "sst:install": "sst install",
+    "sst:remove": "sst remove",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
     "preview": "npx --yes serve@14 out",
