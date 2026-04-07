@@ -11,7 +11,7 @@ import {
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
-import type { AppRouter } from "../../../../packages/trpc/src";
+import { TRPC_HTTP_PATH, AppRouter } from "@acme/trpc";
 
 import { env } from "~/env";
 import { getAccessToken } from "~/lib/client-auth";
@@ -28,19 +28,22 @@ function getQueryClient() {
 
 export const { useTRPC, TRPCProvider } = createTRPCContext<AppRouter>();
 
-/** Base URL (e.g. `http://localhost:5000`) or full batch URL ending in `/api/trpc`. */
+/** Base URL (e.g. `http://localhost:5000`) or full batch URL that already includes the tRPC HTTP path. */
 function getTrpcBatchHttpUrl(): string {
   const raw = env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
   try {
     const u = new URL(raw);
     const path = u.pathname.replace(/\/+$/, "") ?? "";
-    if (path.endsWith("/api/trpc")) {
+    if (path.endsWith(TRPC_HTTP_PATH)) {
       return `${u.origin}${path}`;
     }
     const base = path ? `${u.origin}${path}` : u.origin;
-    return new URL("/api/trpc", `${base}/`).href.replace(/\/$/, "");
+    return new URL(TRPC_HTTP_PATH, `${base}/`).href.replace(/\/$/, "");
   } catch {
-    return "http://localhost:5000/api/trpc";
+    return new URL(TRPC_HTTP_PATH, "http://localhost:5000/").href.replace(
+      /\/$/,
+      "",
+    );
   }
 }
 

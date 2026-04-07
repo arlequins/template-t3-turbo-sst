@@ -1,11 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { AppRouter, createTRPCContext } from "@acme/trpc";
+import {
+  AppRouter,
+  TRPC_HTTP_PATH,
+  TRPC_HTTP_ROUTE_SPLAT,
+  createTRPCContext,
+} from "@acme/trpc";
 
 import { corsPreflightResponse, withCors } from "~/server/cors";
-
-const TRPC_HTTP_PATH = "/api/trpc";
 
 export async function handleAppRouterTrpcRequest(
   req: Request,
@@ -25,7 +28,7 @@ export async function handleAppRouterTrpcRequest(
   return withCors(res);
 }
 
-export const Route = createFileRoute("/api/trpc/$")({
+export const Route = createFileRoute(TRPC_HTTP_ROUTE_SPLAT)({
   server: {
     handlers: {
       GET: ({ request }) => handleAppRouterTrpcRequest(request),
