@@ -66,7 +66,7 @@ To get it running, follow the steps below:
 
 > [!NOTE]
 >
-> This repo uses `apps/web` (Next.js) and `apps/api` (TanStack Router + tRPC). Do not add an `apps/nextjs` folder: `pnpm-workspace.yaml` includes `apps/*`, so any subdirectory without a `package.json` triggers workspace tooling warnings (for example from sherif).
+> This repo uses `apps/web` (Next.js) and `apps/api` (TanStack Router + tRPC). Do not add an `apps/web` folder: `pnpm-workspace.yaml` includes `apps/*`, so any subdirectory without a `package.json` triggers workspace tooling warnings (for example from sherif).
 
 ```bash
 # Install dependencies

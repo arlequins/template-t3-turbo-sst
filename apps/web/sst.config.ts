@@ -46,7 +46,7 @@ export default $config({
       dev: {
         command: "pnpm run dev",
         directory: ".",
-        title: "nextjs",
+        title: "web",
       },
     });
   },
