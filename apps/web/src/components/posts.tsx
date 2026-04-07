@@ -7,7 +7,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import type { RouterOutputs } from "@acme/trpc/client";
+import {
+  getTrpcUserFacingMessage,
+  type RouterOutputs,
+} from "@acme/trpc/client";
 import { createPostInputSchema } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -34,11 +37,7 @@ export function CreatePostForm() {
         await queryClient.invalidateQueries(trpc.post.pathFilter());
       },
       onError: (err) => {
-        toast.error(
-          err.data?.code === "UNAUTHORIZED"
-            ? "You must be logged in to post"
-            : "Failed to create post",
-        );
+        toast.error(getTrpcUserFacingMessage(err));
       },
     }),
   );
@@ -119,7 +118,9 @@ export function CreatePostForm() {
 
 export function PostList() {
   const trpc = useTRPC();
-  const { data: posts, isPending } = useQuery(trpc.post.all.queryOptions());
+  const { data: posts, isPending, isError, error } = useQuery(
+    trpc.post.all.queryOptions(),
+  );
 
   if (isPending) {
     return (
@@ -127,6 +128,18 @@ export function PostList() {
         <PostCardSkeleton />
         <PostCardSkeleton />
         <PostCardSkeleton />
+      </div>
+    );
+  }
+
+  if (isError) {
+    const message = getTrpcUserFacingMessage(error);
+    return (
+      <div
+        className="bg-destructive/15 text-destructive border-destructive/40 rounded-lg border p-6 text-center"
+        role="alert"
+      >
+        <p className="text-base font-medium">{message}</p>
       </div>
     );
   }
@@ -165,11 +178,7 @@ export function PostCard(props: {
         await queryClient.invalidateQueries(trpc.post.pathFilter());
       },
       onError: (err) => {
-        toast.error(
-          err.data?.code === "UNAUTHORIZED"
-            ? "You must be logged in to delete a post"
-            : "Failed to delete post",
-        );
+        toast.error(getTrpcUserFacingMessage(err));
       },
     }),
   );

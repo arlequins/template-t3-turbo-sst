@@ -1,5 +1,3 @@
-import "server-only";
-
 /**
  * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
  * 1. You want to modify request context (see Part 1)
@@ -14,6 +12,8 @@ import { z, ZodError } from "zod/v4";
 
 import { authApi } from "@acme/auth";
 import { db } from "@acme/db/client";
+
+import { formatTrpcErrorShape } from "./errors";
 
 /**
  * 1. CONTEXT
@@ -46,16 +46,15 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
-  errorFormatter: ({ shape, error }) => ({
-    ...shape,
-    data: {
-      ...shape.data,
+  errorFormatter: ({ shape, error }) =>
+    formatTrpcErrorShape({
+      shape,
+      error,
       zodError:
         error.cause instanceof ZodError
           ? z.flattenError(error.cause as ZodError<Record<string, unknown>>)
           : null,
-    },
-  }),
+    }),
 });
 
 /**
