@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * GetSecretValue → overwrite `--out` with SM contents only (see `lib/shared.mjs`).
+ * GetSecretValue → overwrite `.env` (repo root or `apps/<name>/.env` via --env-target / ENV_TARGET).
  */
 import { writeFileSync } from "node:fs";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
@@ -8,10 +8,12 @@ import {
   applyProfile,
   fetchSecret,
   parseGlobalFlags,
+  resolveDefaultEnvPath,
+  resolveEnvTargetCli,
   resolveRegion,
   resolveSecretBase,
   resolveSecretId,
-  resolveStage,
+  resolveStageCli,
   serializeEnv,
 } from "./lib/shared.mjs";
 
@@ -19,13 +21,15 @@ function printPullHelp() {
   console.log(`Usage: node pull-secret-env.mjs [options]
 
 Options:
-  --secret-name, --path <base>   Secret base name (with stage → {stage}-{base}); or full ARN
-  --stage <STAGE>               Prefix: SST_STAGE / STAGE
-  --region, --profile, --out, --dry-run
+  --secret-name, --path <prefix>   Middle path (not ARN), e.g. core/environments
+  --env-target <root|web|…>       Last SM path segment + default .env path (root → repo .env; else apps/<name>/.env)
+  --stage <STAGE>                 Path prefix (leading segment), e.g. offline → offline/core/environments/root
+  --region, --profile, --out (overrides default .env path), --dry-run
 
 Environment:
-  SECRET_NAME (legacy: SSM_ENV_PATH)   Secret base name or ARN
-  SST_STAGE / STAGE
+  SECRET_NAME (legacy: SSM_ENV_PATH)   Same as --secret-name prefix or full ARN
+  ENV_TARGET   Same as --env-target
+  SM_PREFIX / SST_STAGE / STAGE   Prefix (SM_PREFIX avoids SST_STAGE=localhost from app .env)
   SECRETS_MANAGER_PLAIN_KEY   When secret is plain text (pull → one env key, default SECRET_VALUE)
   AWS_REGION / SST_AWS_REGION   Default us-east-1
   AWS_PROFILE / SST_AWS_PROFILE
@@ -46,8 +50,18 @@ async function main() {
     );
     process.exit(1);
   }
-  const stage = resolveStage(args);
-  const secretId = resolveSecretId(base, stage);
+  const envTarget = resolveEnvTargetCli(args);
+  const stagePrefix = resolveStageCli(args);
+  const secretId = resolveSecretId(stagePrefix, base, envTarget);
+
+  let outFile;
+  try {
+    outFile = args.outFile ?? resolveDefaultEnvPath(envTarget);
+  } catch (e) {
+    console.error("pull:", e.message ?? e);
+    process.exit(1);
+  }
+
   applyProfile(
     (args.profile?.trim() || undefined) ??
     process.env.AWS_PROFILE?.trim() ??
@@ -73,9 +87,9 @@ async function main() {
     console.log(body);
     return;
   }
-  writeFileSync(args.outFile, body, "utf8");
+  writeFileSync(outFile, body, "utf8");
   console.log(
-    `Wrote ${Object.keys(fromRemote).length} key(s) from ${secretId} into ${args.outFile} (replaced file).`,
+    `Wrote ${Object.keys(fromRemote).length} key(s) from ${secretId} into ${outFile} (replaced file).`,
   );
 }
 

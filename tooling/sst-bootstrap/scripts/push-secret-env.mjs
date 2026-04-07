@@ -7,15 +7,15 @@ import { isAbsolute, join } from "node:path";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 import {
   applyProfile,
-  DEFAULT_ENV_FILE,
   fileToSecretString,
-  isSecretsManagerArn,
   parseGlobalFlags,
   putSecret,
+  resolveDefaultEnvPath,
+  resolveEnvTargetCli,
   resolveRegion,
   resolveSecretBase,
   resolveSecretId,
-  resolveStage,
+  resolveStageCli,
 } from "./lib/shared.mjs";
 
 function printPushHelp() {
@@ -26,14 +26,16 @@ Uploads a file to Secrets Manager as SecretString (JSON).
   .json files must contain a single JSON object.
 
 Options:
-  --file <path>        Default: repo root .env
-  --secret-name <base> Required logical name (final id = {stage}-{base} unless ARN)
-  --stage <STAGE>      Required unless SECRET_NAME is an ARN (prefix for secret name)
+  --file <path>             Overrides default input file from --env-target
+  --secret-name <prefix>    Middle path, e.g. core/environments
+  --env-target <root|web|…> Last SM segment + default .env path (root → repo .env; else apps/<name>/.env)
+  --stage <STAGE>           Path prefix (leading segment), e.g. offline → offline/core/environments/root
   --region, --profile, --dry-run
 
 Environment:
-  SECRET_NAME          Secret base name (not the stage-prefixed id)
-  SST_STAGE / STAGE
+  SECRET_NAME          Same as --secret-name (or full ARN)
+  ENV_TARGET           Same as --env-target when --file omitted
+  SM_PREFIX / SST_STAGE / STAGE   Prefix (prefer SM_PREFIX for pull/push)
   AWS_REGION / SST_AWS_REGION
   AWS_PROFILE / SST_AWS_PROFILE
 `);
@@ -53,11 +55,11 @@ async function main() {
     );
     process.exit(1);
   }
-  const stage = resolveStage(args);
-  if (!isSecretsManagerArn(base) && !stage?.trim()) {
-    console.error(
-      "push: set --stage or SST_STAGE / STAGE (secret id will be {stage}-{SECRET_NAME})",
-    );
+  let defaultEnvPath;
+  try {
+    defaultEnvPath = resolveDefaultEnvPath(resolveEnvTargetCli(args));
+  } catch (e) {
+    console.error("push:", e.message ?? e);
     process.exit(1);
   }
 
@@ -65,7 +67,7 @@ async function main() {
     ? isAbsolute(args.file)
       ? args.file
       : join(process.cwd(), args.file)
-    : DEFAULT_ENV_FILE;
+    : defaultEnvPath;
   if (!existsSync(filePath)) {
     console.error(`push: file not found: ${filePath}`);
     process.exit(1);
@@ -79,7 +81,11 @@ async function main() {
     process.exit(1);
   }
 
-  const secretId = resolveSecretId(base, stage);
+  const secretId = resolveSecretId(
+    resolveStageCli(args),
+    base,
+    resolveEnvTargetCli(args),
+  );
   if (args.dryRun) {
     console.log(`SecretId: ${secretId}`);
     console.log(secretString);

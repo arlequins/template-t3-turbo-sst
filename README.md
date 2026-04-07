@@ -29,31 +29,17 @@ It uses [Turborepo](https://turborepo.com) and contains:
 .vscode
   └─ Recommended extensions and settings for VSCode users
 apps
-  ├─ expo
-  │   ├─ Expo SDK 54
-  │   ├─ React Native 0.81 using React 19
-  │   ├─ Navigation using Expo Router
-  │   ├─ Tailwind CSS v4 using NativeWind v5
-  │   └─ Typesafe API calls using tRPC
-  ├─ nextjs
-  │   ├─ Next.js 15
-  │   ├─ React 19
-  │   ├─ Tailwind CSS v4
-  │   └─ E2E Typesafe API Server & Client
-  └─ tanstack-start
-      ├─ Tanstack Start v1 (rc)
-      ├─ React 19
-      ├─ Tailwind CSS v4
-      └─ E2E Typesafe API Server & Client
+  ├─ web
+  │   ├─ Next.js (static export + SST StaticSite)
+  │   ├─ React 19, Tailwind CSS v4
+  │   └─ tRPC client
+  └─ api
+      ├─ TanStack Router + Vite (Hono-style API routes)
+      ├─ tRPC server
+      └─ SST for deploy/dev
 packages
-  ├─ api
-  │   └─ tRPC v11 router definition
-  ├─ auth
-  │   └─ Authentication using better-auth.
-  ├─ db
-  │   └─ Typesafe db calls using Drizzle & Supabase
-  └─ ui
-      └─ Start of a UI package for the webapp using shadcn-ui
+  ├─ auth, db, service, trpc, ui, validators
+  │   └─ shared libraries (Drizzle, better-auth, tRPC router, etc.)
 tooling
   ├─ eslint
   │   └─ shared, fine-grained, eslint presets
@@ -80,7 +66,7 @@ To get it running, follow the steps below:
 
 > [!NOTE]
 >
-> While the repo does contain both a Next.js and Tanstack Start version of a web app, you can pick which one you like to use and delete the other folder before starting the setup.
+> This repo uses `apps/web` (Next.js) and `apps/api` (TanStack Router + tRPC). Do not add an `apps/nextjs` folder: `pnpm-workspace.yaml` includes `apps/*`, so any subdirectory without a `package.json` triggers workspace tooling warnings (for example from sherif).
 
 ```bash
 # Install dependencies
@@ -94,14 +80,17 @@ Use a root `.env` before running database or app commands. Pick one approach:
 **A. AWS Secrets Manager (good for a fresh clone or new machine)**  
 With credentials that can call `secretsmanager:GetSecretValue` (for example `AWS_PROFILE` or `SST_AWS_PROFILE`), set at least:
 
-- `SECRET_NAME` — secret *base* name in AWS (not the stage-prefixed id).
-- `SST_STAGE` or `STAGE` — prepended so the secret id becomes `{stage}-{SECRET_NAME}` (skip if `SECRET_NAME` is a full secret ARN).
+- `SECRET_NAME` — middle path of the secret, e.g. `core/environments`.
+- `ENV_TARGET` — last path segment and which `.env` file to use, e.g. `root` → secret `…/root` and repo root `.env`.
+- `SM_PREFIX`, or `SST_STAGE` / `STAGE` (optional) — **leading** path segment (prefix), e.g. `offline` → `offline/core/environments/root`. Prefer `SM_PREFIX` or `--stage` so app `SST_STAGE=localhost` does not affect the secret name (skip if `SECRET_NAME` is a full ARN).
 - `AWS_REGION` — same region as the secret (or use `SST_AWS_REGION`).
 
-Then pull the secret into the repo root `.env` (the file is **replaced**; nothing is merged from an old file):
+Then pull the secret into a `.env` file (the file is **replaced**; nothing is merged from an old file). By default that is the **repo root** `.env`. To write `apps/web/.env` or `apps/api/.env`, set `ENV_TARGET=web` (or `api`) or pass `--env-target web` (the `apps/<name>` directory must already exist).
 
 ```bash
 pnpm env:pull
+# e.g. apps/web/.env
+pnpm env:pull -- --env-target web
 ```
 
 For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.env.example). Implementation: [`tooling/sst-bootstrap/scripts/pull-secret-env.mjs`](./tooling/sst-bootstrap/scripts/pull-secret-env.mjs).
@@ -110,7 +99,7 @@ For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.
 Copy [`.env.example`](./.env.example) to `.env` and fill in values.
 
 **Uploading local env to Secrets Manager**  
-When you want to sync a file *to* AWS (create or update the secret), use `pnpm env:push` after setting the same naming variables. Default input is repo root `.env`; `.json` root objects are also supported. Run `pnpm env:push -- --help`. Script: [`tooling/sst-bootstrap/scripts/push-secret-env.mjs`](./tooling/sst-bootstrap/scripts/push-secret-env.mjs).
+When you want to sync a file _to_ AWS (create or update the secret), use `pnpm env:push` after setting the same naming variables. The default input path follows `ENV_TARGET` / `--env-target` like pull (root `.env` vs `apps/<name>/.env`). `.json` root objects are also supported. Run `pnpm env:push -- --help`. Script: [`tooling/sst-bootstrap/scripts/push-secret-env.mjs`](./tooling/sst-bootstrap/scripts/push-secret-env.mjs).
 
 ### 2. Database schema
 

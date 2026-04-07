@@ -94,6 +94,8 @@
     "SST_AWS_PROFILE",
     "SST_AWS_REGION",
     "AWS_PROFILE",
-    "AWS_REGION"
+    "AWS_REGION",
+    "ENV_TARGET",
+    "SM_PREFIX"
   ]
 }

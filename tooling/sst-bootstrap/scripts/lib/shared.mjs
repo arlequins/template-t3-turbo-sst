@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -13,18 +13,46 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = join(__dirname, "../../../..");
 export const DEFAULT_ENV_FILE = join(REPO_ROOT, ".env");
 
+/**
+ * Default `.env` path for pull/push when `--out` / `--file` omitted.
+ * `root`, `.`, or empty → repo root `.env`; otherwise `apps/<name>/.env` (folder must exist).
+ */
+export function resolveDefaultEnvPath(envTargetRaw) {
+  const raw = (envTargetRaw ?? "").trim();
+  if (!raw || raw === "." || raw.toLowerCase() === "root") {
+    return join(REPO_ROOT, ".env");
+  }
+  const appDir = join(REPO_ROOT, "apps", raw);
+  if (!existsSync(appDir) || !statSync(appDir).isDirectory()) {
+    throw new Error(
+      `env-target "${raw}": expected app directory ${appDir}`,
+    );
+  }
+  return join(appDir, ".env");
+}
+
 export function isSecretsManagerArn(s) {
   return /^arn:aws:secretsmanager:/i.test(s.trim());
 }
 
-/** `{stage}-{base}` when stage set; ARN unchanged */
-export function resolveSecretId(baseRaw, stageRaw) {
+/**
+ * AWS secret name. **Stage is always the leading path prefix** when set (not a suffix).
+ * - `{stage}/{base}/{envTarget}` e.g. `offline` + `core/environments` + `root` → `offline/core/environments/root`
+ * - No stage: `{base}/{envTarget}` → `core/environments/root`
+ * Omitting envTarget → `{stage}/{base}` or `{base}`. ARN: `base` unchanged.
+ */
+export function resolveSecretId(stageRaw, baseRaw, envTargetRaw) {
   const base = baseRaw.trim();
   if (!base) return base;
   if (isSecretsManagerArn(base)) return base;
-  const stage = stageRaw?.trim().replace(/^\/+|\/+$/g, "");
-  if (!stage) return base;
-  return `${stage}-${base}`;
+
+  const seg = (envTargetRaw ?? "").trim().replace(/^\/+|\/+$/g, "");
+  const st = (stageRaw ?? "").trim().replace(/^\/+|\/+$/g, "");
+
+  const trimmedBase = base.replace(/\/+$/, "");
+  const rest = seg ? `${trimmedBase}/${seg}` : trimmedBase;
+  if (!st) return rest;
+  return `/${st}/${rest}`;
 }
 
 export function parseGlobalFlags(argv, startIdx) {
@@ -32,10 +60,11 @@ export function parseGlobalFlags(argv, startIdx) {
     dryRun: false,
     secretName: null,
     stage: null,
+    envTarget: null,
     region: null,
     profile: null,
-    file: null,
-    outFile: DEFAULT_ENV_FILE,
+    file: undefined,
+    outFile: undefined,
   };
   for (let i = startIdx; i < argv.length; i++) {
     const a = argv[i];
@@ -47,6 +76,7 @@ export function parseGlobalFlags(argv, startIdx) {
     )
       out.secretName = argv[++i];
     else if (a === "--stage" && argv[i + 1]) out.stage = argv[++i];
+    else if (a === "--env-target" && argv[i + 1]) out.envTarget = argv[++i];
     else if (a === "--region" && argv[i + 1]) out.region = argv[++i];
     else if (a === "--profile" && argv[i + 1]) out.profile = argv[++i];
     else if (a === "--file" && argv[i + 1]) out.file = argv[++i];
@@ -69,19 +99,29 @@ export function resolveRegion(args) {
   );
 }
 
-export function resolveStage(args) {
-  return (
-    (args.stage?.trim() || undefined) ??
-    process.env.SST_STAGE?.trim() ??
-    process.env.STAGE?.trim()
-  );
-}
-
 export function resolveSecretBase(args) {
   return (
     args.secretName ??
     process.env.SECRET_NAME?.trim() ??
     process.env.SSM_ENV_PATH?.trim()
+  );
+}
+
+/** CLI `--env-target` or `ENV_TARGET` (drives SM name suffix and default .env path). */
+export function resolveEnvTargetCli(args) {
+  return args.envTarget ?? process.env.ENV_TARGET?.trim() ?? "";
+}
+
+/**
+ * Path **prefix** for the SM secret (first segment). Order: CLI, then SM_PREFIX (SM-only), then SST_STAGE/STAGE.
+ */
+export function resolveStageCli(args) {
+  return (
+    args.stage?.trim() ||
+    process.env.SM_PREFIX?.trim() ||
+    process.env.SST_STAGE?.trim() ||
+    process.env.STAGE?.trim() ||
+    ""
   );
 }
 
