@@ -1,56 +1,58 @@
-export type MainDatabaseSsl =
-  | boolean
-  | "require"
-  | "allow"
-  | "prefer"
-  | "verify-full";
+import { createEnv } from "@t3-oss/env-core";
+import { z } from "zod/v4";
 
-export type MainDatabaseEnv = {
+type DatabaseSsl = boolean | "require" | "allow" | "prefer" | "verify-full";
+
+type DatabaseEnv = {
   host: string;
   port: number;
   user: string;
   password: string;
   database: string;
-  ssl: MainDatabaseSsl;
+  ssl: DatabaseSsl;
 };
 
-function parseSsl(value: string): MainDatabaseSsl {
-  const v = value.trim().toLowerCase();
-  if (v === "false" || v === "0" || v === "off") return false;
-  if (v === "require") return "require";
-  if (v === "allow") return "allow";
-  if (v === "prefer") return "prefer";
-  if (v === "verify-full") return "verify-full";
-  if (v === "true" || v === "1" || v === "on") return true;
-  return true;
-}
+/** Parses `GLOBAL_DATABASE_SSL` string values for `postgres` / RDS-style flags. */
+const databaseSslSchema = z
+  .string()
+  .min(1)
+  .transform((raw): DatabaseSsl => {
+    const v = raw.trim().toLowerCase();
+    if (v === "false" || v === "0" || v === "off") return false;
+    if (v === "require") return "require";
+    if (v === "allow") return "allow";
+    if (v === "prefer") return "prefer";
+    if (v === "verify-full") return "verify-full";
+    if (v === "true" || v === "1" || v === "on") return true;
+    return true;
+  });
+
+/**
+ * Validated `GLOBAL_DATABASE_*` from the environment (t3-env).
+ * Use `loadDatabaseEnv()` for the shape expected by `postgres` / Drizzle.
+ */
+const databaseEnv = createEnv({
+  server: {
+    GLOBAL_DATABASE_HOST: z.string().min(1),
+    GLOBAL_DATABASE_PORT: z.coerce.number().int().min(1).max(65535),
+    GLOBAL_DATABASE_USER: z.string().min(1),
+    GLOBAL_DATABASE_PASSWORD: z.string().min(1),
+    GLOBAL_DATABASE_NAME: z.string().min(1),
+    GLOBAL_DATABASE_SSL: databaseSslSchema,
+  },
+  runtimeEnv: process.env,
+  skipValidation:
+    !!process.env.CI || process.env.npm_lifecycle_event === "lint",
+});
 
 /** Shared by `client.ts` and `drizzle.config.ts`. */
-export function loadDatabaseEnv(): MainDatabaseEnv {
-  const host = process.env.MAIN_DATABASE_HOST;
-  const portStr = process.env.MAIN_DATABASE_PORT;
-  const user = process.env.MAIN_DATABASE_USER;
-  const password = process.env.MAIN_DATABASE_PASSWORD;
-  const database = process.env.MAIN_DATABASE_NAME;
-  const sslStr = process.env.MAIN_DATABASE_SSL;
-
-  if (!host || !portStr || !user || !password || !database || !sslStr) {
-    throw new Error("Missing MAIN_DATABASE_ environment variables");
-  }
-
-  const port = Number(portStr);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error(
-      `MAIN_DATABASE_PORT must be an integer 1–65535, got: ${portStr}`,
-    );
-  }
-
+export function loadDatabaseEnv(): DatabaseEnv {
   return {
-    host,
-    port,
-    user,
-    password,
-    database,
-    ssl: parseSsl(sslStr),
+    host: databaseEnv.GLOBAL_DATABASE_HOST,
+    port: databaseEnv.GLOBAL_DATABASE_PORT,
+    user: databaseEnv.GLOBAL_DATABASE_USER,
+    password: databaseEnv.GLOBAL_DATABASE_PASSWORD,
+    database: databaseEnv.GLOBAL_DATABASE_NAME,
+    ssl: databaseEnv.GLOBAL_DATABASE_SSL,
   };
 }

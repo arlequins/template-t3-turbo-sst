@@ -27,18 +27,19 @@ export default $config({
       },
     };
   },
+  // TODO: lambda configを追加
   async run() {
     new sst.aws.TanStackStart("Api", {
       path: ".",
       buildCommand: "pnpm run build",
       environment: {
         NODE_ENV: "production",
-        MAIN_DATABASE_HOST: process.env.MAIN_DATABASE_HOST ?? "",
-        MAIN_DATABASE_PORT: process.env.MAIN_DATABASE_PORT ?? "",
-        MAIN_DATABASE_USER: process.env.MAIN_DATABASE_USER ?? "",
-        MAIN_DATABASE_PASSWORD: process.env.MAIN_DATABASE_PASSWORD ?? "",
-        MAIN_DATABASE_NAME: process.env.MAIN_DATABASE_NAME ?? "",
-        MAIN_DATABASE_SSL: process.env.MAIN_DATABASE_SSL ?? "",
+        GLOBAL_DATABASE_HOST: process.env.GLOBAL_DATABASE_HOST ?? "",
+        GLOBAL_DATABASE_PORT: process.env.GLOBAL_DATABASE_PORT ?? "",
+        GLOBAL_DATABASE_USER: process.env.GLOBAL_DATABASE_USER ?? "",
+        GLOBAL_DATABASE_PASSWORD: process.env.GLOBAL_DATABASE_PASSWORD ?? "",
+        GLOBAL_DATABASE_NAME: process.env.GLOBAL_DATABASE_NAME ?? "",
+        GLOBAL_DATABASE_SSL: process.env.GLOBAL_DATABASE_SSL ?? "",
       },
       dev: {
         command: "pnpm with-env vite dev",
