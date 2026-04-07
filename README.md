@@ -59,6 +59,8 @@ tooling
   │   └─ shared, fine-grained, eslint presets
   ├─ prettier
   │   └─ shared prettier configuration
+  ├─ sst-bootstrap
+  │   └─ first-time env: `pnpm env:pull` / `pnpm env:push` (AWS Secrets Manager)
   ├─ tailwind
   │   └─ shared tailwind theme and configuration
   └─ typescript
@@ -83,16 +85,42 @@ To get it running, follow the steps below:
 ```bash
 # Install dependencies
 pnpm i
+```
 
-# Configure environment variables
-# There is an `.env.example` in the root directory you can use for reference
-cp .env.example .env
+### Environment variables (first-time setup)
 
-# Push the Drizzle schema to the database
+Use a root `.env` before running database or app commands. Pick one approach:
+
+**A. AWS Secrets Manager (good for a fresh clone or new machine)**  
+With credentials that can call `secretsmanager:GetSecretValue` (for example `AWS_PROFILE` or `SST_AWS_PROFILE`), set at least:
+
+- `SECRET_NAME` — secret *base* name in AWS (not the stage-prefixed id).
+- `SST_STAGE` or `STAGE` — prepended so the secret id becomes `{stage}-{SECRET_NAME}` (skip if `SECRET_NAME` is a full secret ARN).
+- `AWS_REGION` — same region as the secret (or use `SST_AWS_REGION`).
+
+Then pull the secret into the repo root `.env` (the file is **replaced**; nothing is merged from an old file):
+
+```bash
+pnpm env:pull
+```
+
+For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.env.example). Implementation: [`tooling/sst-bootstrap/scripts/pull-secret-env.mjs`](./tooling/sst-bootstrap/scripts/pull-secret-env.mjs).
+
+**B. Manual**  
+Copy [`.env.example`](./.env.example) to `.env` and fill in values.
+
+**Uploading local env to Secrets Manager**  
+When you want to sync a file *to* AWS (create or update the secret), use `pnpm env:push` after setting the same naming variables. Default input is repo root `.env`; `.json` root objects are also supported. Run `pnpm env:push -- --help`. Script: [`tooling/sst-bootstrap/scripts/push-secret-env.mjs`](./tooling/sst-bootstrap/scripts/push-secret-env.mjs).
+
+### 2. Database schema
+
+After root `.env` is in place:
+
+```bash
 pnpm db:push
 ```
 
-### 2a. When it's time to add a new UI component
+### 3a. When it's time to add a new UI component
 
 Run the `ui-add` script to add a new UI component using the interactive `shadcn/ui` CLI:
 
@@ -102,7 +130,7 @@ pnpm ui-add
 
 When the component(s) has been installed, you should be good to go and start using it in your app.
 
-### 2b. When it's time to add a new package
+### 3b. When it's time to add a new package
 
 To add a new package, simply run `pnpm turbo gen init` in the monorepo root. This will prompt you for a package name as well as if you want to install any dependencies to the new package (of course you can also do this yourself later).
 

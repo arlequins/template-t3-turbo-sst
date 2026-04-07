@@ -58,6 +58,12 @@
       "cache": false,
       "persistent": true
     },
+    "env:pull": {
+      "cache": false
+    },
+    "env:push": {
+      "cache": false
+    },
     "ui-add": {
       "cache": false,
       "interactive": true
@@ -79,6 +85,15 @@
     "VERCEL",
     "VERCEL_ENV",
     "VERCEL_URL",
-    "npm_lifecycle_event"
+    "npm_lifecycle_event",
+    "SECRET_NAME",
+    "SECRETS_MANAGER_PLAIN_KEY",
+    "SSM_ENV_PATH",
+    "SST_STAGE",
+    "STAGE",
+    "SST_AWS_PROFILE",
+    "SST_AWS_REGION",
+    "AWS_PROFILE",
+    "AWS_REGION"
   ]
 }
