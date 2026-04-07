@@ -6,6 +6,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "default": "./src/client.ts"
     }
   },
   "license": "MIT",
@@ -23,6 +27,7 @@
     "@acme/service": "workspace:*",
     "@acme/validators": "workspace:*",
     "@trpc/server": "catalog:",
+    "server-only": "^0.0.1",
     "superjson": "catalog:",
     "zod": "catalog:"
   },

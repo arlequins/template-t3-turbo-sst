@@ -11,7 +11,7 @@ import {
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
-import { TRPC_HTTP_PATH, AppRouter } from "@acme/trpc";
+import { TRPC_HTTP_PATH, type AppRouter } from "@acme/trpc/client";
 
 import { env } from "~/env";
 import { getAccessToken } from "~/lib/client-auth";
