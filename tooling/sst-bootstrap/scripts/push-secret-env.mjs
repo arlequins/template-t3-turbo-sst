@@ -27,9 +27,9 @@ Uploads a file to Secrets Manager as SecretString (JSON).
 
 Options:
   --file <path>             Overrides default input file from --env-target
-  --secret-name <prefix>    Middle path, e.g. core/environments
+  --secret-name <prefix>    Middle path, e.g. environments
   --env-target <root|web|…> Last SM segment + default .env path (root → repo .env; else apps/<name>/.env)
-  --stage <STAGE>           Path prefix (leading segment), e.g. offline → offline/core/environments/root
+  --stage <STAGE>           Path prefix (leading segment), e.g. offline → offline/environments/root
   --region, --profile, --dry-run
 
 Environment:

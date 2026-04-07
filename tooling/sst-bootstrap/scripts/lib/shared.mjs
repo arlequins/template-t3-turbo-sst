@@ -37,8 +37,8 @@ export function isSecretsManagerArn(s) {
 
 /**
  * AWS secret name. **Stage is always the leading path prefix** when set (not a suffix).
- * - `{stage}/{base}/{envTarget}` e.g. `offline` + `core/environments` + `root` → `offline/core/environments/root`
- * - No stage: `{base}/{envTarget}` → `core/environments/root`
+ * - `{stage}/{base}/{envTarget}` e.g. `offline` + `environments` + `root` → `offline/environments/root`
+ * - No stage: `{base}/{envTarget}` → `environments/root`
  * Omitting envTarget → `{stage}/{base}` or `{base}`. ARN: `base` unchanged.
  */
 export function resolveSecretId(stageRaw, baseRaw, envTargetRaw) {

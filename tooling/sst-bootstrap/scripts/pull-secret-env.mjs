@@ -21,9 +21,9 @@ function printPullHelp() {
   console.log(`Usage: node pull-secret-env.mjs [options]
 
 Options:
-  --secret-name, --path <prefix>   Middle path (not ARN), e.g. core/environments
+  --secret-name, --path <prefix>   Middle path (not ARN), e.g. environments
   --env-target <root|web|…>       Last SM path segment + default .env path (root → repo .env; else apps/<name>/.env)
-  --stage <STAGE>                 Path prefix (leading segment), e.g. offline → offline/core/environments/root
+  --stage <STAGE>                 Path prefix (leading segment), e.g. offline → offline/environments/root
   --region, --profile, --out (overrides default .env path), --dry-run
 
 Environment:

@@ -80,17 +80,17 @@ Use a root `.env` before running database or app commands. Pick one approach:
 **A. AWS Secrets Manager (good for a fresh clone or new machine)**  
 With credentials that can call `secretsmanager:GetSecretValue` (for example `AWS_PROFILE` or `SST_AWS_PROFILE`), set at least:
 
-- `SECRET_NAME` — middle path of the secret, e.g. `core/environments`.
+- `SECRET_NAME` — middle path of the secret, e.g. `environments`.
 - `ENV_TARGET` — last path segment and which `.env` file to use, e.g. `root` → secret `…/root` and repo root `.env`.
-- `SM_PREFIX`, or `SST_STAGE` / `STAGE` (optional) — **leading** path segment (prefix), e.g. `offline` → `offline/core/environments/root`. Prefer `SM_PREFIX` or `--stage` so app `SST_STAGE=localhost` does not affect the secret name (skip if `SECRET_NAME` is a full ARN).
+- `SM_PREFIX`, or `SST_STAGE` / `STAGE` (optional) — **leading** path segment (prefix), e.g. `offline` → `offline/environments/root`. Prefer `SM_PREFIX` or `--stage` so app `SST_STAGE=localhost` does not affect the secret name (skip if `SECRET_NAME` is a full ARN).
 - `AWS_REGION` — same region as the secret (or use `SST_AWS_REGION`).
 
 Then pull the secret into a `.env` file (the file is **replaced**; nothing is merged from an old file). By default that is the **repo root** `.env`. To write `apps/web/.env` or `apps/api/.env`, set `ENV_TARGET=web` (or `api`) or pass `--env-target web` (the `apps/<name>` directory must already exist).
 
 ```bash
-pnpm env:pull
+pnpm env:pull --secret-name acme --env-target root
 # e.g. apps/web/.env
-pnpm env:pull -- --env-target web
+pnpm env:pull --secret-name acme --env-target web
 ```
 
 For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.env.example). Implementation: [`tooling/sst-bootstrap/scripts/pull-secret-env.mjs`](./tooling/sst-bootstrap/scripts/pull-secret-env.mjs).
