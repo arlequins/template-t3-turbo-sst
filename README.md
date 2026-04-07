@@ -98,7 +98,7 @@ For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.
 **B. Manual**  
 Copy [`.env.example`](./.env.example) to `.env` and fill in values.
 
-**Uploading local env to Secrets Manager**  
+**Uploading localhost env to Secrets Manager**  
 When you want to sync a file _to_ AWS (create or update the secret), use `pnpm env:push` after setting the same naming variables. The default input path follows `ENV_TARGET` / `--env-target` like pull (root `.env` vs `apps/<name>/.env`). `.json` root objects are also supported. Run `pnpm env:push -- --help`. Script: [`tooling/sst-bootstrap/scripts/push-secret-env.mjs`](./tooling/sst-bootstrap/scripts/push-secret-env.mjs).
 
 ### 2. Database schema

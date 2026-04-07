@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm with-env vite dev",
-    "build": "vite build",
-    "start": "vite start",
+    "build": "pnpm with-env vite build",
+    "start": "pnpm with-env vite start",
     "sst:dev": "pnpm with-env sst dev",
     "sst:deploy": "pnpm with-env sst deploy",
     "sst:install": "sst install",

@@ -70,6 +70,7 @@
     }
   },
   "globalEnv": [
+    "SST_STAGE",
     "NEXT_PUBLIC_SITE_URL",
     "NEXT_PUBLIC_API_URL",
     "GLOBAL_DATABASE_HOST",
