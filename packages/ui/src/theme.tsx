@@ -95,12 +95,12 @@ export const themeDetectorScript = (function () {
   return `(${themeFn.toString()})();`;
 })();
 
-interface ThemeContextProps {
+type ThemeContextProps = {
   themeMode: ThemeMode;
   resolvedTheme: ResolvedTheme;
   setTheme: (theme: ThemeMode) => void;
   toggleMode: () => void;
-}
+};
 const ThemeContext = React.createContext<ThemeContextProps | undefined>(
   undefined,
 );

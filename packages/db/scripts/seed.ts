@@ -34,7 +34,7 @@ async function loadAppliedSeedNames(): Promise<Set<string>> {
   const rows = await db.execute(sql`SELECT name FROM ${ledgerTable}`);
   const names = new Set<string>();
   for (const row of rows) {
-    const name = (row as Record<string, unknown>).name;
+    const name = Reflect.get(row, "name");
     if (typeof name === "string") names.add(name);
   }
   return names;

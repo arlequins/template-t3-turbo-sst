@@ -1,12 +1,9 @@
 import type { InferSelectModel } from "drizzle-orm";
-import type { z } from "zod/v4";
 
 import type { Database } from "@acme/db/client";
 import { desc, eq } from "@acme/db";
 import { Post } from "@acme/db/schema";
-import { createPostInputSchema } from "@acme/validators";
-
-type CreatePostInput = z.infer<typeof createPostInputSchema>;
+import type { CreatePostInput } from "@acme/validators";
 
 type PostRow = InferSelectModel<typeof Post>;
 

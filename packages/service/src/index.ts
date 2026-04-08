@@ -1,6 +1,7 @@
 import { db } from "@acme/db/client";
 
-import { createPostService, PostService } from "./post";
+import type { PostService } from "./post";
+import { createPostService } from "./post";
 
 export const postService = createPostService(db);
 export type { PostService };

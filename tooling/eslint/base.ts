@@ -73,6 +73,8 @@ export const baseConfig = defineConfig(
         },
       ],
       "@typescript-eslint/no-non-null-assertion": "error",
+      // Prefer `type` for object shapes (unions/intersections stay as `type` anyway).
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
     },
   },

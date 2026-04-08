@@ -14,6 +14,7 @@
     "eslint.config.ts",
     ".next/types/**/*.ts",
     "sst.config.ts",
+    "sst-env.d.ts",
     "sst-globals.d.ts"
   ],
   "exclude": ["node_modules", ".next", "out"]

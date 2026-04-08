@@ -10,6 +10,7 @@ type DatabaseEnv = {
   password: string;
   database: string;
   ssl: DatabaseSsl;
+  poolMax: number;
 };
 
 /** Parses `GLOBAL_DATABASE_SSL` string values for `postgres` / RDS-style flags. */
@@ -39,6 +40,10 @@ const databaseEnv = createEnv({
     GLOBAL_DATABASE_PASSWORD: z.string().min(1),
     GLOBAL_DATABASE_NAME: z.string().min(1),
     GLOBAL_DATABASE_SSL: databaseSslSchema,
+    POSTGRES_POOL_MAX: z.preprocess(
+      (val) => (val === "" || val === undefined ? undefined : val),
+      z.coerce.number().int().min(1).max(500).default(10),
+    ),
   },
   runtimeEnv: process.env,
   skipValidation:
@@ -54,5 +59,6 @@ export function loadDatabaseEnv(): DatabaseEnv {
     password: databaseEnv.GLOBAL_DATABASE_PASSWORD,
     database: databaseEnv.GLOBAL_DATABASE_NAME,
     ssl: databaseEnv.GLOBAL_DATABASE_SSL,
+    poolMax: databaseEnv.POSTGRES_POOL_MAX,
   };
 }

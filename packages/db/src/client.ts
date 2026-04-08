@@ -17,7 +17,7 @@ const client = postgres({
   password: dbEnv.password,
   database: dbEnv.database,
   ssl: dbEnv.ssl,
-  max: Number(process.env.POSTGRES_POOL_MAX ?? 10),
+  max: dbEnv.poolMax,
   idle_timeout: 20,
   connect_timeout: 10,
 });

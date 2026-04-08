@@ -17,7 +17,7 @@ function parseBearerToken(headers: Headers): string | null {
  * Look up the user for this bearer token (e.g. API key / access token row in DB).
  * Replace the body with a real query when the schema exists.
  */
-async function findUserByBearerToken(
+function findUserByBearerToken(
   token: string,
 ): Promise<{ id: string; name?: string | null } | null> {
   // Example once you have tables:
@@ -32,9 +32,9 @@ async function findUserByBearerToken(
   // return { id: row.user.id, name: row.user.name };
 
   if (token) {
-    return { id: "1", name: "dummy" };
+    return Promise.resolve({ id: "1", name: "dummy" });
   }
-  return null;
+  return Promise.resolve(null);
 }
 
 export const authApi: TRPCAuth = {

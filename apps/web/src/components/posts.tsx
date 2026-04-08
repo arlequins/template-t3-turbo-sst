@@ -7,10 +7,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import {
-  getTrpcUserFacingMessage,
-  type RouterOutputs,
-} from "@acme/trpc/client";
+import type { RouterOutputs } from "@acme/trpc/client";
+import { getTrpcUserFacingMessage } from "@acme/trpc/client";
 import { createPostInputSchema } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
@@ -144,7 +142,7 @@ export function PostList() {
     );
   }
 
-  if (!posts?.length) {
+  if (!posts.length) {
     return (
       <div className="relative flex w-full flex-col gap-4">
         <PostCardSkeleton pulse={false} />

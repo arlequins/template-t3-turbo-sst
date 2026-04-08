@@ -11,7 +11,8 @@ import {
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
-import { TRPC_HTTP_PATH, type AppRouter } from "@acme/trpc/client";
+import type { AppRouter } from "@acme/trpc/client";
+import { TRPC_HTTP_PATH } from "@acme/trpc/client";
 
 import { env } from "~/env";
 import { getAccessToken } from "~/lib/client-auth";
@@ -33,7 +34,7 @@ function getTrpcBatchHttpUrl(): string {
   const raw = env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
   try {
     const u = new URL(raw);
-    const path = u.pathname.replace(/\/+$/, "") ?? "";
+    const path = u.pathname.replace(/\/+$/, "");
     if (path.endsWith(TRPC_HTTP_PATH)) {
       return `${u.origin}${path}`;
     }
@@ -48,7 +49,7 @@ function getTrpcBatchHttpUrl(): string {
 }
 
 function getNodeEnv(): string {
-  return process.env.NODE_ENV ?? "development";
+  return env.NODE_ENV;
 }
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {

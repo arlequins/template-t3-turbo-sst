@@ -5,3 +5,5 @@ export const createPostInputSchema = z.object({
   title: z.string().max(256),
   content: z.string().max(256),
 });
+
+export type CreatePostInput = z.infer<typeof createPostInputSchema>;
