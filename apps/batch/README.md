@@ -4,11 +4,12 @@ Runs **batch pipelines** as sequential **Step Functions**, optionally on a sched
 
 ## Scripts
 
-| Script            | Description                                |
-| ----------------- | ------------------------------------------ |
-| `pnpm sst:dev`    | Local SST dev (root `.env` via `with-env`) |
-| `pnpm sst:deploy` | Deploy                                     |
-| `pnpm sst:remove` | Remove stack                               |
+| Script            | Description                                                                         |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| `pnpm run`        | Interactive local step runner (optional `-- --batch <id>`, `-- --step <stateName>`) |
+| `pnpm sst:dev`    | Local SST dev (root `.env` via `with-env`)                                          |
+| `pnpm sst:deploy` | Deploy                                                                              |
+| `pnpm sst:remove` | Remove stack                                                                        |
 
 Run commands from **`apps/batch`** (`package.json` `with-env` loads the repo-root `.env`).
 

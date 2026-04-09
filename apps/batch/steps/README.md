@@ -1,6 +1,6 @@
 # Batches — overview
 
-Batches are registered in **`RegisteredManifests`** in **`config/index.ts`**. Each entry is built with `createBatchManifest(batchId, stepDefs)`; `stepDefs` usually live in **`config/step-defs/<batch>.ts`**.
+Batches are registered in **`RegisteredManifests`** in **`config/index.ts`**. Each entry is built with `createBatchManifest(batchId, schedule, enabled, stepDefs)`; `stepDefs` usually live in **`config/step-defs/<batch>.ts`**.
 
 ## Resources per batch
 
@@ -34,7 +34,7 @@ lib/
 2. **`config/step-defs/<batch>.ts`**
    - Export `BatchPipelineStep[]` (`stateName`, `handlerKey`, `useCase`, `withRetry`, optional `input`).
 3. **`RegisteredManifests`**
-   - Append `createBatchManifest(BatchScheduleId.XXX, xxxSteps)`.
+   - Append `createBatchManifest(BatchScheduleId.XXX, cron, enabled, xxxSteps)`.
 4. **If you need a new handler**
    - Add `lib/functions/<name>.ts` with `export const handler`.
    - Add a **`handlerKey`** line to **`HandlerMap`** in **`lib/index.ts`**.

@@ -8,6 +8,7 @@
  */
 
 import type { DeployStage } from "@acme/env";
+import { resolveDeployStage } from "@acme/env";
 
 import type { BatchManifest } from "../shared";
 import { createBatchManifest } from "../shared";
@@ -22,9 +23,7 @@ export const BatchScheduleId = {
 } as const;
 
 /** Every batch here gets its own Step Functions + Cron + starter Lambda. Order does not matter. */
-export const RegisteredManifests: BatchManifest[] = [
-  createBatchManifest(BatchScheduleId.SAMPLE, sampleSteps),
-];
+const stage = resolveDeployStage();
 
 /**
  * Per-stage cron/rate per batch id (`sample`, …). Add a column when you add a batch folder.
@@ -58,3 +57,13 @@ export const ScheduleByStage: Record<
     },
   },
 };
+
+/** Every batch here gets its own Step Functions + Cron + starter Lambda. Order does not matter. */
+export const RegisteredManifests: BatchManifest[] = [
+  createBatchManifest(
+    BatchScheduleId.SAMPLE,
+    ScheduleByStage[stage][BatchScheduleId.SAMPLE].cron,
+    ScheduleByStage[stage][BatchScheduleId.SAMPLE].enabled,
+    sampleSteps,
+  ),
+];

@@ -1,8 +1,5 @@
-import { resolveDeployStage } from "@acme/env";
-
 import type { BatchScheduleId } from "../config";
 import type { HandlerKey } from "../lib";
-import { ScheduleByStage } from "../config";
 
 /**
  * One **batch** = one Step Functions state machine + its own schedule + starter Lambda.
@@ -54,17 +51,15 @@ export const BATCH_TASK_RETRY_POLICY = {
   backoffRate: 2,
 } as const;
 
-const stage = resolveDeployStage();
-
 /**
- * Builds a `BatchManifest`: schedule/enabled come from `ScheduleByStage` in `config/index.ts`
- * for the current deploy stage (`resolveDeployStage()`).
- *
- * Wire new batches by adding `step-defs`, extending `ScheduleByStage` / `BatchScheduleId`,
- * and appending to `RegisteredManifests` in `config/index.ts`.
+ * Builds a `BatchManifest`.
+ * `schedule` and `eventBridgeScheduleEnabled` are computed in `config/index.ts`
+ * for the current deploy stage and passed in here.
  */
 export const createBatchManifest = (
   name: BatchScheduleId,
+  schedule: string,
+  eventBridgeScheduleEnabled: boolean,
   stepDefs: {
     stateName: string;
     handlerKey: HandlerKey;
@@ -81,8 +76,8 @@ export const createBatchManifest = (
     id: name,
     pipelineComponentName: `${name}Pipeline`,
     cronComponentName: `${name}Schedule`,
-    schedule: ScheduleByStage[stage][name].cron,
-    eventBridgeScheduleEnabled: ScheduleByStage[stage][name].enabled,
+    schedule,
+    eventBridgeScheduleEnabled,
     starterHandler: `shared/entry.ts`,
     steps: stepDefs.map((stepDef) => ({
       stateName: stepDef.stateName,
