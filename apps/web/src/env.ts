@@ -1,12 +1,17 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod/v4";
 
-const fallbackSite = "http://localhost:3000";
-const fallbackApiUrl = "http://localhost:5000";
+import {
+  DEFAULT_LOCALHOST_API_URL,
+  DEFAULT_LOCALHOST_SITE_URL,
+} from "@acme/env/public-defaults";
+import { skipEnvValidation } from "@acme/env/skip-validation";
 
 /**
- * Public env vars for the client bundle and build time.
- * For SST `StaticSite` builds: inject via `environment` in `sst.config.ts`, or export in the shell before `sst deploy`.
+ * Public env for the Next.js client bundle. Do **not** import `serverEnv` here — it runs in the browser
+ * and must only use `NEXT_PUBLIC_*` via `process.env` (inlined at build) plus shared defaults from `@acme/env/public-defaults`.
+ *
+ * `serverEnv` in `@acme/env` stays aligned with the same default URLs for SST / tooling.
  */
 export const env = createEnv({
   shared: {
@@ -17,26 +22,24 @@ export const env = createEnv({
   server: {},
   client: {
     NEXT_PUBLIC_SITE_URL: z.preprocess(
-      (v) => (typeof v === "string" && v.length > 0 ? v : fallbackSite),
-      z.string().url(),
+      (v) =>
+        typeof v === "string" && v.trim().length > 0
+          ? v
+          : DEFAULT_LOCALHOST_SITE_URL,
+      z.url(),
     ),
     NEXT_PUBLIC_API_URL: z.preprocess(
-      (v) => (typeof v === "string" && v.length > 0 ? v : fallbackApiUrl),
-      z.string().url(),
+      (v) =>
+        typeof v === "string" && v.trim().length > 0
+          ? v
+          : DEFAULT_LOCALHOST_API_URL,
+      z.url(),
     ),
   },
-  /*
-   * Specify what values should be validated by your schemas above.
-   *
-   * If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
-   * For Next.js >= 13.4.4, you can use the experimental__runtimeEnv option and
-   * only specify client-side variables.
-   */
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
-  skipValidation:
-    !!process.env.CI || process.env.npm_lifecycle_event === "lint",
+  skipValidation: skipEnvValidation,
 });

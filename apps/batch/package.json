@@ -1,12 +1,9 @@
 {
-  "name": "@acme/api",
+  "name": "@acme/batch",
   "private": true,
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "pnpm with-env vite dev",
-    "build": "pnpm with-env vite build",
-    "start": "pnpm with-env vite start",
     "sst:dev": "pnpm with-env sst dev",
     "sst:deploy": "pnpm with-env sst deploy",
     "sst:install": "sst install",
@@ -17,36 +14,19 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/auth": "workspace:*",
-    "@acme/db": "workspace:*",
     "@acme/env": "workspace:*",
-    "@acme/trpc": "workspace:*",
-    "@t3-oss/env-core": "^0.13.11",
-    "@tanstack/react-router": "^1.135.2",
-    "@tanstack/react-start": "^1.135.2",
-    "@trpc/server": "catalog:",
-    "nitro": "3.0.260311-beta",
-    "react": "catalog:react19",
-    "react-dom": "catalog:react19",
-    "zod": "catalog:"
+    "@aws-sdk/client-sfn": "^3.787.0"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:*",
     "@acme/prettier-config": "workspace:*",
-    "@acme/tailwind-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
-    "@tailwindcss/vite": "catalog:",
+    "@types/aws-lambda": "^8.10.155",
     "@types/node": "catalog:",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
-    "@vitejs/plugin-react": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "sst": "4.6.11",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:",
-    "vite": "catalog:",
-    "vite-tsconfig-paths": "^5.1.4"
+    "typescript": "catalog:"
   },
   "prettier": "@acme/prettier-config"
 }

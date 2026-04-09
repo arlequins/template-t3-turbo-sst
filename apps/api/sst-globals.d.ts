@@ -23,6 +23,10 @@ declare const sst: {
         path?: string;
         buildCommand?: string;
         environment?: Record<string, string>;
+        vpc?: {
+          subnets: string[];
+          securityGroups: string[];
+        };
         domain?: string | Record<string, unknown>;
         link?: unknown[];
         dev?:

@@ -1,5 +1,7 @@
 /// <reference path="./sst-globals.d.ts" />
 
+import { serverEnv, Stage } from "@acme/env";
+
 /**
  * Bootstrap app: no deployed resources. Aligns AWS provider (profile/region) with web/api.
  * `pnpm env:pull` / `env:push`: Secrets Manager — `pull-secret-env.mjs` / `push-secret-env.mjs` + `scripts/lib/shared.mjs`.
@@ -7,13 +9,13 @@
  */
 export default $config({
   app(input) {
-    const localAwsProfile = process.env.SST_AWS_PROFILE?.trim();
-    const region = process.env.SST_AWS_REGION?.trim() ?? "us-east-1";
+    const localAwsProfile = serverEnv.SST_AWS_PROFILE?.trim();
+    const region = serverEnv.SST_AWS_REGION!;
 
     return {
       name: "bootstrap",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: input?.stage === "production",
+      removal: input?.stage === Stage.PRODUCTION ? "retain" : "remove",
+      protect: input?.stage === Stage.PRODUCTION,
       home: "aws",
       providers: {
         aws: {

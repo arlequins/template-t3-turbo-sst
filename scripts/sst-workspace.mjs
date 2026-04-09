@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 
-const PACKAGES = { web: "@acme/web", api: "@acme/api" };
+const PACKAGES = { web: "@acme/web", api: "@acme/api", batch: "@acme/batch" };
 const TO_SCRIPT = {
   dev: "sst:dev",
   deploy: "sst:deploy",
@@ -15,8 +15,8 @@ const [appKey, cmdKey, ...forward] = process.argv.slice(2);
 
 if (!appKey || !cmdKey) {
   console.error(
-    "Usage: pnpm sst:ws <web|api> <dev|deploy|types|remove> [-- extra sst args]\n" +
-    "Example: pnpm sst:ws api deploy -- --stage production",
+    "Usage: pnpm sst:ws <web|api|batch> <dev|deploy|types|remove> [-- extra sst args]\n" +
+      "Example: pnpm sst:ws api deploy -- --stage production",
   );
   process.exit(1);
 }

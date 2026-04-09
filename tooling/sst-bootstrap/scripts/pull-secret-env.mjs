@@ -29,7 +29,7 @@ Options:
 Environment:
   SECRET_NAME (legacy: SSM_ENV_PATH)   Same as --secret-name prefix or full ARN
   ENV_TARGET   Same as --env-target
-  SM_PREFIX / SST_STAGE / STAGE   Prefix (SM_PREFIX avoids SST_STAGE=localhost from app .env)
+  SM_PREFIX / SST_STAGE / STAGE   Prefix (SM_PREFIX avoids SST_STAGE=offline from app .env)
   SECRETS_MANAGER_PLAIN_KEY   When secret is plain text (pull → one env key, default SECRET_VALUE)
   AWS_REGION / SST_AWS_REGION   Default us-east-1
   AWS_PROFILE / SST_AWS_PROFILE

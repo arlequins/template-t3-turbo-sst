@@ -3,10 +3,11 @@ import { vercel } from "@t3-oss/env-core/presets-zod";
 import { z } from "zod/v4";
 
 import { authEnv } from "@acme/auth/env";
+import { globalEnv, skipEnvValidation } from "@acme/env";
 
 export const env = createEnv({
   clientPrefix: "VITE_",
-  extends: [authEnv(), vercel()],
+  extends: [authEnv(), globalEnv(), vercel()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -27,6 +28,5 @@ export const env = createEnv({
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
    */
   runtimeEnv: process.env,
-  skipValidation:
-    !!process.env.CI || process.env.npm_lifecycle_event === "lint",
+  skipValidation: skipEnvValidation,
 });

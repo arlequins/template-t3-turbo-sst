@@ -5,6 +5,8 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
 
+import { nitroPreset } from "@acme/env";
+
 export default defineConfig({
   server: {
     port: 5000,
@@ -23,7 +25,7 @@ export default defineConfig({
   ],
   // SST TanStack Start + AWS: https://sst.dev/docs/start/aws/tanstack/
   nitro: {
-    preset: process.env.NITRO_PRESET ?? "aws-lambda",
+    preset: nitroPreset(),
     awsLambda: {
       streaming: true,
     },

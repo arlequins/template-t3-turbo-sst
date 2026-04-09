@@ -73,6 +73,10 @@
     "SST_STAGE",
     "NEXT_PUBLIC_SITE_URL",
     "NEXT_PUBLIC_API_URL",
+    "VPC_ID",
+    "SUBNET_IDS",
+    "SECURITY_GROUP_IDS",
+    "NITRO_PRESET",
     "DATABASE_HOST",
     "DATABASE_PORT",
     "DATABASE_USER",
@@ -95,9 +99,11 @@
     "STAGE",
     "SST_AWS_PROFILE",
     "SST_AWS_REGION",
+    "NITRO_PRESET",
     "AWS_PROFILE",
     "AWS_REGION",
     "ENV_TARGET",
-    "SM_PREFIX"
+    "SM_PREFIX",
+    "STATE_MACHINE_ARN"
   ]
 }

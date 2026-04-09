@@ -29,23 +29,10 @@ function getQueryClient() {
 
 export const { useTRPC, TRPCProvider } = createTRPCContext<AppRouter>();
 
-/** Base URL (e.g. `http://localhost:5000`) or full batch URL that already includes the tRPC HTTP path. */
+/** Batch URL = validated `NEXT_PUBLIC_API_URL` base + `TRPC_HTTP_PATH`. */
 function getTrpcBatchHttpUrl(): string {
-  const raw = env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
-  try {
-    const u = new URL(raw);
-    const path = u.pathname.replace(/\/+$/, "");
-    if (path.endsWith(TRPC_HTTP_PATH)) {
-      return `${u.origin}${path}`;
-    }
-    const base = path ? `${u.origin}${path}` : u.origin;
-    return new URL(TRPC_HTTP_PATH, `${base}/`).href.replace(/\/$/, "");
-  } catch {
-    return new URL(TRPC_HTTP_PATH, "http://localhost:5000/").href.replace(
-      /\/$/,
-      "",
-    );
-  }
+  const base = env.NEXT_PUBLIC_API_URL.trim().replace(/\/+$/, "");
+  return new URL(TRPC_HTTP_PATH, `${base}/`).href.replace(/\/$/, "");
 }
 
 function getNodeEnv(): string {

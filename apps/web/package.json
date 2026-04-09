@@ -17,6 +17,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@acme/env": "workspace:*",
     "@acme/trpc": "workspace:*",
     "@acme/ui": "workspace:*",
     "@acme/validators": "workspace:*",
