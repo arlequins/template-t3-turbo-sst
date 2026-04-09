@@ -5,7 +5,7 @@ import { reactConfig } from "@acme/eslint-config/react";
 
 export default defineConfig(
   {
-    ignores: [".nitro/**", ".output/**", ".tanstack/**"],
+    ignores: [".nitro/**", ".output/**", ".tanstack/**", "sst-env.d.ts"],
   },
   baseConfig,
   reactConfig,

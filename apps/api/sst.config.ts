@@ -34,12 +34,12 @@ export default $config({
       buildCommand: "pnpm run build",
       environment: {
         NODE_ENV: "production",
-        GLOBAL_DATABASE_HOST: process.env.GLOBAL_DATABASE_HOST ?? "",
-        GLOBAL_DATABASE_PORT: process.env.GLOBAL_DATABASE_PORT ?? "",
-        GLOBAL_DATABASE_USER: process.env.GLOBAL_DATABASE_USER ?? "",
-        GLOBAL_DATABASE_PASSWORD: process.env.GLOBAL_DATABASE_PASSWORD ?? "",
-        GLOBAL_DATABASE_NAME: process.env.GLOBAL_DATABASE_NAME ?? "",
-        GLOBAL_DATABASE_SSL: process.env.GLOBAL_DATABASE_SSL ?? "",
+        DATABASE_HOST: process.env.DATABASE_HOST ?? "",
+        DATABASE_PORT: process.env.DATABASE_PORT ?? "",
+        DATABASE_USER: process.env.DATABASE_USER ?? "",
+        DATABASE_PASSWORD: process.env.DATABASE_PASSWORD ?? "",
+        DATABASE_NAME: process.env.DATABASE_NAME ?? "",
+        DATABASE_SSL: process.env.DATABASE_SSL ?? "",
       },
       dev: {
         command: "pnpm with-env vite dev",

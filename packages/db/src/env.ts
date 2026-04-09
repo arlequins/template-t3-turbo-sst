@@ -13,7 +13,7 @@ type DatabaseEnv = {
   poolMax: number;
 };
 
-/** Parses `GLOBAL_DATABASE_SSL` string values for `postgres` / RDS-style flags. */
+/** Parses `DATABASE_SSL` string values for `postgres` / RDS-style flags. */
 const databaseSslSchema = z
   .string()
   .min(1)
@@ -29,17 +29,17 @@ const databaseSslSchema = z
   });
 
 /**
- * Validated `GLOBAL_DATABASE_*` from the environment (t3-env).
+ * Validated `DATABASE_*` from the environment (t3-env).
  * Use `loadDatabaseEnv()` for the shape expected by `postgres` / Drizzle.
  */
 const databaseEnv = createEnv({
   server: {
-    GLOBAL_DATABASE_HOST: z.string().min(1),
-    GLOBAL_DATABASE_PORT: z.coerce.number().int().min(1).max(65535),
-    GLOBAL_DATABASE_USER: z.string().min(1),
-    GLOBAL_DATABASE_PASSWORD: z.string().min(1),
-    GLOBAL_DATABASE_NAME: z.string().min(1),
-    GLOBAL_DATABASE_SSL: databaseSslSchema,
+    DATABASE_HOST: z.string().min(1),
+    DATABASE_PORT: z.coerce.number().int().min(1).max(65535),
+    DATABASE_USER: z.string().min(1),
+    DATABASE_PASSWORD: z.string().min(1),
+    DATABASE_NAME: z.string().min(1),
+    DATABASE_SSL: databaseSslSchema,
     POSTGRES_POOL_MAX: z.preprocess(
       (val) => (val === "" || val === undefined ? undefined : val),
       z.coerce.number().int().min(1).max(500).default(10),
@@ -53,12 +53,12 @@ const databaseEnv = createEnv({
 /** Shared by `client.ts` and `drizzle.config.ts`. */
 export function loadDatabaseEnv(): DatabaseEnv {
   return {
-    host: databaseEnv.GLOBAL_DATABASE_HOST,
-    port: databaseEnv.GLOBAL_DATABASE_PORT,
-    user: databaseEnv.GLOBAL_DATABASE_USER,
-    password: databaseEnv.GLOBAL_DATABASE_PASSWORD,
-    database: databaseEnv.GLOBAL_DATABASE_NAME,
-    ssl: databaseEnv.GLOBAL_DATABASE_SSL,
+    host: databaseEnv.DATABASE_HOST,
+    port: databaseEnv.DATABASE_PORT,
+    user: databaseEnv.DATABASE_USER,
+    password: databaseEnv.DATABASE_PASSWORD,
+    database: databaseEnv.DATABASE_NAME,
+    ssl: databaseEnv.DATABASE_SSL,
     poolMax: databaseEnv.POSTGRES_POOL_MAX,
   };
 }

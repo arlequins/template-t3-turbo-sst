@@ -33,10 +33,10 @@
   },
   "devDependencies": {
     "@acme/prettier-config": "workspace:*",
-    "@turbo/gen": "^2.5.8",
-    "dotenv-cli": "^10.0.0",
+    "@turbo/gen": "^2.9.5",
+    "dotenv-cli": "^11.0.0",
     "prettier": "catalog:",
-    "turbo": "^2.5.8",
+    "turbo": "^2.9.5",
     "typescript": "catalog:"
   },
   "prettier": "@acme/prettier-config"
