@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { sql } from "drizzle-orm";
 
-import { closeMainDatabasePool, db } from "../src/client";
+import { closeDatabasePool, db } from "../src/client";
 
 const Config = {
   schema: "drizzle",
@@ -86,5 +86,5 @@ async function main() {
 try {
   await main();
 } finally {
-  await closeMainDatabasePool();
+  await closeDatabasePool();
 }

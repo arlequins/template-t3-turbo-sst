@@ -189,6 +189,9 @@ importers:
 
   apps/batch:
     dependencies:
+      '@acme/db':
+        specifier: workspace:^
+        version: link:../../packages/db
       '@acme/env':
         specifier: workspace:*
         version: link:../../packages/env

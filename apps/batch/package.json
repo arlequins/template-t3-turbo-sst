@@ -16,6 +16,7 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@acme/db": "workspace:^",
     "@acme/env": "workspace:*",
     "@acme/service": "workspace:^",
     "@aws-sdk/client-sfn": "^3.787.0"

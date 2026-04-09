@@ -1,3 +1,4 @@
+import { closeLocalDatabasePool } from "@acme/db/client";
 import { postService } from "@acme/service";
 
 import type { ProcessMainEvent } from "../../functions/process-main";
@@ -20,6 +21,9 @@ export async function processMain(payload: ProcessMainEvent): Promise<void> {
   console.info("Processing db query");
   const result = await postService.listPosts();
   console.info(result);
+
+  // close db connection
+  await closeLocalDatabasePool();
 
   console.info("ProcessMain completed");
 }
