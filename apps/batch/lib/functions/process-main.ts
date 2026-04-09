@@ -1,18 +1,24 @@
+/**
+ * Pipeline handler for `handlerKey` `process-main` (ETL, API call, …).
+ * Registered in `lib/index.ts` (`HandlerMap`).
+ */
 import type { Handler } from "aws-lambda";
 
 import type { HandlerInvokeEvent } from "..";
 import { logStepPayload } from "../usecases/common/logging";
+import { processMain } from "../usecases/process-main";
 
-/**
- * `handlerKey` `process-main` — primary batch work (ETL, API call, …).
- */
+export type ProcessMainEvent = HandlerInvokeEvent<{ type: "raw" | "db-query" }>;
+
 export const handler: Handler<
-  HandlerInvokeEvent,
+  ProcessMainEvent,
   { ok: true; detail?: string }
-> = (event) => {
+> = async (event) => {
   logStepPayload("ProcessMain", event.input);
+
+  await processMain(event);
+
   return Promise.resolve({
     ok: true as const,
-    detail: "replace-with-real-work",
   });
 };

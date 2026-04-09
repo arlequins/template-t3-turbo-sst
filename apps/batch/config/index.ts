@@ -1,5 +1,8 @@
 /**
- * Cron schedules per deploy stage (`SST_STAGE`). Stage keys come from `@acme/env`.
+ * Batch app wiring: schedule keys, per-stage cron/enabled flags, and the list of manifests
+ * consumed by `sst.config.ts`.
+ *
+ * Step arrays live in `config/step-defs/` and are passed to `createBatchManifest` from `../shared`.
  *
  * @see https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html
  */
@@ -13,7 +16,7 @@ import { sampleSteps } from "./step-defs/sample";
 export type BatchScheduleId =
   (typeof BatchScheduleId)[keyof typeof BatchScheduleId];
 
-/** Extend this union when you add a new batch with rows in `SCHEDULE_BY_STAGE` / `EVENTBRIDGE_SCHEDULE_ENABLED_BY_STAGE`. */
+/** Extend when adding a batch: add a row in `ScheduleByStage` for every `DeployStage`. */
 export const BatchScheduleId = {
   SAMPLE: "sample",
 } as const;

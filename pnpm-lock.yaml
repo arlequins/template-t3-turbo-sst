@@ -192,6 +192,9 @@ importers:
       '@acme/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@acme/service':
+        specifier: workspace:^
+        version: link:../../packages/service
       '@aws-sdk/client-sfn':
         specifier: ^3.787.0
         version: 3.1027.0

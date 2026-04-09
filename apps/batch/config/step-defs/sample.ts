@@ -1,5 +1,6 @@
 import type { BatchPipelineStep } from "../../shared";
 
+/** Steps for `BatchScheduleId.SAMPLE` — imported by `RegisteredManifests` in `config/index.ts`. */
 export const sampleSteps: BatchPipelineStep[] = [
   {
     stateName: "LogStart",
@@ -13,10 +14,20 @@ export const sampleSteps: BatchPipelineStep[] = [
     stateName: "ProcessMain",
     handlerKey: "process-main",
     useCase:
-      "Main work for this batch. Add a handler file and register `handlerKey` in `lib/index.ts` (HandlerMap).",
+      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `lib/index.ts` (HandlerMap).",
     withRetry: true,
     input: {
-      type: "query",
+      type: "raw",
+    },
+  },
+  {
+    stateName: "ProcessMain2",
+    handlerKey: "process-main",
+    useCase:
+      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `lib/index.ts` (HandlerMap).",
+    withRetry: true,
+    input: {
+      type: "db-query",
     },
   },
 ];

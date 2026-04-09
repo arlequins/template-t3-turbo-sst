@@ -1,10 +1,9 @@
-# `shared/` — batch manifests and cron entry
+# `shared/` — types, manifest factory, cron entry
 
-Batch **definitions** live under `steps/<batchId>/manifest.ts`. Handler Lambdas and domain code are under **`../lib/`** (`functions/`, `usecases/`).
+| Path       | Purpose                                                                                              |
+| ---------- | ---------------------------------------------------------------------------------------------------- |
+| `index.ts` | `BatchManifest`, `BatchPipelineStep`, `createBatchManifest`, `BATCH_TASK_RETRY_POLICY`               |
+| `entry.ts` | **`StartExecution`** handler for scheduled batches (`STATE_MACHINE_ARN` injected in `sst.config.ts`) |
 
-| Path       | Purpose                                                                     |
-| ---------- | --------------------------------------------------------------------------- |
-| `index.ts` | `createBatchManifest`, Step Functions **retry** (`BATCH_TASK_RETRY_POLICY`) |
-| `entry.ts` | Cron → **`StartExecution`** (`STATE_MACHINE_ARN` from `sst.config.ts`)      |
-
-Register handler file paths in **`lib/index.ts`** (`HandlerMap`), not here.
+Step definitions, schedules, and the manifest list live under **`config/`** (`config/step-defs/`, `config/index.ts`).  
+Register handler file paths only in **`lib/index.ts`** (`HandlerMap`).

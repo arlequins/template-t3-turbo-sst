@@ -1,6 +1,6 @@
 # `apps/batch` — Step Functions + EventBridge cron
 
-Runs **batch pipelines** as sequential AWS Step Functions Lambdas, optionally on a schedule via **EventBridge** (SST `CronV2`).
+Runs **batch pipelines** as sequential **Step Functions**, optionally on a schedule via **EventBridge** (`CronV2`).
 
 ## Scripts
 
@@ -10,17 +10,19 @@ Runs **batch pipelines** as sequential AWS Step Functions Lambdas, optionally on
 | `pnpm sst:deploy` | Deploy                                     |
 | `pnpm sst:remove` | Remove stack                               |
 
-Always run commands from **`apps/batch`** (`package.json` `with-env` loads the repo-root `.env`).
+Run commands from **`apps/batch`** (`package.json` `with-env` loads the repo-root `.env`).
 
 ## Layout
 
-| Path                  | Role                                                          |
-| --------------------- | ------------------------------------------------------------- |
-| `sst.config.ts`       | Step Functions + Lambdas + optional Cron per registered batch |
-| `config/constants.ts` | Stage-specific cron / EventBridge on-off (`@acme/env`)        |
-| `config/registry.ts`  | Batches to deploy (`REGISTERED_BATCHES`)                      |
-| `lib/`                | `HandlerMap` (handler paths), `functions/*.ts`, `usecases/`   |
-| `shared/`             | `createBatchManifest`, retry policy, cron `entry.ts`          |
-| `steps/<batchId>/`    | Per-batch manifest (`manifest.ts`)                            |
+| Path                | Role                                                                          |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `sst.config.ts`     | Wires Step Functions, Lambdas, and Cron from `RegisteredManifests`            |
+| `config/index.ts`   | `BatchScheduleId`, per-stage `ScheduleByStage`, `RegisteredManifests`         |
+| `config/step-defs/` | Per-batch step arrays (`BatchPipelineStep[]`) passed to `createBatchManifest` |
+| `shared/index.ts`   | `BatchManifest` / `BatchPipelineStep`, `createBatchManifest`, retry policy    |
+| `shared/entry.ts`   | Cron → `StartExecution` (`STATE_MACHINE_ARN`)                                 |
+| `lib/index.ts`      | `HandlerMap` — handler file paths (`handlerKey` → Lambda)                     |
+| `lib/functions/`    | Pipeline and failure Lambdas (`export const handler`)                         |
+| `lib/usecases/`     | Shared logging, failure alerting, etc.                                        |
 
-For adding batches, see **[`steps/README.md`](./steps/README.md)**. Reference: **`steps/sample/`**.
+See **[`steps/README.md`](./steps/README.md)** for how to add batches.

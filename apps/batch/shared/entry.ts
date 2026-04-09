@@ -1,3 +1,7 @@
+/**
+ * Default cron starter (`manifest.starterHandler`): `StartExecution` using `STATE_MACHINE_ARN`
+ * from `sst.config.ts` CronV2 `environment`.
+ */
 import type { Handler } from "aws-lambda";
 import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
 
@@ -13,10 +17,6 @@ function requireStateMachineArn(): string {
   return arn;
 }
 
-/**
- * Cron target: starts one execution of this batch’s state machine.
- * ARN comes from `environment.STATE_MACHINE_ARN` on the Function (see `sst.config.ts`).
- */
 export const handler: Handler = async () => {
   await client.send(
     new StartExecutionCommand({

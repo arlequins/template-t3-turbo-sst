@@ -21,14 +21,14 @@ function pipelineStepPayloadInput(step: BatchPipelineStep): unknown {
 }
 
 /**
- * Each registry entry = one Step Functions state machine (`sst.aws.StepFunctions`) + its own schedule.
+ * For each item in `RegisteredManifests` (`config/index.ts`): one Step Functions state machine
+ * + optional EventBridge schedule + starter Lambda.
  * @see https://sst.dev/docs/component/aws/step-functions/
  *
- * The schedule Lambda receives `STATE_MACHINE_ARN` and `states:StartExecution` on that ARN
- * (same idea as wiring Cron `job` with `environment` + `permissions`).
+ * Cron `function` gets `STATE_MACHINE_ARN` and `states:StartExecution` on the pipeline ARN.
  *
- * Pipeline steps: one Lambda per **handler** (`handlerKey`); register paths in `lib/index.ts` (`HandlerMap`).
- * If `SUBNET_IDS` / `SECURITY_GROUP_IDS` are empty, Lambdas are not placed in a VPC.
+ * Pipeline steps: one Lambda per `handlerKey` — paths in `lib/index.ts` (`HandlerMap`).
+ * Without VPC env (`SUBNET_IDS` / `SECURITY_GROUP_IDS`), Lambdas are not placed in a VPC.
  */
 export default $config({
   app(input) {

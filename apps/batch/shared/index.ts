@@ -57,8 +57,11 @@ export const BATCH_TASK_RETRY_POLICY = {
 const stage = resolveDeployStage();
 
 /**
- * Example batch: one Step Functions workflow + one Cron schedule.
- * Copy the `${BATCH_NAME}/` folder to add another batch, register it in `steps/registry.ts`.
+ * Builds a `BatchManifest`: schedule/enabled come from `ScheduleByStage` in `config/index.ts`
+ * for the current deploy stage (`resolveDeployStage()`).
+ *
+ * Wire new batches by adding `step-defs`, extending `ScheduleByStage` / `BatchScheduleId`,
+ * and appending to `RegisteredManifests` in `config/index.ts`.
  */
 export const createBatchManifest = (
   name: BatchScheduleId,
