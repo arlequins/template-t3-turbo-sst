@@ -98,11 +98,7 @@ function isUnauthorizedTrpcError(error: unknown): boolean {
  */
 export function formatTrpcErrorShape<
   T extends { message: string; data: Record<string, unknown> },
->(opts: {
-  shape: T;
-  error: unknown;
-  zodError: unknown;
-}): T {
+>(opts: { shape: T; error: unknown; zodError: unknown }): T {
   const { shape, error, zodError } = opts;
 
   const databaseUnavailable =

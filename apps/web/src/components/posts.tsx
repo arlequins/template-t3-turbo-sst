@@ -1,15 +1,10 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { RouterOutputs } from "@acme/trpc/client";
 import { getTrpcUserFacingMessage } from "@acme/trpc/client";
-import { createPostInputSchema } from "@acme/validators";
 import { cn } from "@acme/ui";
 import { Button } from "@acme/ui/button";
 import {
@@ -21,6 +16,7 @@ import {
 } from "@acme/ui/field";
 import { Input } from "@acme/ui/input";
 import { toast } from "@acme/ui/toast";
+import { createPostInputSchema } from "@acme/validators";
 
 import { useTRPC } from "~/trpc/react";
 
@@ -116,9 +112,12 @@ export function CreatePostForm() {
 
 export function PostList() {
   const trpc = useTRPC();
-  const { data: posts, isPending, isError, error } = useQuery(
-    trpc.post.all.queryOptions(),
-  );
+  const {
+    data: posts,
+    isPending,
+    isError,
+    error,
+  } = useQuery(trpc.post.all.queryOptions());
 
   if (isPending) {
     return (

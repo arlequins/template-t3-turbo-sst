@@ -11,7 +11,8 @@ import "~/app/styles.css";
 
 export const metadata: Metadata = {
   title: "Create T3 Turbo",
-  description: "Static Next.js client — API served separately (e.g. behind CloudFront)",
+  description:
+    "Static Next.js client — API served separately (e.g. behind CloudFront)",
 };
 
 export const viewport: Viewport = {
