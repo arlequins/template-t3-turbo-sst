@@ -1,3 +1,4 @@
+import type { HandlerKey } from "../lib";
 import type { BatchManifest } from "../steps/types";
 
 /**
@@ -22,9 +23,14 @@ export const createBatchManifest = (
   eventBridgeScheduleEnabled: boolean,
   stepDefs: {
     stateName: string;
-    handler: string;
+    handlerKey: HandlerKey;
     useCase: string;
     withRetry?: boolean;
+    /**
+     * Passed to `lambdaInvoke.payload.input` (JSONata string or static object).
+     * Omit to default to `{% $states.input %}` in `sst.config.ts`.
+     */
+    input?: unknown;
   }[],
 ) =>
   ({
@@ -35,10 +41,10 @@ export const createBatchManifest = (
     eventBridgeScheduleEnabled,
     starterHandler: `shared/entry.ts`,
     steps: stepDefs.map((stepDef) => ({
-      functionId: stepDef.stateName,
       stateName: stepDef.stateName,
-      handler: `steps/${name}/${stepDef.handler}`,
+      handlerKey: stepDef.handlerKey,
       useCase: stepDef.useCase,
       withRetry: stepDef.withRetry,
+      ...(stepDef.input !== undefined ? { input: stepDef.input } : {}),
     })),
   }) satisfies BatchManifest;

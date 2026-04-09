@@ -19,9 +19,10 @@ type SfnState = {
   next: (other: SfnState) => SfnState;
 };
 
-/** Task from `lambdaInvoke`: supports `retry` then `next` (success path). */
+/** Task from `lambdaInvoke`: `retry` → `catch` → `next` (success path). */
 type SfnTaskState = SfnState & {
   retry: (args: Record<string, unknown>) => SfnTaskState;
+  catch: (next: SfnState, args?: { errors?: string[] }) => SfnTaskState;
 };
 
 type StepFunctionsCtor = new (
@@ -36,7 +37,11 @@ type StepFunctionsCtor = new (
 type StepFunctionsStatics = {
   pass: (args: { name: string }) => SfnState;
   succeed: (args: { name: string }) => SfnState;
-  lambdaInvoke: (args: { name: string; function: unknown }) => SfnTaskState;
+  lambdaInvoke: (args: {
+    name: string;
+    function: unknown;
+    payload?: Record<string, unknown> | string;
+  }) => SfnTaskState;
 };
 
 declare const sst: {

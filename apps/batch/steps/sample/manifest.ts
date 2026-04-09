@@ -1,29 +1,33 @@
-import type { BatchManifest } from "../types";
+import type { BatchManifest, BatchPipelineStep } from "../types";
 import { EVENTBRIDGE_ENABLED, SCHEDULE } from "../../config/constants";
 import { createBatchManifest } from "../../shared";
 
 const BATCH_NAME = "sample";
 
-const STEPS = [
+const STEPS: BatchPipelineStep[] = [
   {
     stateName: "LogStart",
-    handler: "log-batch-start.handler.ts",
+    handlerKey: "log-batch-start",
     useCase:
       "First step: RUNNING / audit / idempotency (like a “logger running” task).",
     withRetry: false,
+    input: "{% $states.input %}",
   },
   {
     stateName: "ProcessMain",
-    handler: `process-main.handler.ts`,
+    handlerKey: "process-main",
     useCase:
-      "Main work for this batch. Add more steps as sibling folders + rows here.",
+      "Main work for this batch. Add a handler file and register `handlerKey` in `lib/index.ts` (HandlerMap).",
     withRetry: true,
+    input: {
+      type: "query",
+    },
   },
 ];
 
 /**
  * Example batch: one Step Functions workflow + one Cron schedule.
- * Copy the `${BATCH_NAME}/` folder to add another batch, register it in `steps/registry.ts`.
+ * Copy the `${BATCH_NAME}/` folder to add another batch; register the manifest in `steps/registry.ts`.
  */
 export const sample = createBatchManifest(
   BATCH_NAME,

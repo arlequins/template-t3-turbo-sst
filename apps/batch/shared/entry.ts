@@ -22,7 +22,6 @@ export const handler: Handler = async () => {
     new StartExecutionCommand({
       stateMachineArn: requireStateMachineArn(),
       name: `cron-${Date.now()}`,
-      input: JSON.stringify({ source: "cron", at: new Date().toISOString() }),
     }),
   );
 };

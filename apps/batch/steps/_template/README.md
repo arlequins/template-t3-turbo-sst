@@ -1,7 +1,17 @@
-# Template (copy to `steps/<your-name>/`)
+# Template (`_template/`)
 
-1. Copy this folder next to `default/` and rename it.
-2. Replace every `TEMPLATE` placeholder in `manifest.ts` / `constants.ts`.
-3. Reuse `default/start-execution.handler.ts` or copy it; `STATE_MACHINE_ARN` is set in root `sst.config.ts` per batch.
-4. Add steps under `steps/<step-name>/handler.ts` and rows in `manifest.ts`.
-5. Register the manifest in `registry.ts` and add `Resource` typings in `../../sst-env.d.ts`.
+When creating a batch **from scratch**:
+
+1. Copy **`steps/sample/`** → `steps/<batchId>/`, then edit `manifest.ts` and `config/constants.ts`.
+2. Or follow **[`steps/README.md`](../README.md)** and mirror `sample/manifest.ts`.
+
+## Checklist
+
+| Step | Action                                                                                                       |
+| ---- | ------------------------------------------------------------------------------------------------------------ |
+| 1    | `config/constants.ts`: `BatchScheduleId`, `SCHEDULE_BY_STAGE`, `SCHEDULE` / `EVENTBRIDGE_ENABLED`            |
+| 2    | `steps/<batchId>/manifest.ts`: `createBatchManifest` (imports from `../../shared`, `../../config/constants`) |
+| 3    | New pipeline handler: `lib/functions/<name>.ts` + **`handlerKey`** in **`lib/index.ts`** (`HandlerMap`)      |
+| 4    | `steps/registry.ts`: register the batch                                                                      |
+
+`<batchId>` must match `BATCH_NAME` and schedule keys in `config`.

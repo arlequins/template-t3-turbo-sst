@@ -1,17 +1,25 @@
+import type { HandlerKey } from "../lib";
+
 /**
  * One **batch** = one Step Functions state machine + its own schedule + starter Lambda.
  * Steps run in array order inside that state machine.
  */
 export type BatchPipelineStep = {
-  /** Unique among steps in this batch (used in SST `Function` name). */
-  functionId: string;
   /** State name in the graph (PascalCase, unique in this batch). */
   stateName: string;
-  /** Path from `apps/batch` root, e.g. `steps/foo/steps/bar/handler.ts`. */
-  handler: string;
-  /** Human-readable use case (not deployed). */
+  /**
+   * Selects the handler Lambda — must exist as a key in `lib/index.ts` (`HandlerMap`).
+   * The same key can be reused across batches or steps.
+   */
+  handlerKey: HandlerKey;
+  /** Human-readable description (not deployed). */
   useCase: string;
   withRetry?: boolean;
+  /**
+   * `lambdaInvoke.payload.input` for this step. Omit to use `{% $states.input %}` (chain input).
+   * Set to a JSONata string or a static object; see `pipelineStepPayloadInput` in `sst.config.ts`.
+   */
+  input?: unknown;
 };
 
 export type BatchManifest = {

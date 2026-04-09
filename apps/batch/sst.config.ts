@@ -8,8 +8,18 @@ import {
   vpcFromEnv,
 } from "@acme/env";
 
+import type { BatchPipelineStep } from "./steps/types";
 import { REGISTERED_BATCHES } from "./config/registry";
+import { HandlerMap } from "./lib";
 import { BATCH_TASK_RETRY_POLICY } from "./shared";
+
+/**
+ * Default: pass the Task’s state input into `HandlerInvokeEvent.input`.
+ * Override per step in the manifest with a JSONata string or a static object.
+ */
+function pipelineStepPayloadInput(step: BatchPipelineStep): unknown {
+  return step.input === undefined ? "{% $states.input %}" : step.input;
+}
 
 /**
  * Each registry entry = one Step Functions state machine (`sst.aws.StepFunctions`) + its own schedule.
@@ -18,7 +28,7 @@ import { BATCH_TASK_RETRY_POLICY } from "./shared";
  * The schedule Lambda receives `STATE_MACHINE_ARN` and `states:StartExecution` on that ARN
  * (same idea as wiring Cron `job` with `environment` + `permissions`).
  *
- * Step handlers: `steps/<id>/steps/<step-folder>/handler.ts`.
+ * Pipeline steps: one Lambda per **handler** (`handlerKey`); register paths in `lib/index.ts` (`HandlerMap`).
  * If `SUBNET_IDS` / `SECURITY_GROUP_IDS` are empty, Lambdas are not placed in a VPC.
  */
 export default $config({
@@ -51,28 +61,66 @@ export default $config({
         }
       : undefined;
 
+    /** One Lambda per `handlerKey` (shared across batches that reference the same key). */
+    const handlerFns = new Map<string, unknown>();
+    for (const [key, handler] of Object.entries(HandlerMap)) {
+      handlerFns.set(
+        key,
+        new sst.aws.Function([stage, "sfn", "uc", key].join("-"), {
+          handler,
+          timeout: "5 minutes",
+          ...(vpc ? { vpc } : {}),
+        }),
+      );
+    }
+
+    /** One Lambda for all pipelines; `batchId` is passed in `lambdaInvoke.payload` per state machine. */
+    const pipelineFailureFn = new sst.aws.Function(
+      [stage, "sfn", "pipelineFailure"].join("-"),
+      {
+        handler: "lib/functions/common/pipeline-failure.ts",
+        timeout: "1 minute",
+        ...(vpc ? { vpc } : {}),
+      },
+    );
+
     for (const manifest of REGISTERED_BATCHES) {
-      const lambdaSteps = manifest.steps.map((step) => ({
-        step,
-        fn: new sst.aws.Function(
-          [stage, "sfn", manifest.id, step.functionId].join("-"),
-          {
-            handler: step.handler,
-            timeout: "5 minutes",
-            ...(vpc ? { vpc } : {}),
-          },
-        ),
-      }));
+      const failureHandled = sst.aws.StepFunctions.succeed({
+        name: "PipelineFailureHandled",
+      });
+
+      const pipelineFailureAlert = sst.aws.StepFunctions.lambdaInvoke({
+        name: "PipelineFailureAlert",
+        function: pipelineFailureFn,
+        payload: {
+          batchId: manifest.id,
+          stepFunctionsInput: "{% $states.input %}",
+        },
+      }).next(failureHandled);
 
       let chain = sst.aws.StepFunctions.succeed({ name: "PipelineSucceeded" });
-      for (const { step, fn } of [...lambdaSteps].reverse()) {
+      for (const step of [...manifest.steps].reverse()) {
+        const handlerFn = handlerFns.get(step.handlerKey);
+        if (!handlerFn) {
+          throw new Error(
+            `Unknown handlerKey "${step.handlerKey}" (step "${step.stateName}"). Register it in lib/index.ts (HandlerMap)`,
+          );
+        }
         let task = sst.aws.StepFunctions.lambdaInvoke({
           name: step.stateName,
-          function: fn,
+          function: handlerFn,
+          payload: {
+            batchId: manifest.id,
+            stateName: step.stateName,
+            input: pipelineStepPayloadInput(step),
+          },
         });
         if (step.withRetry) {
           task = task.retry(BATCH_TASK_RETRY_POLICY);
         }
+        task = task.catch(pipelineFailureAlert, {
+          errors: ["States.ALL"],
+        });
         chain = task.next(chain);
       }
 
@@ -83,25 +131,24 @@ export default $config({
         },
       );
 
-      if (manifest.eventBridgeScheduleEnabled) {
-        new sst.aws.CronV2(manifest.cronComponentName, {
-          schedule: manifest.schedule,
-          function: {
-            handler: manifest.starterHandler,
-            timeout: "1 minute",
-            link: [pipeline],
-            environment: {
-              STATE_MACHINE_ARN: pipeline.arn,
-            },
-            permissions: [
-              {
-                actions: ["states:StartExecution"],
-                resources: [pipeline.arn],
-              },
-            ],
+      new sst.aws.CronV2(manifest.cronComponentName, {
+        schedule: manifest.schedule,
+        enabled: manifest.eventBridgeScheduleEnabled,
+        function: {
+          handler: manifest.starterHandler,
+          timeout: "1 minute",
+          link: [pipeline],
+          environment: {
+            STATE_MACHINE_ARN: pipeline.arn,
           },
-        });
-      }
+          permissions: [
+            {
+              actions: ["states:StartExecution"],
+              resources: [pipeline.arn],
+            },
+          ],
+        },
+      });
     }
   },
 });
