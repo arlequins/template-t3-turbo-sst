@@ -1,143 +1,99 @@
 # template-t3-turbo-sst
 
-## Installation
+[T3](https://create.t3.gg/)-style **monorepo** with **Turborepo**, **SST** (AWS), and shared packages. Use it as a GitHub template or clone and rename.
 
-> [!NOTE]
->
-> Make sure to follow the system requirements specified in [`package.json#engines`](./package.json#L4) before proceeding.
+## Requirements
 
-There are two ways of initializing an app using the `create-t3-turbo` starter. You can either use this repository as a template:
+See [`package.json` → `engines`](./package.json) (Node and pnpm versions).
 
-![use-as-template](https://github.com/t3-oss/create-t3-turbo/assets/51714798/bb6c2e5d-d8b6-416e-aeb3-b3e50e2ca994)
-
-or use Turbo's CLI to init your project (use PNPM as package manager):
-
-```bash
-npx create-turbo@latest -e https://github.com/t3-oss/create-t3-turbo
-```
-
-## About
-
-Ever wondered how to migrate your T3 application into a monorepo? Stop right here! This is the perfect starter repo to get you running with the perfect stack!
-
-It uses [Turborepo](https://turborepo.com) and contains:
+## What’s inside
 
 ```text
-.github
-  └─ workflows
-        └─ CI with pnpm cache setup
-.vscode
-  └─ Recommended extensions and settings for VSCode users
+.github          CI (lint, format, typecheck)
 apps
-  ├─ web
-  │   ├─ Next.js (static export + SST StaticSite)
-  │   ├─ React 19, Tailwind CSS v4
-  │   └─ tRPC client
-  └─ api
-      ├─ TanStack Router + Vite (Hono-style API routes)
-      ├─ tRPC server
-      └─ SST for deploy/dev
-packages
-  ├─ auth, db, service, trpc, ui, validators
-  │   └─ shared libraries (Drizzle, better-auth, tRPC router, etc.)
-tooling
-  ├─ eslint
-  │   └─ shared, fine-grained, eslint presets
-  ├─ prettier
-  │   └─ shared prettier configuration
-  ├─ sst-bootstrap
-  │   └─ first-time env: `pnpm env:pull` / `pnpm env:push` (AWS Secrets Manager)
-  ├─ tailwind
-  │   └─ shared tailwind theme and configuration
-  └─ typescript
-      └─ shared tsconfig you can extend from
+  web            Next.js (output: "export") + tRPC client → SST StaticSite (S3/CloudFront)
+  api            TanStack Start + tRPC on Vite → Nitro (e.g. AWS Lambda) via SST
+packages         auth, db, service, trpc, ui, validators (shared libraries)
+tooling          eslint, prettier, tailwind, tsconfig, sst-bootstrap (Secrets Manager ↔ .env)
 ```
 
-> In this template, we use `@acme` as a placeholder for package names. As a user, you might want to replace it with your own organization or project name. You can use find-and-replace to change all the instances of `@acme` to something like `@my-company` or `@project-name`.
+- **Database:** [Drizzle ORM](https://orm.drizzle.team/) + [`postgres`](https://github.com/porsager/postgres) (Node). Configure `DATABASE_*` in `.env` (see [`.env.example`](./.env.example)). Not Vercel Postgres / edge-only unless you change the client yourself.
+- **Package scope:** Names are under **`@acme/*`**. For your fork, find-and-replace `@acme` with your org (e.g. `@myorg`).
+- **Auth:** Server/client pieces are **stubs** (bearer + dummy user) so the app runs; replace with real auth before production.
 
-## Quick Start
+## Quick start
 
-> **Note**
-> The [db](./packages/db) package is preconfigured to use Supabase and is **edge-bound** with the [Vercel Postgres](https://github.com/vercel/storage/tree/main/packages/postgres) driver. If you're using something else, make the necessary modifications to the [schema](./packages/db/src/schema.ts) as well as the [client](./packages/db/src/index.ts) and the [drizzle config](./packages/db/drizzle.config.ts). If you want to switch to non-edge database driver, remove `export const runtime = "edge";` [from all pages and api routes](https://github.com/t3-oss/create-t3-turbo/issues/634#issuecomment-1730240214).
-
-To get it running, follow the steps below:
-
-### 1. Setup dependencies
-
-> [!NOTE]
->
-> This repo uses `apps/web` (Next.js) and `apps/api` (TanStack Router + tRPC). Do not add an `apps/web` folder: `pnpm-workspace.yaml` includes `apps/*`, so any subdirectory without a `package.json` triggers workspace tooling warnings (for example from sherif).
+### 1. Install
 
 ```bash
-# Install dependencies
-pnpm i
+pnpm install
 ```
 
-### Environment variables (first-time setup)
+Do not add empty folders under `apps/` without a `package.json` (workspace tools such as sherif will warn).
 
-Use a root `.env` before running database or app commands. Pick one approach:
+### 2. Environment
 
-**A. AWS Secrets Manager (good for a fresh clone or new machine)**  
-With credentials that can call `secretsmanager:GetSecretValue` (for example `AWS_PROFILE` or `SST_AWS_PROFILE`), set at least:
+Use a **root** `.env` for DB and shared vars.
 
-- `SECRET_NAME` — middle path of the secret, e.g. `environments`.
-- `ENV_TARGET` — last path segment and which `.env` file to use, e.g. `root` → secret `…/root` and repo root `.env`.
-- `SM_PREFIX`, or `SST_STAGE` / `STAGE` (optional) — **leading** path segment (prefix), e.g. `offline` → `offline/environments/root`. Prefer `SM_PREFIX` or `--stage` so app `SST_STAGE=localhost` does not affect the secret name (skip if `SECRET_NAME` is a full ARN).
-- `AWS_REGION` — same region as the secret (or use `SST_AWS_REGION`).
+- **Manual:** copy [`.env.example`](./.env.example) → `.env` and fill in values.
+- **AWS Secrets Manager:** see comments in [`.env.example`](./.env.example) and run `pnpm env:pull` / `pnpm env:push` ([scripts](tooling/sst-bootstrap/scripts/)).
 
-Then pull the secret into a `.env` file (the file is **replaced**; nothing is merged from an old file). By default that is the **repo root** `.env`. To write `apps/web/.env` or `apps/api/.env`, set `ENV_TARGET=web` (or `api`) or pass `--env-target web` (the `apps/<name>` directory must already exist).
+Example pull (adjust names to your secret layout):
 
 ```bash
-pnpm env:pull --secret-name acme --env-target root
-# e.g. apps/web/.env
-pnpm env:pull --secret-name acme --env-target web
+pnpm env:pull -- --secret-name environments --env-target root
 ```
 
-For flags and edge cases, see `pnpm env:pull -- --help` and [`.env.example`](./.env.example). Implementation: [`tooling/sst-bootstrap/scripts/pull-secret-env.mjs`](./tooling/sst-bootstrap/scripts/pull-secret-env.mjs).
+### 3. Database
 
-**B. Manual**  
-Copy [`.env.example`](./.env.example) to `.env` and fill in values.
-
-**Uploading localhost env to Secrets Manager**  
-When you want to sync a file _to_ AWS (create or update the secret), use `pnpm env:push` after setting the same naming variables. The default input path follows `ENV_TARGET` / `--env-target` like pull (root `.env` vs `apps/<name>/.env`). `.json` root objects are also supported. Run `pnpm env:push -- --help`. Script: [`tooling/sst-bootstrap/scripts/push-secret-env.mjs`](./tooling/sst-bootstrap/scripts/push-secret-env.mjs).
-
-### 2. Database schema
-
-After root `.env` is in place:
+With `.env` valid:
 
 ```bash
 pnpm db:push
 ```
 
-### 3a. When it's time to add a new UI component
+### 4. Develop
 
-Run the `ui-add` script to add a new UI component using the interactive `shadcn/ui` CLI:
+```bash
+pnpm dev:sst
+# or Next-only: pnpm dev:next
+```
+
+### New UI component
 
 ```bash
 pnpm ui-add
 ```
 
-When the component(s) has been installed, you should be good to go and start using it in your app.
+### New package
 
-### 3b. When it's time to add a new package
+From the repo root:
 
-To add a new package, simply run `pnpm turbo gen init` in the monorepo root. This will prompt you for a package name as well as if you want to install any dependencies to the new package (of course you can also do this yourself later).
+```bash
+pnpm turbo gen init
+```
 
-The generator sets up the `package.json`, `tsconfig.json` and a `index.ts`, as well as configures all the necessary configurations for tooling around your package such as formatting, linting and typechecking. When the package is created, you're ready to go build out the package.
+## Deployment (overview)
 
-## Deployment
+- **Web:** static export (`next build`); SST `StaticSite` points at `apps/web` build output.
+- **API:** `pnpm -F @acme/api sst:deploy` (see `apps/api/sst.config.ts` and [SST TanStack Start on AWS](https://sst.dev/docs/start/aws/tanstack/)).
 
-### Next.js
+Set `NEXT_PUBLIC_*` (and other env) for the target stage before deploy.
 
-#### Prerequisites
+## Before you publish a fork (checklist)
 
-> **Note**
-> Please note that the Next.js application with tRPC must be deployed in order for the Expo app to communicate with the server in a production environment.
+1. Replace **`@acme`** across the repo with your scope.
+2. Edit **`LICENSE`** (copyright line) for your project or org; update **`NOTICE`** if you change attribution requirements.
+3. Add [`.github/FUNDING.yml`](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/displaying-a-sponsor-button-in-your-repository) if you want a Sponsor button.
+4. Pin dependency versions when you are ready (`pnpm` overrides / lockfile policy).
+
+## License
+
+This repository is under the [MIT License](./LICENSE). See [NOTICE](./NOTICE) for attribution to the upstream [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo) lineage.
+
+`apps/web/next.config.js` sets **`typescript.ignoreBuildErrors: false`** so `next build` runs TypeScript checks (in addition to root `pnpm typecheck`). Temporarily set it to `true` only if you must unblock a deploy while fixing types separately.
 
 ## References
 
-The stack originates from [create-t3-app](https://github.com/t3-oss/create-t3-app).
-
-The stack more originates from [create-t3-app](https://github.com/t3-oss/create-t3-app).
-
-A [blog post](https://jumr.dev/blog/t3-turbo) where I wrote how to migrate a T3 app into this.
+- Derived from the [T3](https://github.com/t3-oss/create-t3-app) / [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo) ecosystem.
+- Monorepo layout and ideas: [blog post (t3-turbo)](https://jumr.dev/blog/t3-turbo).

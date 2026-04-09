@@ -20,8 +20,11 @@ const config = {
     unoptimized: true,
   },
 
-  /** We already do linting and typechecking as separate tasks in CI */
-  typescript: { ignoreBuildErrors: true },
+  /**
+   * Let `next build` fail on TypeScript errors (in addition to `pnpm typecheck` in CI).
+   * Set to `true` only if you need to unblock a build while fixing types separately.
+   */
+  typescript: { ignoreBuildErrors: false },
 };
 
 export default config;
