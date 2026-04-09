@@ -8,10 +8,9 @@ import {
   vpcFromEnv,
 } from "@acme/env";
 
-import type { BatchPipelineStep } from "./steps/types";
-import { REGISTERED_BATCHES } from "./config/registry";
+import { RegisteredManifests } from "./config";
 import { HandlerMap } from "./lib";
-import { BATCH_TASK_RETRY_POLICY } from "./shared";
+import { BATCH_TASK_RETRY_POLICY, BatchPipelineStep } from "./shared";
 
 /**
  * Default: pass the Task’s state input into `HandlerInvokeEvent.input`.
@@ -84,7 +83,7 @@ export default $config({
       },
     );
 
-    for (const manifest of REGISTERED_BATCHES) {
+    for (const manifest of RegisteredManifests) {
       const failureHandled = sst.aws.StepFunctions.succeed({
         name: "PipelineFailureHandled",
       });
