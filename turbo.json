@@ -87,6 +87,8 @@
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
+    "NO_COLOR",
+    "TERM",
     "CI",
     "VERCEL",
     "VERCEL_ENV",

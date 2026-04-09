@@ -2,7 +2,7 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { loadDatabaseEnv, serverEnv, Stage } from "@acme/env";
+import { loadDatabaseEnv } from "@acme/env";
 
 import * as schema from "./schema";
 
@@ -28,10 +28,4 @@ export const db = drizzle({ client, schema, casing: "snake_case" });
 /** Call after one-off scripts/tests so pooled DB connections do not delay process exit. */
 export async function closeDatabasePool(): Promise<void> {
   await client.end({ timeout: 5 });
-}
-
-export async function closeLocalDatabasePool(): Promise<void> {
-  if (serverEnv.SST_STAGE === Stage.OFFLINE) {
-    await client.end({ timeout: 5 });
-  }
 }
