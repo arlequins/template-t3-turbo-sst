@@ -1,7 +1,5 @@
 /// <reference path="./sst-globals.d.ts" />
 
-import { LambdaEnvironment } from "@acme/env";
-
 /**
  * TanStack Start on AWS via SST `TanStackStart` (CloudFront + S3 static assets + Lambda SSR).
  * Matches https://sst.dev/docs/start/aws/tanstack/ — Nitro `aws-lambda` + streaming in `vite.config.ts`.
@@ -31,7 +29,8 @@ export default $config({
     };
   },
   async run() {
-    const { vpcFromEnv, DEFAULT_LOCALHOST_API_URL } = await import("@acme/env");
+    const { vpcFromEnv, DEFAULT_LOCALHOST_API_URL, LambdaEnvironment } =
+      await import("@acme/env");
 
     const vpc = vpcFromEnv();
 
