@@ -26,10 +26,6 @@ export type BatchPipelineStep = {
 export type BatchManifest = {
   /** Short key for logs and stable prefixes (e.g. `default`, `nightly-sync`). */
   id: BatchScheduleId;
-  /** `new sst.aws.StepFunctions("<this>", …)`. Cron passes its ARN via `STATE_MACHINE_ARN`. */
-  pipelineComponentName: string;
-  /** `new sst.aws.CronV2("<this>", …)`. */
-  cronComponentName: string;
   /** EventBridge schedule for this batch only (`rate(...)` / `cron(...)`). */
   schedule: string;
   /** When `false`, `CronV2` is not deployed (Step Functions + manual `StartExecution` still available). */
@@ -74,8 +70,6 @@ export const createBatchManifest = (
 ) =>
   ({
     id: name,
-    pipelineComponentName: `${name}Pipeline`,
-    cronComponentName: `${name}Schedule`,
     schedule,
     eventBridgeScheduleEnabled,
     starterHandler: `shared/entry.ts`,

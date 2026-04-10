@@ -78,7 +78,7 @@ async function main(): Promise<void> {
   console.info(`[LocalPipeline] initialInput=${JSON.stringify(current)}`);
 
   for (const step of manifest.steps) {
-    const handlerPath = HandlerMap[step.handlerKey];
+    const handlerPath = HandlerMap[step.handlerKey].handler;
     const handlerInput = resolveStepInput(step.input, current);
     const handlerEvent = {
       batchId: manifest.id,

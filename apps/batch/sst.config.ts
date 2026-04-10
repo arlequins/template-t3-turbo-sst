@@ -1,5 +1,16 @@
 /// <reference path="./sst-globals.d.ts" />
 
+function toPascalCase(slug: string): string {
+  return slug
+    .split(/[-_\s]+/)
+    .filter((s) => s.length > 0)
+    .map(
+      (segment) =>
+        segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase(),
+    )
+    .join("");
+}
+
 /**
  * SST disallows top-level imports in `sst.config.ts` — use dynamic `import()` inside `app` / `run`.
  * `app()` loads {@link serverEnv} / {@link sstAwsRegion} / {@link Stage} from `@acme/env` (Zod-validated).
@@ -24,7 +35,7 @@ export default $config({
     };
   },
   async run() {
-    const { sstStageForResourceNames, vpcFromEnv } = await import("@acme/env");
+    const { vpcFromEnv, Stage } = await import("@acme/env");
     const { RegisteredManifests } = await import("./config");
     const { HandlerMap } = await import("./lib");
     const { BATCH_TASK_RETRY_POLICY } = await import("./shared");
@@ -47,7 +58,7 @@ export default $config({
      * Pipeline steps: one Lambda per `handlerKey` — paths in `lib/index.ts` (`HandlerMap`).
      * Without VPC env (`SUBNET_IDS` / `SECURITY_GROUP_IDS`), Lambdas are not placed in a VPC.
      */
-    const stage = sstStageForResourceNames();
+    const stage = $app.name;
 
     const attach = vpcFromEnv();
     const vpc = attach
@@ -59,42 +70,48 @@ export default $config({
 
     /** One Lambda per `handlerKey` (shared across batches that reference the same key). */
     const handlerFns = new Map<string, unknown>();
-    for (const [key, handler] of Object.entries(HandlerMap)) {
+    for (const [id, def] of Object.entries(HandlerMap)) {
+      const name = toPascalCase(id);
       handlerFns.set(
-        key,
-        new sst.aws.Function([stage, "sfn", "uc", key].join("-"), {
-          handler,
-          timeout: "5 minutes",
+        id,
+        new sst.aws.Function(name, {
+          handler: def.handler,
+          timeout: def.timeout,
+          memory: def.memory,
+          retention: def.retention,
           ...(vpc ? { vpc } : {}),
         }),
       );
     }
 
     /** One Lambda for all pipelines; `batchId` is passed in `lambdaInvoke.payload` per state machine. */
-    const pipelineFailureFn = new sst.aws.Function(
-      [stage, "sfn", "pipelineFailure"].join("-"),
-      {
-        handler: "lib/functions/common/pipeline-failure.ts",
-        timeout: "1 minute",
-        ...(vpc ? { vpc } : {}),
-      },
-    );
+    const pipelineFailureFn = new sst.aws.Function(`PipelineFailure`, {
+      handler: "lib/functions/common/pipeline-failure.ts",
+      timeout: "1 minute",
+      memory: "1024 MB",
+      retention: stage === Stage.PRODUCTION ? "13 months" : "2 weeks",
+      ...(vpc ? { vpc } : {}),
+    });
 
     for (const manifest of RegisteredManifests) {
+      const batchId = manifest.id;
+      const name = toPascalCase(batchId);
+
+      /** Top-level SST names must be unique — do not reuse `manifest.id` for both Step Functions and Cron. */
       const failureHandled = sst.aws.StepFunctions.succeed({
-        name: "PipelineFailureHandled",
+        name: "pipeline-failure-handled",
       });
 
       const pipelineFailureAlert = sst.aws.StepFunctions.lambdaInvoke({
-        name: "PipelineFailureAlert",
+        name: "pipeline-failure-alert",
         function: pipelineFailureFn,
         payload: {
-          batchId: manifest.id,
+          batchId,
           stepFunctionsInput: "{% $states.input %}",
         },
       }).next(failureHandled);
 
-      let chain = sst.aws.StepFunctions.succeed({ name: "PipelineSucceeded" });
+      let chain = sst.aws.StepFunctions.succeed({ name: "pipeline-succeeded" });
       for (const step of [...manifest.steps].reverse()) {
         const handlerFn = handlerFns.get(step.handlerKey);
         if (!handlerFn) {
@@ -106,7 +123,7 @@ export default $config({
           name: step.stateName,
           function: handlerFn,
           payload: {
-            batchId: manifest.id,
+            batchId,
             stateName: step.stateName,
             input: pipelineStepPayloadInput(step),
           },
@@ -120,14 +137,11 @@ export default $config({
         chain = task.next(chain);
       }
 
-      const pipeline = new sst.aws.StepFunctions(
-        manifest.pipelineComponentName,
-        {
-          definition: chain,
-        },
-      );
+      const pipeline = new sst.aws.StepFunctions(`Step${name}`, {
+        definition: chain,
+      });
 
-      new sst.aws.CronV2(manifest.cronComponentName, {
+      new sst.aws.CronV2(`Cron${name}`, {
         schedule: manifest.schedule,
         enabled: manifest.eventBridgeScheduleEnabled,
         function: {

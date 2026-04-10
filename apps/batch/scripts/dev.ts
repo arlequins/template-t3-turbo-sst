@@ -198,7 +198,7 @@ async function main(): Promise<void> {
       input: stepInput,
     };
 
-    const handlerPath = HandlerMap[step.handlerKey];
+    const handlerPath = HandlerMap[step.handlerKey].handler;
     const handler = await loadHandler(handlerPath);
 
     console.info("");

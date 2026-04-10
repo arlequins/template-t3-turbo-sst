@@ -1,3 +1,5 @@
+import { serverEnv, Stage } from "@acme/env";
+
 /** Passed from Step Functions `lambdaInvoke.payload` for every pipeline handler Lambda. */
 export type HandlerInvokeEvent<T = unknown> = {
   batchId: string;
@@ -14,8 +16,20 @@ export type HandlerInvokeEvent<T = unknown> = {
  * Paths are relative to the `apps/batch` package root; each module must `export const handler`.
  */
 export const HandlerMap = {
-  "log-batch-start": "lib/functions/log-batch-start.ts",
-  "process-main": "lib/functions/process-main.ts",
+  "log-batch-start": {
+    handler: "lib/functions/log-batch-start.ts",
+    memory: "1024 MB",
+    retention:
+      serverEnv.SST_STAGE === Stage.PRODUCTION ? "13 months" : "2 weeks",
+    timeout: "5 minutes",
+  },
+  "process-main": {
+    handler: "lib/functions/process-main.ts",
+    memory: "1024 MB",
+    retention:
+      serverEnv.SST_STAGE === Stage.PRODUCTION ? "13 months" : "2 weeks",
+    timeout: "5 minutes",
+  },
 } as const;
 
 export type HandlerMap = (typeof HandlerMap)[keyof typeof HandlerMap];
