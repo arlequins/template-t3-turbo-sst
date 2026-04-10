@@ -1,5 +1,5 @@
 import type { BatchScheduleId } from "../config";
-import type { HandlerKey } from "../lib";
+import type { HandlerKey } from "../config/handler";
 
 /**
  * One **batch** = one Step Functions state machine + its own schedule + starter Lambda.
@@ -9,7 +9,7 @@ export type BatchPipelineStep = {
   /** State name in the graph (PascalCase, unique in this batch). */
   stateName: string;
   /**
-   * Selects the handler Lambda — must exist as a key in `lib/index.ts` (`HandlerMap`).
+   * Selects the handler Lambda — must exist as a key in `config/handler.ts` (`HandlerMap`).
    * The same key can be reused across batches or steps.
    */
   handlerKey: HandlerKey;

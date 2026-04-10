@@ -14,7 +14,7 @@ export const sampleSteps: BatchPipelineStep[] = [
     stateName: "ProcessMain",
     handlerKey: "process-main",
     useCase:
-      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `lib/index.ts` (HandlerMap).",
+      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `config/handler.ts` (HandlerMap).",
     withRetry: true,
     input: {
       type: "raw",
@@ -24,7 +24,7 @@ export const sampleSteps: BatchPipelineStep[] = [
     stateName: "ProcessMain2",
     handlerKey: "process-main",
     useCase:
-      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `lib/index.ts` (HandlerMap).",
+      "Main work for this batch. Add `lib/functions/<name>.ts` and register `handlerKey` in `config/handler.ts` (HandlerMap).",
     withRetry: true,
     input: {
       type: "db-query",

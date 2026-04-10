@@ -41,7 +41,7 @@ export default $config({
     const { vpcFromEnv, Stage, resolveDeployStage, LambdaEnvironment } =
       await import("@acme/env");
     const { RegisteredManifests } = await import("./config");
-    const { HandlerMap } = await import("./lib");
+    const { HandlerMap } = await import("./config/handler");
     const { BATCH_TASK_RETRY_POLICY } = await import("./shared");
 
     const environment = LambdaEnvironment;
@@ -61,7 +61,7 @@ export default $config({
      *
      * Cron `function` gets `STATE_MACHINE_ARN` and `states:StartExecution` on the pipeline ARN.
      *
-     * Pipeline steps: one **`sst.aws.Function` per `handlerKey`** (see `HandlerMap` in `lib/index.ts`).
+     * Pipeline steps: one **`sst.aws.Function` per `handlerKey`** (see `HandlerMap` in `config/handler.ts`).
      * Passing the **same `Function` component** to multiple `lambdaInvoke({ function })` calls can
      * merge Task states in the generated ASL; pass **`function: fn.arn`** so each Task stays a
      * distinct state while invoking the same deployed Lambda.
@@ -133,7 +133,7 @@ export default $config({
         const handlerFn = fnByHandlerKey.get(step.handlerKey);
         if (!handlerFn) {
           throw new Error(
-            `Unknown handlerKey "${step.handlerKey}" (step "${step.stateName}"). Register it in lib/index.ts (HandlerMap)`,
+            `Unknown handlerKey "${step.handlerKey}" (step "${step.stateName}"). Register it in config/handler.ts (HandlerMap)`,
           );
         }
         let task = sst.aws.StepFunctions.lambdaInvoke({

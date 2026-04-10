@@ -9,24 +9,7 @@ import "sst";
 /* biome-ignore-all lint: auto-generated */
 
 declare module "sst" {
-  export interface Resource {
-    LogBatchStart: {
-      name: string;
-      type: "sst.aws.Function";
-    };
-    PipelineFailure: {
-      name: string;
-      type: "sst.aws.Function";
-    };
-    ProcessMain: {
-      name: string;
-      type: "sst.aws.Function";
-    };
-    StepSample: {
-      arn: string;
-      type: "sst.aws.StepFunctions";
-    };
-  }
+  export interface Resource {}
 }
 
 export {};

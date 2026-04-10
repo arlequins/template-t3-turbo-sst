@@ -1,6 +1,6 @@
 /**
  * Pipeline handler for `handlerKey` `log-batch-start` (RUNNING / audit / idempotency, etc.).
- * Registered in `lib/index.ts` (`HandlerMap`).
+ * Registered in `config/handler.ts` (`HandlerMap`).
  */
 import type { Handler } from "aws-lambda";
 

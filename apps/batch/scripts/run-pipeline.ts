@@ -2,7 +2,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { RegisteredManifests } from "../config";
-import { HandlerMap } from "../lib";
+import { HandlerMap } from "../config/handler";
 
 type HandlerFn = (
   event: unknown,

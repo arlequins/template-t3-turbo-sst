@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 import { closeDatabasePool } from "@acme/db/client";
 
 import { RegisteredManifests } from "../config";
-import { HandlerMap } from "../lib";
+import { HandlerMap } from "../config/handler";
 
 type HandlerFn = (
   event: unknown,
