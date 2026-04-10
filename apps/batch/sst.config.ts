@@ -1,5 +1,7 @@
 /// <reference path="./sst-globals.d.ts" />
 
+import { serverEnv } from "@acme/env";
+
 function toPascalCase(slug: string): string {
   return slug
     .split(/[-_\s]+/)
@@ -36,10 +38,13 @@ export default $config({
   },
   async run() {
     type HandlerKey = keyof typeof HandlerMap;
-    const { vpcFromEnv, Stage, resolveDeployStage } = await import("@acme/env");
+    const { vpcFromEnv, Stage, resolveDeployStage, LambdaEnvironment } =
+      await import("@acme/env");
     const { RegisteredManifests } = await import("./config");
     const { HandlerMap } = await import("./lib");
     const { BATCH_TASK_RETRY_POLICY } = await import("./shared");
+
+    const environment = LambdaEnvironment;
 
     /**
      * Default: pass the Task’s state input into `HandlerInvokeEvent.input`.
@@ -87,6 +92,7 @@ export default $config({
           memory: def.memory,
           retention: def.retention,
           ...(vpc ? { vpc } : {}),
+          environment,
         }),
       );
     }
@@ -98,6 +104,7 @@ export default $config({
       memory: "1024 MB",
       retention: deployStage === Stage.PRODUCTION ? "13 months" : "2 weeks",
       ...(vpc ? { vpc } : {}),
+      environment,
     });
 
     for (const manifest of RegisteredManifests) {
