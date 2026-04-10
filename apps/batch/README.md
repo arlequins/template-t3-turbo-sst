@@ -22,13 +22,13 @@ Runs **batch pipelines** as sequential **AWS Step Functions**, optionally on a s
 
 `RegisteredManifests` in **`config/index.ts`** lists batches. For each manifest, SST provisions roughly:
 
-| Piece               | Role                                                                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **State machine**   | Runs `steps` in **array order**. Each step invokes the Lambda for `handlerKey` (see **`HandlerMap`** in [`config/handler.ts`](config/handler.ts)).                             |
-| **Handler Lambdas** | One **deployed function per distinct `handlerKey`** (reused by multiple steps when needed). `sst.config.ts` uses `function: fn.arn` so the ASL keeps a separate Task per step. |
-| **Cron (`CronV2`)** | Optional; `schedule` + `enabled` come from **`ScheduleByStage`** for the current deploy stage (`resolveDeployStage()` in `@acme/env`).                                         |
-| **Starter Lambda**  | `shared/entry.ts` — uses env **`STATE_MACHINE_ARN`** (injected for that batch’s Cron).                                                                                         |
-| **Failure path**    | Retries when `withRetry: true` (`BATCH_TASK_RETRY_POLICY` in `shared/index.ts`), then **Catch** → `lib/functions/common/pipeline-failure` → `PipelineFailureHandled`.          |
+| Piece               | Role                                                                                                                                                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **State machine**   | Runs `steps` in **array order**. Each step invokes the Lambda for `handlerKey` (see **`HandlerMap`** in [`config/handler.ts`](config/handler.ts)).                                                               |
+| **Handler Lambdas** | One **deployed function per distinct `handlerKey`** (reused by multiple steps when needed). `sst.config.ts` uses `function: fn.arn` so the ASL keeps a separate Task per step.                                   |
+| **Cron (`CronV2`)** | Optional; `schedule` + `enabled` come from **`ScheduleByStage`** for the current deploy stage (`resolveDeployStage()` in `@acme/env`).                                                                           |
+| **Starter Lambda**  | `shared/entry.ts` — uses env **`STATE_MACHINE_ARN`** (injected for that batch’s Cron).                                                                                                                           |
+| **Failure path**    | Retries when `withRetry: true` (`batchTaskRetryPolicyForDeployStage` in `shared/index.ts` — develop/production vs default), then **Catch** → `lib/functions/common/pipeline-failure` → `PipelineFailureHandled`. |
 
 ## Directory layout
 

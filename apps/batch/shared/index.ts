@@ -1,3 +1,5 @@
+import type { DeployStage } from "@acme/env";
+
 import type { BatchScheduleId } from "../config";
 import type { HandlerKey } from "../config/handler";
 
@@ -37,15 +39,57 @@ export type BatchManifest = {
 
 /**
  * Shared Step Functions task retry for any batch step with `withRetry: true`.
+ * `develop` / `production` match ASL-style intervals; other {@link DeployStage} keys use {@link BATCH_TASK_RETRY_POLICY_DEFAULT}.
  *
  * @see https://sst.dev/docs/component/aws/step-functions/state/#retryargs
  */
-export const BATCH_TASK_RETRY_POLICY = {
+export type BatchTaskRetryPolicy = {
+  errors: string[];
+  maxAttempts: number;
+  interval: string;
+  backoffRate: number;
+  maxDelay?: string;
+};
+
+/** offline, test, and sandboxes that resolve to the default stage — short interval. */
+export const BATCH_TASK_RETRY_POLICY_DEFAULT = {
   errors: ["States.ALL"],
   maxAttempts: 3,
   interval: "5 seconds",
   backoffRate: 2,
-} as const;
+} as const satisfies BatchTaskRetryPolicy;
+
+const BATCH_TASK_RETRY_POLICY_DEVELOP = {
+  errors: ["States.ALL"],
+  maxAttempts: 3,
+  interval: "1 hour",
+  backoffRate: 2,
+  maxDelay: "4 hours",
+} as const satisfies BatchTaskRetryPolicy;
+
+const BATCH_TASK_RETRY_POLICY_PRODUCTION = {
+  errors: ["States.ALL"],
+  maxAttempts: 3,
+  interval: "5 minutes",
+  backoffRate: 2,
+  maxDelay: "15 minutes",
+} as const satisfies BatchTaskRetryPolicy;
+
+export function batchTaskRetryPolicyForDeployStage(
+  stage: DeployStage,
+): BatchTaskRetryPolicy {
+  switch (stage) {
+    case "develop":
+      return BATCH_TASK_RETRY_POLICY_DEVELOP;
+    case "production":
+      return BATCH_TASK_RETRY_POLICY_PRODUCTION;
+    default:
+      return BATCH_TASK_RETRY_POLICY_DEFAULT;
+  }
+}
+
+/** Same as {@link BATCH_TASK_RETRY_POLICY_DEFAULT} (offline/test/default stage). Deployed graphs use {@link batchTaskRetryPolicyForDeployStage}. */
+export const BATCH_TASK_RETRY_POLICY = BATCH_TASK_RETRY_POLICY_DEFAULT;
 
 /**
  * Builds a `BatchManifest`.

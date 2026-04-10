@@ -42,7 +42,7 @@ export default $config({
       await import("@acme/env");
     const { RegisteredManifests } = await import("./config");
     const { HandlerMap } = await import("./config/handler");
-    const { BATCH_TASK_RETRY_POLICY } = await import("./shared");
+    const { batchTaskRetryPolicyForDeployStage } = await import("./shared");
 
     const environment = LambdaEnvironment;
 
@@ -72,6 +72,8 @@ export default $config({
      * iteration prepends another Task. Using `chain = task.next(chain)` drops intermediate steps.
      */
     const deployStage = resolveDeployStage();
+    const batchTaskRetryPolicy =
+      batchTaskRetryPolicyForDeployStage(deployStage);
 
     const attach = vpcFromEnv();
     const vpc = attach
@@ -147,7 +149,7 @@ export default $config({
         });
 
         if (step.withRetry) {
-          task = task.retry(BATCH_TASK_RETRY_POLICY);
+          task = task.retry(batchTaskRetryPolicy);
         }
 
         task = task.catch(pipelineFailureAlert, {

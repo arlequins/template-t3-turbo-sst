@@ -22,7 +22,7 @@ How to add **pipeline steps** and (optionally) a **new batch**. Step lists live 
   stateName: "MyNewStep",
   handlerKey: "process-main",
   useCase: "What this step does (not deployed).",
-  withRetry: true, // optional → shared BATCH_TASK_RETRY_POLICY
+  withRetry: true, // optional → batchTaskRetryPolicyForDeployStage (develop/production vs default)
   input: { foo: "bar" }, // optional; omit to chain previous output / execution input
 },
 ```
