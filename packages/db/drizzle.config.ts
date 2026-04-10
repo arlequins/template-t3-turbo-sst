@@ -15,7 +15,6 @@ export default {
     user: dbEnv.user,
     password: dbEnv.password,
     database: dbEnv.database,
-    ssl: dbEnv.ssl,
   },
   casing: "snake_case",
 } satisfies Config;

@@ -17,10 +17,12 @@ const client = postgres({
   user: dbEnv.user,
   password: dbEnv.password,
   database: dbEnv.database,
-  ssl: dbEnv.ssl,
   max: dbEnv.poolMax,
   idle_timeout: 20,
   connect_timeout: 10,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const db = drizzle({ client, schema, casing: "snake_case" });

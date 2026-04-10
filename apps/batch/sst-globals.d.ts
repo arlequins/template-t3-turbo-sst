@@ -43,9 +43,20 @@ type StepFunctionsCtor = new (
   },
 ) => { arn: unknown };
 
+/** @see https://sst.dev/docs/component/aws/step-functions/fail/#failargs */
+type StepFunctionsFailArgs = {
+  name: string;
+  error?: unknown;
+  cause?: unknown;
+  output?: unknown;
+  assign?: Record<string, unknown>;
+};
+
 type StepFunctionsStatics = {
   pass: (args: { name: string; output?: unknown }) => SfnState;
   succeed: (args: { name: string }) => SfnState;
+  /** Terminal Fail state — e.g. after a Catch path’s alert Lambda. */
+  fail: (args: StepFunctionsFailArgs) => SfnState;
   lambdaInvoke: (args: {
     name: string;
     function: unknown;

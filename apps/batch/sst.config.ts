@@ -112,7 +112,7 @@ export default $config({
       const name = toPascalCase(batchId);
 
       /** Top-level SST names must be unique — do not reuse `manifest.id` for both Step Functions and Cron. */
-      const failureHandled = sst.aws.StepFunctions.succeed({
+      const failureHandled = sst.aws.StepFunctions.fail({
         name: "PipelineFailureHandled",
       });
 

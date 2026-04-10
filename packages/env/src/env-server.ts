@@ -35,7 +35,6 @@ export const serverEnv = createEnv({
     DATABASE_USER: z.string().optional(),
     DATABASE_PASSWORD: z.string().optional(),
     DATABASE_NAME: z.string().optional(),
-    DATABASE_SSL: z.string().optional(),
     POSTGRES_POOL_MAX: z.string().optional(),
   },
   runtimeEnv: {
@@ -52,7 +51,6 @@ export const serverEnv = createEnv({
     DATABASE_USER: process.env.DATABASE_USER,
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
     DATABASE_NAME: process.env.DATABASE_NAME,
-    DATABASE_SSL: process.env.DATABASE_SSL,
     POSTGRES_POOL_MAX: process.env.POSTGRES_POOL_MAX,
   },
   emptyStringAsUndefined: true,

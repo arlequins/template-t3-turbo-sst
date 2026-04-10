@@ -44,6 +44,7 @@ yarn-error.log*
 # localhost env files
 .env
 .env*.local
+.env.localhost
 .env.develop
 .env.production
 
