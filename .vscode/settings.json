@@ -3,6 +3,9 @@
     "source.fixAll.eslint": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[json]": {
+    "editor.defaultFormatter": null
+  },
   "[typescript,typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

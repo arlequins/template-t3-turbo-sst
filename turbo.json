@@ -32,13 +32,37 @@
     "//#clean": {
       "cache": false
     },
+    "pull": {
+      "cache": false,
+      "interactive": true
+    },
     "push": {
       "cache": false,
       "interactive": true
     },
+    "create-migration": {
+      "cache": false,
+      "interactive": true
+    },
+    "migrate": {
+      "cache": false
+    },
+    "seed": {
+      "cache": false
+    },
     "studio": {
       "cache": false,
       "persistent": true
+    },
+    "sst:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "env:pull": {
+      "cache": false
+    },
+    "env:push": {
+      "cache": false
     },
     "ui-add": {
       "cache": false,
@@ -46,19 +70,41 @@
     }
   },
   "globalEnv": [
-    "POSTGRES_URL",
-    "AUTH_DISCORD_ID",
-    "AUTH_DISCORD_SECRET",
-    "AUTH_REDIRECT_PROXY_URL",
-    "AUTH_SECRET",
-    "PORT"
+    "SST_STAGE",
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_API_URL",
+    "VPC_ID",
+    "SUBNET_IDS",
+    "SECURITY_GROUP_IDS",
+    "NITRO_PRESET",
+    "DATABASE_HOST",
+    "DATABASE_PORT",
+    "DATABASE_USER",
+    "DATABASE_PASSWORD",
+    "DATABASE_NAME",
+    "POSTGRES_POOL_MAX"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
+    "NO_COLOR",
+    "TERM",
     "CI",
     "VERCEL",
     "VERCEL_ENV",
     "VERCEL_URL",
-    "npm_lifecycle_event"
+    "npm_lifecycle_event",
+    "SECRET_NAME",
+    "SECRETS_MANAGER_PLAIN_KEY",
+    "SSM_ENV_PATH",
+    "SST_STAGE",
+    "STAGE",
+    "SST_AWS_PROFILE",
+    "SST_AWS_REGION",
+    "NITRO_PRESET",
+    "AWS_PROFILE",
+    "AWS_REGION",
+    "ENV_TARGET",
+    "SM_PREFIX",
+    "STATE_MACHINE_ARN"
   ]
 }

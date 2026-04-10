@@ -1,0 +1,21 @@
+{
+  "name": "@acme/sst-bootstrap",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "env:pull": "node ./scripts/pull-secret-env.mjs",
+    "env:push": "node ./scripts/push-secret-env.mjs",
+    "sst:install": "sst install",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@acme/env": "workspace:*",
+    "@acme/prettier-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "@aws-sdk/client-secrets-manager": "^3.1027.0",
+    "@types/node": "catalog:",
+    "sst": "4.6.11",
+    "typescript": "catalog:"
+  },
+  "prettier": "@acme/prettier-config"
+}

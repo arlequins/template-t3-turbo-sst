@@ -13,6 +13,10 @@ coverage
 out/
 next-env.d.ts
 
+# sst / open-next
+.sst/
+.open-next/
+
 # nitro
 .nitro/
 .output/
@@ -37,9 +41,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# local env files
+# localhost env files
 .env
 .env*.local
+.env.localhost
+.env.develop
+.env.production
 
 # vercel
 .vercel
@@ -53,3 +60,6 @@ dist/
 
 # tanstack
 .tanstack
+
+# pnpm
+.pnpm-store
