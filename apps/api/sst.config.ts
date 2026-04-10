@@ -1,24 +1,17 @@
 /// <reference path="./sst-globals.d.ts" />
 
-import {
-  DEFAULT_LOCALHOST_API_URL,
-  serverEnv,
-  sstAwsRegion,
-  Stage,
-  vpcFromEnv,
-} from "@acme/env";
-
 /**
  * TanStack Start on AWS via SST `TanStackStart` (CloudFront + S3 static assets + Lambda SSR).
  * Matches https://sst.dev/docs/start/aws/tanstack/ — Nitro `aws-lambda` + streaming in `vite.config.ts`.
  *
- * Run SST from `apps/api`. Deploy runs `buildCommand` internally (no need to pre-run `vite build`).
+ * SST disallows top-level imports — `@acme/env` is loaded via dynamic `import()` in `app` / `run`.
+ * `app()` uses validated {@link serverEnv}, {@link sstAwsRegion}, {@link Stage}.
  *
- * `environment` uses `serverEnv` from `@acme/env` when SST runs. Monorepo: use `pnpm with-env sst deploy`
- * (see package.json) so repo-root `.env` is loaded; CI should export the same variables.
+ * `environment` uses `serverEnv` when SST runs. Monorepo: use `pnpm with-env sst deploy`; CI should export the same variables.
  */
 export default $config({
-  app(input) {
+  async app(input) {
+    const { serverEnv, sstAwsRegion, Stage } = await import("@acme/env");
     const localAwsProfile = serverEnv.SST_AWS_PROFILE?.trim();
     const region = sstAwsRegion();
 
@@ -36,6 +29,9 @@ export default $config({
     };
   },
   async run() {
+    const { serverEnv, vpcFromEnv, DEFAULT_LOCALHOST_API_URL } =
+      await import("@acme/env");
+
     const vpc = vpcFromEnv();
 
     new sst.aws.TanStackStart("Api", {

@@ -1,37 +1,12 @@
 /// <reference path="./sst-globals.d.ts" />
 
-import {
-  serverEnv,
-  sstAwsRegion,
-  sstStageForResourceNames,
-  Stage,
-  vpcFromEnv,
-} from "@acme/env";
-
-import { RegisteredManifests } from "./config";
-import { HandlerMap } from "./lib";
-import { BATCH_TASK_RETRY_POLICY, BatchPipelineStep } from "./shared";
-
 /**
- * Default: pass the Task’s state input into `HandlerInvokeEvent.input`.
- * Override per step in the manifest with a JSONata string or a static object.
- */
-function pipelineStepPayloadInput(step: BatchPipelineStep): unknown {
-  return step.input === undefined ? "{% $states.input %}" : step.input;
-}
-
-/**
- * For each item in `RegisteredManifests` (`config/index.ts`): one Step Functions state machine
- * + optional EventBridge schedule + starter Lambda.
- * @see https://sst.dev/docs/component/aws/step-functions/
- *
- * Cron `function` gets `STATE_MACHINE_ARN` and `states:StartExecution` on the pipeline ARN.
- *
- * Pipeline steps: one Lambda per `handlerKey` — paths in `lib/index.ts` (`HandlerMap`).
- * Without VPC env (`SUBNET_IDS` / `SECURITY_GROUP_IDS`), Lambdas are not placed in a VPC.
+ * SST disallows top-level imports in `sst.config.ts` — use dynamic `import()` inside `app` / `run`.
+ * `app()` loads {@link serverEnv} / {@link sstAwsRegion} / {@link Stage} from `@acme/env` (Zod-validated).
  */
 export default $config({
-  app(input) {
+  async app(input) {
+    const { serverEnv, sstAwsRegion, Stage } = await import("@acme/env");
     const localAwsProfile = serverEnv.SST_AWS_PROFILE?.trim();
     const region = sstAwsRegion();
 
@@ -49,7 +24,29 @@ export default $config({
     };
   },
   async run() {
-    /** Matches repo-root `.env` `SST_STAGE` (Turbo / `pnpm with-env`). */
+    const { sstStageForResourceNames, vpcFromEnv } = await import("@acme/env");
+    const { RegisteredManifests } = await import("./config");
+    const { HandlerMap } = await import("./lib");
+    const { BATCH_TASK_RETRY_POLICY } = await import("./shared");
+
+    /**
+     * Default: pass the Task’s state input into `HandlerInvokeEvent.input`.
+     * Override per step in the manifest with a JSONata string or a static object.
+     */
+    function pipelineStepPayloadInput(step: { input?: unknown }): unknown {
+      return step.input === undefined ? "{% $states.input %}" : step.input;
+    }
+
+    /**
+     * For each item in `RegisteredManifests` (`config/index.ts`): one Step Functions state machine
+     * + optional EventBridge schedule + starter Lambda.
+     * @see https://sst.dev/docs/component/aws/step-functions/
+     *
+     * Cron `function` gets `STATE_MACHINE_ARN` and `states:StartExecution` on the pipeline ARN.
+     *
+     * Pipeline steps: one Lambda per `handlerKey` — paths in `lib/index.ts` (`HandlerMap`).
+     * Without VPC env (`SUBNET_IDS` / `SECURITY_GROUP_IDS`), Lambdas are not placed in a VPC.
+     */
     const stage = sstStageForResourceNames();
 
     const attach = vpcFromEnv();
