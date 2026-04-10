@@ -73,6 +73,22 @@ From the repo root:
 pnpm turbo gen init
 ```
 
+## プロダクションリリース
+
+開発環境・本番環境など、ステージごとに環境変数をリポジトリルートの別ファイル（例: `.env.develop`）で扱う場合、AWS Secrets Manager との同期は次のコマンドで行います。**日々の作業ではローカルへ取り込む `env:pull` だけで足りる**ことが多く、`env:push` は Secret をクラウド側へ反映させるときだけ使えば十分です。
+
+```bash
+# Secrets Manager → リポジトリルートの .env.develop に保存
+pnpm env:pull -- --env-file .env.develop
+
+# 従来のフラグ（--out）も同じ（パスはリポジトリルートを基準）
+pnpm env:pull -- --out .env.develop
+
+# ローカルの .env.develop → Secrets Manager へアップロード（必要な場合のみ）
+pnpm env:push -- --env-file .env.develop
+pnpm env:push -- --file .env.develop
+```
+
 ## Deployment (overview)
 
 - **Web:** static export (`next build`); SST `StaticSite` points at `apps/web` build output.

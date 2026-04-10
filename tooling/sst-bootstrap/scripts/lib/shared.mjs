@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   CreateSecretCommand,
@@ -29,6 +29,17 @@ export function resolveDefaultEnvPath(envTargetRaw) {
     );
   }
   return join(appDir, ".env");
+}
+
+/**
+ * User-supplied env file path: absolute paths unchanged; relative paths are from
+ * {@link REPO_ROOT} so e.g. `.env.develop` works when cwd is `tooling/sst-bootstrap`.
+ */
+export function resolveEnvFilePath(relativeOrAbsolute) {
+  const t = (relativeOrAbsolute ?? "").trim();
+  if (!t) return undefined;
+  if (isAbsolute(t)) return t;
+  return join(REPO_ROOT, t);
 }
 
 export function isSecretsManagerArn(s) {
@@ -81,6 +92,11 @@ export function parseGlobalFlags(argv, startIdx) {
     else if (a === "--profile" && argv[i + 1]) out.profile = argv[++i];
     else if (a === "--file" && argv[i + 1]) out.file = argv[++i];
     else if (a === "--out" && argv[i + 1]) out.outFile = argv[++i];
+    else if (a === "--env-file" && argv[i + 1]) {
+      const v = argv[++i];
+      out.file = v;
+      out.outFile = v;
+    }
     else if (a === "--help" || a === "-h") return { help: true };
   }
   return { ...out, help: false };

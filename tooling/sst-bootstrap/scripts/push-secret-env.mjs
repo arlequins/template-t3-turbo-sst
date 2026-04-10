@@ -3,7 +3,6 @@
  * Read `.env` or JSON → CreateSecret / UpdateSecret (see `lib/shared.mjs`).
  */
 import { existsSync } from "node:fs";
-import { isAbsolute, join } from "node:path";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 import {
   applyProfile,
@@ -11,6 +10,7 @@ import {
   parseGlobalFlags,
   putSecret,
   resolveDefaultEnvPath,
+  resolveEnvFilePath,
   resolveEnvTargetCli,
   resolveRegion,
   resolveSecretBase,
@@ -26,7 +26,8 @@ Uploads a file to Secrets Manager as SecretString (JSON).
   .json files must contain a single JSON object.
 
 Options:
-  --file <path>             Overrides default input file from --env-target
+  --file <path>             Input file (repo-root relative or absolute)
+  --env-file <path>         Same as --file (alias; matches pull --env-file)
   --secret-name <prefix>    Middle path, e.g. environments
   --env-target <root|web|…> Last SM segment + default .env path (root → repo .env; else apps/<name>/.env)
   --stage <STAGE>           Path prefix (leading segment), e.g. offline → offline/environments/root
@@ -64,9 +65,7 @@ async function main() {
   }
 
   const filePath = args.file
-    ? isAbsolute(args.file)
-      ? args.file
-      : join(process.cwd(), args.file)
+    ? resolveEnvFilePath(args.file)
     : defaultEnvPath;
   if (!existsSync(filePath)) {
     console.error(`push: file not found: ${filePath}`);

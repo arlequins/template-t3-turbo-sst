@@ -9,6 +9,7 @@ import {
   fetchSecret,
   parseGlobalFlags,
   resolveDefaultEnvPath,
+  resolveEnvFilePath,
   resolveEnvTargetCli,
   resolveRegion,
   resolveSecretBase,
@@ -24,7 +25,9 @@ Options:
   --secret-name, --path <prefix>   Middle path (not ARN), e.g. environments
   --env-target <root|web|…>       Last SM path segment + default .env path (root → repo .env; else apps/<name>/.env)
   --stage <STAGE>                 Path prefix (leading segment), e.g. offline → offline/environments/root
-  --region, --profile, --out (overrides default .env path), --dry-run
+  --out <path>              Write to this file (repo-root relative or absolute)
+  --env-file <path>         Same as --out (same flag name as push --file)
+  --region, --profile, --dry-run
 
 Environment:
   SECRET_NAME (legacy: SSM_ENV_PATH)   Same as --secret-name prefix or full ARN
@@ -56,7 +59,8 @@ async function main() {
 
   let outFile;
   try {
-    outFile = args.outFile ?? resolveDefaultEnvPath(envTarget);
+    outFile =
+      resolveEnvFilePath(args.outFile) ?? resolveDefaultEnvPath(envTarget);
   } catch (e) {
     console.error("pull:", e.message ?? e);
     process.exit(1);
