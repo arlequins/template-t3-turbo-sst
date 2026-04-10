@@ -44,7 +44,7 @@ type StepFunctionsCtor = new (
 ) => { arn: unknown };
 
 type StepFunctionsStatics = {
-  pass: (args: { name: string }) => SfnState;
+  pass: (args: { name: string; output?: unknown }) => SfnState;
   succeed: (args: { name: string }) => SfnState;
   lambdaInvoke: (args: {
     name: string;
@@ -53,9 +53,17 @@ type StepFunctionsStatics = {
   }) => SfnTaskState;
 };
 
+/** Minimal shape for `new sst.aws.Function` — extend when using more properties in `sst.config.ts`. */
+type SstAwsFunctionInstance = {
+  arn: unknown;
+};
+
 declare const sst: {
   aws: {
-    Function: new (name: string, args?: Record<string, unknown>) => unknown;
+    Function: new (
+      name: string,
+      args?: Record<string, unknown>,
+    ) => SstAwsFunctionInstance;
     CronV2: new (name: string, args?: Record<string, unknown>) => unknown;
     StepFunctions: StepFunctionsCtor & StepFunctionsStatics;
   };

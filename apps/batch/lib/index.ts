@@ -11,7 +11,8 @@ export type HandlerInvokeEvent<T = unknown> = {
 
 /**
  * Maps `handlerKey` (from `BatchPipelineStep` / `config/step-defs`) to Lambda handler paths.
- * One deploy-time `Function` per key; multiple batches may reference the same key.
+ * `sst.config.ts` deploys one `sst.aws.Function` per key; Step Tasks use `function: fn.arn` so
+ * multiple steps can share the same Lambda without SST merging Task states in the ASL.
  *
  * Paths are relative to the `apps/batch` package root; each module must `export const handler`.
  * Use `path/to/file.handler` (not `.ts`) — SST parses `file.ext` as export name `ext`.
