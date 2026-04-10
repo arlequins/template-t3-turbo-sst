@@ -72,7 +72,7 @@ export const createBatchManifest = (
     id: name,
     schedule,
     eventBridgeScheduleEnabled,
-    starterHandler: `shared/entry.ts`,
+    starterHandler: `shared/entry.handler`,
     steps: stepDefs.map((stepDef) => ({
       stateName: stepDef.stateName,
       handlerKey: stepDef.handlerKey,

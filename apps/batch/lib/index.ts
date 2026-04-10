@@ -14,17 +14,18 @@ export type HandlerInvokeEvent<T = unknown> = {
  * One deploy-time `Function` per key; multiple batches may reference the same key.
  *
  * Paths are relative to the `apps/batch` package root; each module must `export const handler`.
+ * Use `path/to/file.handler` (not `.ts`) — SST parses `file.ext` as export name `ext`.
  */
 export const HandlerMap = {
   "log-batch-start": {
-    handler: "lib/functions/log-batch-start.ts",
+    handler: "lib/functions/log-batch-start.handler",
     memory: "1024 MB",
     retention:
       serverEnv.SST_STAGE === Stage.PRODUCTION ? "13 months" : "2 weeks",
     timeout: "5 minutes",
   },
   "process-main": {
-    handler: "lib/functions/process-main.ts",
+    handler: "lib/functions/process-main.handler",
     memory: "1024 MB",
     retention:
       serverEnv.SST_STAGE === Stage.PRODUCTION ? "13 months" : "2 weeks",

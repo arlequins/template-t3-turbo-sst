@@ -86,7 +86,7 @@ export default $config({
 
     /** One Lambda for all pipelines; `batchId` is passed in `lambdaInvoke.payload` per state machine. */
     const pipelineFailureFn = new sst.aws.Function(`PipelineFailure`, {
-      handler: "lib/functions/common/pipeline-failure.ts",
+      handler: "lib/functions/common/pipeline-failure.handler",
       timeout: "1 minute",
       memory: "1024 MB",
       retention: stage === Stage.PRODUCTION ? "13 months" : "2 weeks",
