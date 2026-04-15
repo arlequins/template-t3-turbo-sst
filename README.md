@@ -1,13 +1,13 @@
 # template-t3-turbo-sst
 
-**v1.0.0** — A pnpm monorepo template inspired by [T3](https://create.t3.gg/) and [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo), extended around **AWS SST (Ion)** and **batch pipelines**. Use it as a GitHub template or clone and rename.
+**v1.0.1** — A pnpm monorepo template inspired by [T3](https://create.t3.gg/) and [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo), extended around **AWS SST (Ion)** and **batch pipelines**. Use it as a GitHub template or clone and rename.
 
 ## Tech stack (summary)
 
 | Layer | Stack |
 | --- | --- |
 | Runtime / package manager | Node.js · **pnpm** workspaces (see [`engines`](./package.json)) |
-| Monorepo | **Turborepo** |
+| Monorepo | **Turborepo** · shared dependency versions via **pnpm `catalog:`** ([`pnpm-workspace.yaml`](./pnpm-workspace.yaml)) |
 | Frontend | **Next.js** (App Router, `output: "export"`) · **Tailwind CSS** · **tRPC** client |
 | API | **TanStack Start** · **Vite** · **Nitro** (e.g. `aws-lambda`) · **tRPC** server |
 | Batch / orchestration | **SST** `StepFunctions` · **Lambda** · **EventBridge** (`CronV2`) — see `apps/batch` |
@@ -31,7 +31,7 @@ apps/
   web/             Next.js static export → SST StaticSite (S3 / CloudFront)
   api/             TanStack Start + tRPC → Nitro on AWS Lambda (SST)
   batch/           Step Functions pipelines + EventBridge Cron + handler Lambdas
-packages/          @acme/db, trpc, ui, validators, env, service, auth, …
+packages/          @acme/db, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
 tooling/           eslint, prettier, tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
 ```
 
@@ -68,6 +68,14 @@ With a valid `.env`:
 ```bash
 pnpm db:push
 ```
+
+Optional **seed data** (TypeScript seeds, ledger in `drizzle.__drizzle_seeds`):
+
+```bash
+pnpm db:seed
+```
+
+See [`packages/db/README.md`](./packages/db/README.md) and [`packages/shared/README.md`](./packages/shared/README.md) (`runDrizzleSeeds`).
 
 ### 4. Develop
 

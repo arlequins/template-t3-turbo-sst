@@ -87,4 +87,4 @@ When you need a **new** step file (new pipeline id):
 | [`../lib/index.ts`](../lib/index.ts)   | `HandlerInvokeEvent` (payload shape for handlers)           |
 | [`../README.md`](../README.md)         | App layout and scripts                                      |
 
-Repo: [root `README.md`](../../../README.md), [`CHANGELOG.md`](../../../CHANGELOG.md).
+Repo: [root `README.md`](../../../README.md), [`CHANGELOG.md`](../../../CHANGELOG.md), [`packages/README.md`](../../../packages/README.md).

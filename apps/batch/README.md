@@ -1,6 +1,6 @@
 # `apps/batch` — Step Functions + EventBridge cron
 
-(Template **v1.0.0** — see repo-root [`CHANGELOG.md`](../../CHANGELOG.md).)
+(Template **v1.0.1** — see repo-root [`CHANGELOG.md`](../../CHANGELOG.md).)
 
 Runs **batch pipelines** as sequential **AWS Step Functions**, optionally on a schedule via **EventBridge** (`CronV2`). One **starter Lambda** (`shared/entry.ts`) calls `StartExecution` when the schedule fires.
 
@@ -52,10 +52,11 @@ apps/batch/
 
 ## Documentation
 
-| Doc                                        | Contents                                                                                                                          |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| [**`config/README.md`**](config/README.md) | **Add steps** — `step-defs/`, [`handler.ts`](config/handler.ts) for new `handlerKey`, [`index.ts`](config/index.ts) like `sample` |
-| [Repository `README.md`](../../README.md)  | Monorepo tech stack, SST / deploy overview                                                                                        |
-| [`CHANGELOG.md`](../../CHANGELOG.md)       | Release notes                                                                                                                     |
+| Doc                                              | Contents                                                                                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| [**`config/README.md`**](config/README.md)       | **Add steps** — `step-defs/`, [`handler.ts`](config/handler.ts) for new `handlerKey`, [`index.ts`](config/index.ts) like `sample` |
+| [Repository `README.md`](../../README.md)        | Monorepo tech stack, SST / deploy overview                                                                                        |
+| [`packages/README.md`](../../packages/README.md) | Workspace packages (`@acme/db`, `@acme/shared`, …)                                                                                |
+| [`CHANGELOG.md`](../../CHANGELOG.md)             | Release notes                                                                                                                     |
 
 For **local debugging** without full SST, see `scripts/dev.ts` and `scripts/run-pipeline.ts`.
