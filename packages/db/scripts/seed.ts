@@ -1,8 +1,17 @@
+/**
+ * Runs `scripts/seeds/*.ts` in filename order. Each file must default-export
+ * `async ({ tx, stage }) => void` (`stage` comes from `resolveDeployStage()`).
+ *
+ * Applied seeds are recorded in `drizzle.__drizzle_seeds` by filename (e.g. `0000-init-client.ts`).
+ */
 /// <reference types="node" />
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { sql } from "drizzle-orm";
+
+import type { SeedRun } from "@acme/types";
+import { resolveDeployStage } from "@acme/env";
 
 import { closeDatabasePool, db } from "../src/client";
 
@@ -40,44 +49,64 @@ async function loadAppliedSeedNames(): Promise<Set<string>> {
   return names;
 }
 
+async function listTsSeeds(): Promise<{ name: string; path: string }[]> {
+  let entries;
+  try {
+    entries = await readdir(seedsRoot, { withFileTypes: true });
+  } catch (e: unknown) {
+    const code = e && typeof e === "object" && "code" in e ? e.code : undefined;
+    if (code === "ENOENT") return [];
+    throw e;
+  }
+
+  const out: { name: string; path: string }[] = [];
+  for (const e of entries) {
+    if (!e.isFile() || e.name.startsWith("_") || !e.name.endsWith(".ts")) {
+      continue;
+    }
+    out.push({ name: e.name, path: join(seedsRoot, e.name) });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name, "en"));
+}
+
 async function main() {
+  const stage = resolveDeployStage();
+  console.log(`Seeds: stage = "${stage}"`);
+
   await ensureSeedsLedgerTable();
 
-  const entries = await readdir(seedsRoot, { withFileTypes: true });
-  const seedFiles = entries
-    .filter(
-      (e) => e.isFile() && e.name.endsWith(".sql") && !e.name.startsWith("_"),
-    )
-    .map((e) => e.name)
-    .sort((a, b) => a.localeCompare(b, "en"));
-
-  if (seedFiles.length === 0) {
-    console.log("No seed files under scripts/seeds.");
+  const files = await listTsSeeds();
+  if (files.length === 0) {
+    console.log("No .ts files under scripts/seeds/.");
     return;
   }
 
   const applied = await loadAppliedSeedNames();
 
-  for (const fileName of seedFiles) {
-    if (applied.has(fileName)) {
-      console.log(`Skip (already seeded): ${fileName}`);
+  for (const { name, path } of files) {
+    if (applied.has(name)) {
+      console.log(`Skip (already seeded): ${name}`);
       continue;
     }
 
-    const seedPath = join(seedsRoot, fileName);
-    const body = (await readFile(seedPath, "utf8")).trim();
-    if (body.length === 0) {
-      throw new Error(`Seed "${fileName}" is empty`);
+    console.log(`Seeding: ${name} …`);
+    const mod = (await import(pathToFileURL(path).href)) as {
+      default?: unknown;
+    };
+    const run = mod.default;
+    if (typeof run !== "function") {
+      throw new Error(
+        `Seed "${name}" must default-export async ({ tx, stage }) => …`,
+      );
     }
 
-    console.log(`Seeding: ${fileName} …`);
     await db.transaction(async (tx) => {
-      await tx.execute(sql.raw(body));
-      await tx.execute(
-        sql`INSERT INTO ${ledgerTable} (name) VALUES (${fileName})`,
-      );
+      await (run as SeedRun<typeof tx>)({ tx, stage });
+      await tx.execute(sql`INSERT INTO ${ledgerTable} (name) VALUES (${name})`);
     });
-    console.log(`Seeded: ${fileName}`);
+
+    applied.add(name);
+    console.log(`Seeded: ${name}`);
   }
 
   console.log("All seeds completed.");

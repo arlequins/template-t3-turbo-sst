@@ -357,6 +357,9 @@ importers:
       '@acme/env':
         specifier: workspace:*
         version: link:../env
+      '@acme/types':
+        specifier: workspace:*
+        version: link:../types
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(postgres@3.4.9)
@@ -502,6 +505,31 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 22.19.17
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.4(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.8.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/types:
+    dependencies:
+      '@acme/env':
+        specifier: workspace:*
+        version: link:../env
+    devDependencies:
+      '@acme/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@acme/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@acme/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
       eslint:
         specifier: 'catalog:'
         version: 9.39.4(jiti@2.6.1)
