@@ -3,7 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { createInterface } from "node:readline/promises";
 import { pathToFileURL } from "node:url";
 
-import { closeDatabasePool } from "@acme/db/client";
+import { closeDatabasePool } from "@acme/db-backbone/client";
 
 import { RegisteredManifests } from "../config";
 import { HandlerMap } from "../config/handler";

@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@acme/auth": "workspace:*",
-    "@acme/db": "workspace:*",
+    "@acme/db-backbone": "workspace:*",
     "@acme/env": "workspace:*",
     "@acme/trpc": "workspace:*",
     "@t3-oss/env-core": "^0.13.11",

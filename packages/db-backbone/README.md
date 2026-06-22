@@ -1,4 +1,4 @@
-# `@acme/db`
+# `@acme/db-backbone`
 
 **Drizzle ORM** + **postgres.js** for this monorepo. Schema under `src/`, Drizzle Kit config in [`drizzle.config.ts`](./drizzle.config.ts).
 
@@ -24,4 +24,4 @@ All use `pnpm with-env` and the **repository root** `.env` (`DATABASE_*`).
 
 ## Exports
 
-See [`package.json` → `exports`](./package.json): `@acme/db`, `@acme/db/client`, `@acme/db/schema`.
+See [`package.json` → `exports`](./package.json): `@acme/db-backbone`, `@acme/db-backbone/client`, `@acme/db-backbone/schema`.

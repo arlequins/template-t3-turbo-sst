@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/db": "workspace:*",
+    "@acme/db-backbone": "workspace:*",
     "@t3-oss/env-core": "^0.13.11",
     "zod": "catalog:"
   },
