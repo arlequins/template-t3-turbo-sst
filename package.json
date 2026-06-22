@@ -1,6 +1,6 @@
 {
   "name": "template-t3-turbo-sst",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "engines": {
     "node": "^24.14.0",
@@ -11,10 +11,10 @@
     "build": "turbo run build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
-    "db:pull": "turbo -F @acme/db pull",
-    "db:push": "turbo -F @acme/db push",
-    "db:create-migration": "turbo -F @acme/db create-migration",
-    "db:migrate": "turbo -F @acme/db migrate",
+    "db:pull": "turbo -F @acme/db-backbone pull",
+    "db:push": "turbo -F @acme/db-backbone push",
+    "db:create-migration": "turbo -F @acme/db-backbone create-migration",
+    "db:migrate": "turbo -F @acme/db-backbone migrate",
     "db:seed": "turbo -F @acme/db seed",
     "db:studio": "turbo -F @acme/db studio",
     "dev": "turbo watch dev --continue",

@@ -11,7 +11,7 @@ import superjson from "superjson";
 import { z, ZodError } from "zod/v4";
 
 import { authApi } from "@acme/auth";
-import { db } from "@acme/db/client";
+import { db } from "@acme/db-backbone/client";
 
 import { formatTrpcErrorShape } from "./errors";
 
