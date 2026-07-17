@@ -37,11 +37,11 @@
     "env:push": "pnpm -F @acme/sst-bootstrap run env:push --"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
-    "@turbo/gen": "^2.9.5",
+    "@biomejs/biome": "^2.5.4",
+    "@turbo/gen": "^2.10.5",
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
-    "turbo": "^2.9.5",
+    "turbo": "^2.10.5",
     "typescript": "catalog:"
   }
 }
