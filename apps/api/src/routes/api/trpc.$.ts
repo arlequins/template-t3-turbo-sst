@@ -1,12 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-
 import {
   AppRouter,
   createTRPCContext,
   TRPC_HTTP_PATH,
   TRPC_HTTP_ROUTE_SPLAT,
 } from "@acme/trpc";
+import { createFileRoute } from "@tanstack/react-router";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { corsPreflightResponse, withCors } from "~/server/cors";
 

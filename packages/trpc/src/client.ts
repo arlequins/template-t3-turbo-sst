@@ -3,13 +3,12 @@
  * Do not import `@acme/trpc` from Client Components — it pulls server code (`postgres`, etc.).
  */
 export { TRPC_HTTP_PATH, TRPC_HTTP_ROUTE_SPLAT } from "./constants";
-export type { AppRouter, RouterInputs, RouterOutputs } from "./types";
-
 export {
-  TRPC_DATABASE_UNAVAILABLE_MESSAGE,
-  TRPC_GENERIC_CLIENT_MESSAGE,
-  TRPC_UNAUTHORIZED_MESSAGE,
   getTrpcUserFacingMessage,
   isTrpcDatabaseUnavailableError,
   isTrpcUnauthorizedError,
+  TRPC_DATABASE_UNAVAILABLE_MESSAGE,
+  TRPC_GENERIC_CLIENT_MESSAGE,
+  TRPC_UNAUTHORIZED_MESSAGE,
 } from "./errors";
+export type { AppRouter, RouterInputs, RouterOutputs } from "./types";

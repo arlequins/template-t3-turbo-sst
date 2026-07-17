@@ -20,7 +20,8 @@ Then expand to `@acme/env`, `@acme/service`, and `@acme/trpc`.
 
 - Prefer mocks for database and external service dependencies, using `vi.mock` or manual test doubles.
 - Consider real database integration tests after the pure layers have sufficient coverage.
-- Apply the existing formatter, linter, and import-order conventions to test code.
+- Apply the existing Biome formatter, linter, and import-order conventions to
+  test code.
 - There is no mandatory coverage percentage yet. At minimum, cover public API happy paths and representative edge cases.
 
 ## Test File Location and Naming

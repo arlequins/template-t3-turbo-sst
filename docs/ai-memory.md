@@ -21,7 +21,7 @@ This page is a durable context note for AI agents working in this repository.
 | Database        | Drizzle ORM with `postgres.js`.                                                             |
 | Validation      | Zod, mostly through shared validator packages.                                              |
 | Environment     | Centralized environment validation through `@acme/env` and SST bootstrap tooling.           |
-| Tooling         | Shared ESLint, Prettier, Tailwind, and TypeScript packages under `tooling/`.                |
+| Tooling         | Biome plus shared Tailwind and TypeScript packages under `tooling/`.                        |
 
 ## Package Layout Memory
 
@@ -48,10 +48,10 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm dev`                        | Start development tasks in watch mode.                   |
 | `pnpm dev:next`                   | Start the web app and dependencies in watch mode.        |
 | `pnpm dev:sst`                    | Start web, API, and batch SST development tasks.         |
-| `pnpm lint` / `pnpm lint:fix`     | Run lint checks, optionally with fixes.                  |
-| `pnpm format` / `pnpm format:fix` | Run formatter checks, optionally with fixes.             |
+| `pnpm check` / `pnpm check:fix`   | Run Biome lint, format, and assist checks.               |
+| `pnpm lint` / `pnpm lint:fix`     | Run Biome lint checks, optionally with fixes.            |
+| `pnpm format` / `pnpm format:fix` | Run Biome formatter checks, optionally with fixes.       |
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
-| `pnpm exec prettier docs --check` | Check documentation formatting.                          |
 | `pnpm turbo gen init`             | Scaffold a new package.                                  |
 
 ## Coding Memory

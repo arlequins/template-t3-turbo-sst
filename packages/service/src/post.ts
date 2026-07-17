@@ -1,9 +1,9 @@
-import type { InferSelectModel } from "drizzle-orm";
+import { desc, eq } from "@acme/db-backbone";
 
 import type { Database } from "@acme/db-backbone/client";
-import type { CreatePostInput } from "@acme/validators";
-import { desc, eq } from "@acme/db-backbone";
 import { Post } from "@acme/db-backbone/schema";
+import type { CreatePostInput } from "@acme/validators";
+import type { InferSelectModel } from "drizzle-orm";
 
 type PostRow = InferSelectModel<typeof Post>;
 

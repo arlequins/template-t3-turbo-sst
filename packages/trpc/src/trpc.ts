@@ -6,12 +6,12 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { z, ZodError } from "zod/v4";
 
 import { authApi } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import { ZodError, z } from "zod/v4";
 
 import { formatTrpcErrorShape } from "./errors";
 

@@ -11,7 +11,6 @@
   "include": [
     "src",
     "next.config.js",
-    "eslint.config.ts",
     ".next/types/**/*.ts",
     "sst.config.ts",
     "sst-env.d.ts",

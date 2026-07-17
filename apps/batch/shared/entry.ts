@@ -2,8 +2,9 @@
  * Default cron starter (`manifest.starterHandler`): `StartExecution` using `STATE_MACHINE_ARN`
  * from `sst.config.ts` CronV2 `environment`.
  */
-import type { Handler } from "aws-lambda";
+
 import { SFNClient, StartExecutionCommand } from "@aws-sdk/client-sfn";
+import type { Handler } from "aws-lambda";
 
 const client = new SFNClient({});
 

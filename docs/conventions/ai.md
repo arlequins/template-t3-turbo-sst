@@ -40,8 +40,9 @@ This document defines how AI coding agents should work in this repository.
 
 Choose checks based on risk and scope:
 
-- Documentation-only changes: run `pnpm exec prettier docs --check`.
-- Formatting-sensitive changes: run `pnpm format` or the relevant package format command.
+- Documentation-only changes: run `pnpm check`.
+- Formatting-sensitive changes: run `pnpm check` or the relevant package
+  command.
 - Code changes: run targeted lint and typecheck first.
 - Shared package or cross-package changes: run root `pnpm lint` and `pnpm typecheck`.
 - Test changes or behavior changes: run the relevant Vitest suite once tests are available.

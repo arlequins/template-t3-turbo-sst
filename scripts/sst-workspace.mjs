@@ -25,11 +25,15 @@ const pkg = PACKAGES[appKey];
 const script = TO_SCRIPT[cmdKey];
 
 if (!pkg) {
-  console.error(`Unknown app "${appKey}". Use: ${Object.keys(PACKAGES).join(", ")}`);
+  console.error(
+    `Unknown app "${appKey}". Use: ${Object.keys(PACKAGES).join(", ")}`,
+  );
   process.exit(1);
 }
 if (!script) {
-  console.error(`Unknown command "${cmdKey}". Use: ${Object.keys(TO_SCRIPT).join(", ")}`);
+  console.error(
+    `Unknown command "${cmdKey}". Use: ${Object.keys(TO_SCRIPT).join(", ")}`,
+  );
   process.exit(1);
 }
 

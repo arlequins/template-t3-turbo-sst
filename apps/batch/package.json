@@ -10,8 +10,8 @@
     "sst:deploy": "pnpm with-env sst deploy",
     "sst:install": "sst install",
     "sst:remove": "pnpm with-env sst remove",
-    "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
-    "lint": "eslint --flag unstable_native_nodejs_ts_config",
+    "format": "biome format .",
+    "lint": "biome lint .",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
@@ -22,15 +22,10 @@
     "@aws-sdk/client-sfn": "^3.787.0"
   },
   "devDependencies": {
-    "@acme/eslint-config": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
     "@types/aws-lambda": "^8.10.155",
     "@types/node": "catalog:",
-    "eslint": "catalog:",
-    "prettier": "catalog:",
     "sst": "4.6.11",
     "typescript": "catalog:"
-  },
-  "prettier": "@acme/prettier-config"
+  }
 }
