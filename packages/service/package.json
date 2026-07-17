@@ -20,7 +20,7 @@
   "dependencies": {
     "@acme/db-backbone": "workspace:*",
     "@acme/validators": "workspace:*",
-    "drizzle-orm": "^0.45.2",
+    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
