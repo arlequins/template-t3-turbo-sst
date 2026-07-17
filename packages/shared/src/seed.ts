@@ -1,11 +1,12 @@
 /// <reference types="node" />
+import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { sql } from "drizzle-orm";
+import { resolveDeployStage } from "@acme/env";
 
 import type { SeedRun } from "@acme/types";
-import { resolveDeployStage } from "@acme/env";
+import { sql } from "drizzle-orm";
 
 const defaultLedger = {
   schema: "drizzle",
@@ -72,7 +73,7 @@ export async function runDrizzleSeeds<TDb>(
   }
 
   async function listTsSeeds(): Promise<{ name: string; path: string }[]> {
-    let entries;
+    let entries: Dirent[];
     try {
       entries = await readdir(seedsRoot, { withFileTypes: true });
     } catch (e: unknown) {

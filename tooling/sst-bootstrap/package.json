@@ -10,12 +10,10 @@
   },
   "devDependencies": {
     "@acme/env": "workspace:*",
-    "@acme/prettier-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
     "@aws-sdk/client-secrets-manager": "^3.1027.0",
     "@types/node": "catalog:",
     "sst": "4.6.11",
     "typescript": "catalog:"
-  },
-  "prettier": "@acme/prettier-config"
+  }
 }

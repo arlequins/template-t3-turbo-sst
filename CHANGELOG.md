@@ -30,7 +30,7 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - **Apps:** `apps/web` (Next.js static export + tRPC client), `apps/api` (TanStack Start + tRPC + Nitro on AWS), `apps/batch` (SST Step Functions + Lambda + EventBridge Cron).
 - **Shared packages:** `@acme/db-backbone`, `@acme/trpc`, `@acme/ui`, `@acme/env`, `@acme/validators`, `@acme/types`, `@acme/shared`, etc.
 - **Infrastructure:** SST (Ion) on AWS; `tooling/sst-bootstrap` for Secrets Manager ↔ root `.env` sync.
-- **Tooling:** Turborepo, pnpm workspaces, shared ESLint/Prettier (`tooling/eslint`).
+- **Tooling:** Turborepo, pnpm workspaces, and Biome.
 
 ### Docs
 

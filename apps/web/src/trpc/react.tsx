@@ -1,7 +1,8 @@
 "use client";
 
+import type { AppRouter } from "@acme/trpc/client";
+import { TRPC_HTTP_PATH } from "@acme/trpc/client";
 import type { QueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   createTRPCClient,
@@ -9,10 +10,8 @@ import {
   loggerLink,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
+import { useState } from "react";
 import SuperJSON from "superjson";
-
-import type { AppRouter } from "@acme/trpc/client";
-import { TRPC_HTTP_PATH } from "@acme/trpc/client";
 
 import { env } from "~/env";
 import { getAccessToken } from "~/lib/client-auth";
@@ -24,7 +23,8 @@ function getQueryClient() {
   if (typeof window === "undefined") {
     return createQueryClient();
   }
-  return (browserQueryClient ??= createQueryClient());
+  browserQueryClient ??= createQueryClient();
+  return browserQueryClient;
 }
 
 export const { useTRPC, TRPCProvider } = createTRPCContext<AppRouter>();

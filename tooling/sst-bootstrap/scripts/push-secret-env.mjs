@@ -64,9 +64,7 @@ async function main() {
     process.exit(1);
   }
 
-  const filePath = args.file
-    ? resolveEnvFilePath(args.file)
-    : defaultEnvPath;
+  const filePath = args.file ? resolveEnvFilePath(args.file) : defaultEnvPath;
   if (!existsSync(filePath)) {
     console.error(`push: file not found: ${filePath}`);
     process.exit(1);
@@ -93,8 +91,8 @@ async function main() {
 
   applyProfile(
     (args.profile?.trim() || undefined) ??
-    process.env.AWS_PROFILE?.trim() ??
-    process.env.SST_AWS_PROFILE?.trim(),
+      process.env.AWS_PROFILE?.trim() ??
+      process.env.SST_AWS_PROFILE?.trim(),
   );
   const region = resolveRegion(args);
   const client = new SecretsManagerClient({ region });

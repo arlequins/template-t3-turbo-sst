@@ -50,8 +50,9 @@ Run common tasks from the repository root through Turborepo.
 | `pnpm dev`                        | Start development servers in watch mode.          |
 | `pnpm dev:next`                   | Watch the web app and its dependencies.           |
 | `pnpm dev:sst`                    | Start `web`, `api`, and `batch` in SST mode.      |
-| `pnpm lint` / `pnpm lint:fix`     | Lint, optionally with automatic fixes.            |
-| `pnpm format` / `pnpm format:fix` | Format, optionally with automatic fixes.          |
+| `pnpm check` / `pnpm check:fix`   | Biome lint, format, and assist checks.            |
+| `pnpm lint` / `pnpm lint:fix`     | Biome lint, optionally with automatic fixes.      |
+| `pnpm format` / `pnpm format:fix` | Biome format, optionally with automatic fixes.    |
 | `pnpm typecheck`                  | Run TypeScript checks.                            |
 | `pnpm clean`                      | Remove untracked files, including `node_modules`. |
 | `pnpm db:*` / `pnpm sst:ws`       | Database and SST workspace helper scripts.        |
@@ -62,10 +63,9 @@ When adding a new task, define it in `turbo.json` and explicitly decide whether 
 
 `.husky/pre-commit` should run the fast checks needed to keep the repository healthy. A typical sequence is:
 
-1. `pnpm lint:fix`
-2. `pnpm format:fix`
-3. `git add -u`
-4. `pnpm typecheck`
+1. `pnpm check:fix`
+2. `git add -u`
+3. `pnpm typecheck`
 
 Commit message validation belongs in `.husky/commit-msg`; see [Git enforcement](git.md#enforcement).
 
@@ -85,7 +85,6 @@ Generated files should include:
 | ---------------------------------- | ------------------------------------------------------------- |
 | `packages/<name>/package.json`     | `private: true`, `type: "module"`, scripts, and dependencies. |
 | `packages/<name>/tsconfig.json`    | Extends `@acme/tsconfig`.                                     |
-| `packages/<name>/eslint.config.ts` | Extends `@acme/eslint-config`.                                |
 | `packages/<name>/src/index.ts`     | Empty or minimal package entry point.                         |
 
 After running the generator:

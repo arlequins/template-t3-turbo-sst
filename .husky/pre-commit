@@ -1,11 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
-echo "pre-commit: lint:fix"
-pnpm lint:fix
-
-echo "pre-commit: format:fix"
-pnpm format:fix
+echo "pre-commit: biome check:fix"
+pnpm check:fix
 
 # Include auto-fixes in this commit (tracked files only)
 git add -u

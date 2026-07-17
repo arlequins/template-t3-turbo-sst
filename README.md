@@ -32,7 +32,7 @@ apps/
   api/             TanStack Start + tRPC → Nitro on AWS Lambda (SST)
   batch/           Step Functions pipelines + EventBridge Cron + handler Lambdas
 packages/          @acme/db, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
-tooling/           eslint, prettier, tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
+tooling/           tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
 ```
 
 - **Package scope:** `@acme/*` — replace with your org when you fork.

@@ -1,8 +1,7 @@
+import { loadDatabaseEnv } from "@acme/env";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-
-import { loadDatabaseEnv } from "@acme/env";
 
 import * as schema from "./schema";
 

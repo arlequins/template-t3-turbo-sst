@@ -1,12 +1,12 @@
 import { execSync } from "node:child_process";
 import type { PlopTypes } from "@turbo/gen";
 
-interface PackageJson {
+type PackageJson = {
   name: string;
   scripts: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
-}
+};
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setGenerator("init", {
@@ -33,11 +33,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           }
         }
         return "Config sanitized";
-      },
-      {
-        type: "add",
-        path: "packages/{{ name }}/eslint.config.ts",
-        templateFile: "templates/eslint.config.ts.hbs",
       },
       {
         type: "add",
@@ -83,9 +78,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           //   stdio: "inherit",
           // });
           execSync("pnpm i", { stdio: "inherit" });
-          execSync(
-            `pnpm prettier --write packages/${answers.name}/** --list-different`,
-          );
+          execSync(`pnpm biome format packages/${answers.name} --write`);
           return "Package scaffolded";
         }
         return "Package not scaffolded";

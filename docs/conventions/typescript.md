@@ -120,7 +120,8 @@ import type { RouterInputs, RouterOutputs } from "@acme/trpc/client";
 import { useTRPC } from "@acme/trpc/client";
 ```
 
-Avoid inline type imports such as `import { type Foo } from "..."` when the formatter or linter enforces separated type imports.
+Avoid inline type imports such as `import { type Foo } from "..."` when Biome
+enforces separated type imports.
 
 ### Strict Mode
 

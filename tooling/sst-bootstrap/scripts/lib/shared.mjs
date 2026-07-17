@@ -24,9 +24,7 @@ export function resolveDefaultEnvPath(envTargetRaw) {
   }
   const appDir = join(REPO_ROOT, "apps", raw);
   if (!existsSync(appDir) || !statSync(appDir).isDirectory()) {
-    throw new Error(
-      `env-target "${raw}": expected app directory ${appDir}`,
-    );
+    throw new Error(`env-target "${raw}": expected app directory ${appDir}`);
   }
   return join(appDir, ".env");
 }
@@ -81,10 +79,7 @@ export function parseGlobalFlags(argv, startIdx) {
     const a = argv[i];
     if (a === "--") continue;
     if (a === "--dry-run") out.dryRun = true;
-    else if (
-      (a === "--path" || a === "--secret-name") &&
-      argv[i + 1]
-    )
+    else if ((a === "--path" || a === "--secret-name") && argv[i + 1])
       out.secretName = argv[++i];
     else if (a === "--stage" && argv[i + 1]) out.stage = argv[++i];
     else if (a === "--env-target" && argv[i + 1]) out.envTarget = argv[++i];
@@ -96,8 +91,7 @@ export function parseGlobalFlags(argv, startIdx) {
       const v = argv[++i];
       out.file = v;
       out.outFile = v;
-    }
-    else if (a === "--help" || a === "-h") return { help: true };
+    } else if (a === "--help" || a === "-h") return { help: true };
   }
   return { ...out, help: false };
 }
@@ -180,7 +174,7 @@ export function formatEnvLine(key, value) {
 
 export function serializeEnv(obj) {
   const keys = Object.keys(obj).sort((a, b) => a.localeCompare(b));
-  return keys.map((k) => formatEnvLine(k, obj[k])).join("\n") + "\n";
+  return `${keys.map((k) => formatEnvLine(k, obj[k])).join("\n")}\n`;
 }
 
 export function secretStringToEnvMap(secretString) {
@@ -223,7 +217,10 @@ export async function putSecret(client, secretId, secretString) {
   try {
     await client.send(new DescribeSecretCommand({ SecretId: secretId }));
     await client.send(
-      new UpdateSecretCommand({ SecretId: secretId, SecretString: secretString }),
+      new UpdateSecretCommand({
+        SecretId: secretId,
+        SecretString: secretString,
+      }),
     );
     return;
   } catch (e) {
