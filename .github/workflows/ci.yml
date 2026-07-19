@@ -75,3 +75,6 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Check migrations
+        run: pnpm db:check

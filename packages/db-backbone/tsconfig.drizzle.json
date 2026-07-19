@@ -3,5 +3,5 @@
   "compilerOptions": {
     "types": ["node"]
   },
-  "include": ["drizzle.config.ts", "src/main-database-env.ts"]
+  "include": ["drizzle.config.ts", "scripts/**/*.ts"]
 }

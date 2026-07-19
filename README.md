@@ -31,7 +31,7 @@ apps/
   web/             Next.js static export → SST StaticSite (S3 / CloudFront)
   api/             Hono + tRPC → Node.js locally / AWS Lambda Function URL (SST)
   batch/           Step Functions pipelines + EventBridge Cron + handler Lambdas
-packages/          @acme/db, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
+packages/          @acme/db-backbone, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
 tooling/           tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
 ```
 
@@ -61,21 +61,22 @@ Example (adjust secret names to your layout):
 pnpm env:pull -- --secret-name environments --env-target root
 ```
 
-### 3. Database schema
+### 3. Database setup
 
-With a valid `.env`:
-
-```bash
-pnpm db:push
-```
-
-Optional **seed data** (TypeScript seeds, ledger in `drizzle.__drizzle_seeds`):
+With a valid `.env`, apply committed migrations and then pending seeds:
 
 ```bash
-pnpm db:seed
+pnpm db:setup
 ```
 
-See [`packages/db-backbone/README.md`](./packages/db-backbone/README.md) and [`packages/shared/README.md`](./packages/shared/README.md) (`runDrizzleSeeds`).
+For schema development, generate and validate a migration:
+
+```bash
+pnpm db:create-migration --name=describe_change
+pnpm db:check
+```
+
+See [`packages/db-backbone/README.md`](./packages/db-backbone/README.md) for the migration workflow and [`packages/shared/README.md`](./packages/shared/README.md) for the seed runner.
 
 ### 4. Develop
 

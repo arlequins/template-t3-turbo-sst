@@ -4,16 +4,37 @@
 
 ## Scripts (from repo root)
 
-| Root script                | Package script     | Description                                 |
-| -------------------------- | ------------------ | ------------------------------------------- |
-| `pnpm db:push`             | `push`             | `drizzle-kit push` — apply schema to the DB |
-| `pnpm db:pull`             | `pull`             | Introspect DB → schema                      |
-| `pnpm db:migrate`          | `migrate`          | Run migrations                              |
-| `pnpm db:create-migration` | `create-migration` | `drizzle-kit generate`                      |
-| `pnpm db:seed`             | `seed`             | Run TypeScript seeds (see below)            |
-| `pnpm db:studio`           | `studio`           | Drizzle Studio                              |
+| Root script                | Package script      | Description                                      |
+| -------------------------- | ------------------- | ------------------------------------------------ |
+| `pnpm db:setup`            | —                   | Run committed migrations, then pending seeds.    |
+| `pnpm db:migrate`          | `migrate`           | Apply committed SQL migrations.                  |
+| `pnpm db:seed`             | `seed`              | Run pending TypeScript seeds (see below).         |
+| `pnpm db:create-migration` | `create-migration`  | Generate SQL and metadata from schema changes.   |
+| `pnpm db:check`            | `check-migrations`  | Validate migration snapshot consistency.         |
+| `pnpm db:push`             | `push`              | Push schema directly for local prototyping only. |
+| `pnpm db:pull`             | `pull`              | Introspect an existing database into schema.      |
+| `pnpm db:studio`           | `studio`            | Open Drizzle Studio.                              |
 
 All use `pnpm with-env` and the **repository root** `.env` (`DATABASE_*`).
+
+## Migration Workflow
+
+SQL migrations and their snapshots are committed under `drizzle/`. The initial migration creates the `sample` schema and `post` table.
+
+After changing files under `src/schemas/`:
+
+```bash
+pnpm db:create-migration --name=describe_change
+pnpm db:check
+```
+
+Review and commit the generated SQL and metadata. Apply migrations and seeds to a configured database with:
+
+```bash
+pnpm db:setup
+```
+
+Deployments should run `pnpm db:migrate` as an explicit release step before starting code that requires the new schema. Do not run `db:push` against shared or production databases because it bypasses the committed migration history.
 
 ## Seeds
 
@@ -21,6 +42,7 @@ All use `pnpm with-env` and the **repository root** `.env` (`DATABASE_*`).
 - **Files:** add `scripts/seeds/*.ts` (sorted by filename). Each file must **default-export** an async function `( { tx, stage } ) => void` (see [`@acme/types`](../types/README.md)).
 - **`stage`:** `resolveDeployStage()` from `@acme/env` (`production` \| `develop` \| `offline` \| `test`) — branch in TypeScript when SQL alone is not enough.
 - **Ledger:** applied seeds are recorded in **`drizzle.__drizzle_seeds`** (schema/table overridable via `runDrizzleSeeds` options; see [`packages/shared`](../shared/README.md)).
+- **Idempotency:** a seed filename runs once. Never edit an applied seed; add a new, higher-numbered file instead.
 
 ## Exports
 
