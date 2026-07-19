@@ -56,7 +56,7 @@ apps/batch/
 | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | [**`config/README.md`**](config/README.md)       | **Add steps** — `step-defs/`, [`handler.ts`](config/handler.ts) for new `handlerKey`, [`index.ts`](config/index.ts) like `sample` |
 | [Repository `README.md`](../../README.md)        | Monorepo tech stack, SST / deploy overview                                                                                        |
-| [`packages/README.md`](../../packages/README.md) | Workspace packages (`@acme/db`, `@acme/shared`, …)                                                                                |
+| [`packages/README.md`](../../packages/README.md) | Workspace packages (`@acme/db-backbone`, `@acme/shared`, …)                                                                       |
 | [`CHANGELOG.md`](../../CHANGELOG.md)             | Release notes                                                                                                                     |
 
 For **local debugging** without full SST, see `scripts/dev.ts` and `scripts/run-pipeline.ts`.

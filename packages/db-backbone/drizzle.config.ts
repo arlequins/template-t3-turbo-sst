@@ -7,8 +7,13 @@ const dbEnv = loadDatabaseEnv();
 
 export default {
   schema: ["./src/schema.ts"],
+  out: "./drizzle",
   dialect: "postgresql",
   schemaFilter: ["sample"],
+  migrations: {
+    schema: "drizzle",
+    table: "__drizzle_migrations",
+  },
   dbCredentials: {
     host: dbEnv.host,
     port: dbEnv.port,
@@ -17,4 +22,6 @@ export default {
     database: dbEnv.database,
   },
   casing: "snake_case",
+  strict: true,
+  verbose: true,
 } satisfies Config;

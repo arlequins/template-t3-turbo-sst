@@ -1,6 +1,6 @@
 # `@acme/shared`
 
-Small **cross-cutting** helpers used by multiple packages. Keep **domain logic** in feature packages (`@acme/db`, apps, …); add only reusable utilities here.
+Small **cross-cutting** helpers used by multiple packages. Keep **domain logic** in feature packages (`@acme/db-backbone`, apps, …); add only reusable utilities here.
 
 ## Exports
 
@@ -11,4 +11,4 @@ Small **cross-cutting** helpers used by multiple packages. Keep **domain logic**
 
 ### `runDrizzleSeeds` (summary)
 
-Used by `@acme/db`’s `scripts/seed.ts`. Pass `{ scriptDir, db }` (and optionally `ledger` for schema/table names). Loads root `.env` via the caller’s `with-env` so `resolveDeployStage()` and DB URLs behave like the rest of the repo.
+Used by `@acme/db-backbone`’s `scripts/seed.ts`. Pass `{ scriptDir, db }` (and optionally `ledger` for schema/table names). Loads root `.env` via the caller’s `with-env` so `resolveDeployStage()` and DB URLs behave like the rest of the repo.

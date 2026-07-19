@@ -53,6 +53,8 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm format` / `pnpm format:fix` | Run Biome formatter checks, optionally with fixes.       |
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
 | `pnpm test`                       | Run workspace tests through Turborepo.                   |
+| `pnpm db:setup`                   | Apply migrations and then pending seeds.                 |
+| `pnpm db:check`                   | Validate committed Drizzle migration metadata.           |
 | `pnpm turbo gen init`             | Scaffold a new package.                                  |
 
 ## Coding Memory
@@ -73,6 +75,7 @@ This page is a durable context note for AI agents working in this repository.
 - External API calls belong in external adapters, not in routers.
 - Environment access should be centralized through `@acme/env`.
 - Tests should start with pure shared packages and use Vitest.
+- Database schema changes require committed Drizzle SQL and metadata; applied seed files are immutable.
 
 ## Review Memory
 

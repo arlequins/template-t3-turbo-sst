@@ -63,3 +63,4 @@ After deploying the API, set `NEXT_PUBLIC_API_URL` to its public URL before buil
 - Keep database calls out of Hono handlers and tRPC routers; place them in dependency-injected services or adapters.
 - Add Drizzle tables under `packages/db-backbone/src/schemas` and export them from `schema.ts`.
 - Keep environment reads centralized in `@acme/env` and update `.env.example` plus `turbo.json` when adding variables.
+- Generate and commit a Drizzle migration for every schema change, then add a new numbered seed file when reference or example data must change.

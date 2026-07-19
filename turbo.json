@@ -42,9 +42,8 @@
       "cache": false,
       "interactive": true
     },
-    "create-migration": {
-      "cache": false,
-      "interactive": true
+    "check-migrations": {
+      "cache": false
     },
     "migrate": {
       "cache": false
