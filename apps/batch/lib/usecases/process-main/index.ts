@@ -1,6 +1,9 @@
-import { postService } from "@acme/service";
+import { db } from "@acme/db-backbone/client";
+import { createPostService } from "@acme/service";
 
 import type { ProcessMainEvent } from "../../functions/process-main";
+
+const postService = createPostService(db);
 
 export async function processMain(payload: ProcessMainEvent): Promise<void> {
   console.info(

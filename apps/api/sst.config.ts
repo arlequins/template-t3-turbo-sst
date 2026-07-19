@@ -1,14 +1,6 @@
 /// <reference path="./sst-globals.d.ts" />
 
-/**
- * TanStack Start on AWS via SST `TanStackStart` (CloudFront + S3 static assets + Lambda SSR).
- * Matches https://sst.dev/docs/start/aws/tanstack/ — Nitro `aws-lambda` + streaming in `vite.config.ts`.
- *
- * SST disallows top-level imports — `@acme/env` is loaded via dynamic `import()` in `app` / `run`.
- * `app()` uses validated {@link serverEnv}, {@link sstAwsRegion}, {@link Stage}.
- *
- * `environment` uses `serverEnv` when SST runs. Monorepo: use `pnpm with-env sst deploy`; CI should export the same variables.
- */
+/** Hono API deployed as an AWS Lambda Function URL. */
 export default $config({
   async app(input) {
     const { serverEnv, sstAwsRegion, Stage } = await import("@acme/env");
@@ -29,14 +21,13 @@ export default $config({
     };
   },
   async run() {
-    const { vpcFromEnv, DEFAULT_LOCALHOST_API_URL, LambdaEnvironment } =
-      await import("@acme/env");
+    const { vpcFromEnv, LambdaEnvironment } = await import("@acme/env");
 
     const vpc = vpcFromEnv();
 
-    new sst.aws.TanStackStart("Api", {
-      path: ".",
-      buildCommand: "pnpm run build",
+    const api = new sst.aws.Function("Api", {
+      handler: "src/lambda.handler",
+      url: true,
       ...(vpc
         ? {
             vpc: {
@@ -46,12 +37,8 @@ export default $config({
           }
         : {}),
       environment: LambdaEnvironment,
-      dev: {
-        command: "pnpm with-env vite dev",
-        directory: ".",
-        title: "tanstack-start",
-        url: DEFAULT_LOCALHOST_API_URL,
-      },
     });
+
+    return { apiUrl: api.url };
   },
 });

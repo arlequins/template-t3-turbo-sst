@@ -16,7 +16,7 @@ This page is a durable context note for AI agents working in this repository.
 | Package manager | pnpm, with versions centralized through `pnpm-workspace.yaml` catalogs.                     |
 | Monorepo runner | Turborepo. Root scripts delegate to `turbo run` or `turbo watch`.                           |
 | Frontend        | Next.js App Router, React, Tailwind CSS, and tRPC client.                                   |
-| API             | TanStack Start, Vite, Nitro, and tRPC server.                                               |
+| API             | Hono HTTP runtime with a tRPC server, local Node entry, and AWS Lambda entry.                |
 | Batch           | SST Step Functions, Lambda handlers, EventBridge schedules, and local batch runner scripts. |
 | Database        | Drizzle ORM with `postgres.js`.                                                             |
 | Validation      | Zod, mostly through shared validator packages.                                              |
@@ -52,6 +52,7 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm lint` / `pnpm lint:fix`     | Run Biome lint checks, optionally with fixes.            |
 | `pnpm format` / `pnpm format:fix` | Run Biome formatter checks, optionally with fixes.       |
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
+| `pnpm test`                       | Run workspace tests through Turborepo.                   |
 | `pnpm turbo gen init`             | Scaffold a new package.                                  |
 
 ## Coding Memory

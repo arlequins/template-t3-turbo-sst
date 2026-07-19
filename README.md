@@ -8,8 +8,8 @@
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Runtime / package manager | Node.js · **pnpm** workspaces (see [`engines`](./package.json))                                                     |
 | Monorepo                  | **Turborepo** · shared dependency versions via **pnpm `catalog:`** ([`pnpm-workspace.yaml`](./pnpm-workspace.yaml)) |
-| Frontend                  | **Next.js** (App Router, `output: "export"`) · **Tailwind CSS** · **tRPC** client                                   |
-| API                       | **TanStack Start** · **Vite** · **Nitro** (e.g. `aws-lambda`) · **tRPC** server                                     |
+| Frontend                  | **Next.js** (App Router, client-only static export) · **Tailwind CSS** · **tRPC** client                             |
+| API                       | **Hono** · **tRPC** server · Node.js locally and AWS Lambda in production                                           |
 | Batch / orchestration     | **SST** `StepFunctions` · **Lambda** · **EventBridge** (`CronV2`) — see `apps/batch`                                |
 | Infrastructure as code    | **SST Ion** on **AWS** (S3, CloudFront, Lambda, …)                                                                  |
 | Database                  | **Drizzle ORM** · **postgres.js** (Node; swap the client yourself for edge-only)                                    |
@@ -29,7 +29,7 @@ Match the Node and pnpm versions in [`package.json` → `engines`](./package.jso
 .github/           CI (lint, format, typecheck, …)
 apps/
   web/             Next.js static export → SST StaticSite (S3 / CloudFront)
-  api/             TanStack Start + tRPC → Nitro on AWS Lambda (SST)
+  api/             Hono + tRPC → Node.js locally / AWS Lambda Function URL (SST)
   batch/           Step Functions pipelines + EventBridge Cron + handler Lambdas
 packages/          @acme/db, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
 tooling/           tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
@@ -117,10 +117,12 @@ Day to day, **`env:pull` into your machine** is often enough; use **`env:push`**
 ## Deployment (overview)
 
 - **Web:** static output from `next build` → SST `StaticSite`.
-- **API:** `sst deploy` from `apps/api` (e.g. `pnpm -F @acme/api sst:deploy`). See [SST · TanStack on AWS](https://sst.dev/docs/start/aws/tanstack/).
+- **API:** Hono on an AWS Lambda Function URL. Deploy with `pnpm -F @acme/api sst:deploy`.
 - **Batch:** `apps/batch` `sst.config.ts` — Step Functions + Cron. [`apps/batch/README.md`](./apps/batch/README.md); add steps: [`apps/batch/config/README.md`](./apps/batch/config/README.md).
 
 Set `NEXT_PUBLIC_*` and other env for the target stage before deploy.
+
+See [Application Architecture](./docs/architecture.md) for layer boundaries, request flow, and extension rules.
 
 ## Before you publish a fork (checklist)
 

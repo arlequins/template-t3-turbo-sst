@@ -9,6 +9,7 @@
 - [TypeScript, imports, exports, constants, and types](conventions/typescript.md)
 - [AI collaboration convention](conventions/ai.md)
 - [Semantic versioning](semantic-versioning.md)
+- [Application architecture](architecture.md)
 
 ## AI Context
 

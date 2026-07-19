@@ -1,208 +1,122 @@
-# tRPC Router Convention: DIP 4-layer Structure
+# tRPC Router Convention
 
-Read this when adding or changing tRPC procedures in `packages/trpc`.
+Read this when adding or changing procedures in `packages/trpc`.
 
 ## Architecture
 
 ```text
-packages/trpc/src/
-├── router/               # Thin entry layer: procedure definitions and usecase calls only
-│   └── common.ts
-├── lib/
-│   ├── types/            # DTOs and domain types
-│   │   └── common.ts
-│   ├── services/
-│   │   ├── ports/        # I/O interfaces
-│   │   │   └── common-port.ts
-│   │   └── common/       # Business logic through ports
-│   │       └── index.ts
-│   ├── adaptors/
-│   │   ├── db/           # Drizzle ORM query implementations
-│   │   │   └── sample.ts
-│   │   └── external/     # External API implementations
-│   │       └── common-api.ts
-│   └── usecases/
-│       ├── composition/  # Production dependency injection
-│       │   └── common-deps.ts
-│       └── common/       # run* wrappers called from routers
-│           └── index.ts
+apps/api/src/app.ts
+  -> packages/trpc/src/router
+       -> request-scoped services from ctx.services
+            -> packages/service
+                 -> packages/db-backbone
 ```
 
-Dependency direction:
+The Hono app owns HTTP concerns. tRPC owns typed API contracts and request middleware. Services own application behavior and receive concrete I/O dependencies during composition. Drizzle owns persistence.
 
-```text
-router -> usecases -> services -> ports <- adaptors
-```
+## Layer Rules
 
-## Implementation Pattern
+### Hono
 
-### Step 1: Define Port Interfaces
+- Mount tRPC through the fetch adapter in `apps/api/src/app.ts`.
+- Keep CORS, request IDs, security headers, health checks, and ordinary HTTP endpoints here.
+- Do not place domain behavior or Drizzle queries in Hono handlers.
 
-Define I/O interfaces in `lib/services/ports/{domain}-port.ts`.
+### tRPC Context
+
+- Build request-scoped dependencies in `packages/trpc/src/trpc.ts`.
+- Resolve authentication once per request.
+- Expose application operations through `ctx.services`.
+- Keep concrete database construction out of routers.
 
 ```ts
-// lib/services/ports/common-port.ts
-export type SamplePort = {
-  findSampleByCode(sampleCode: string): Promise<SampleRecord | null>;
-  listAllSamples(): Promise<SampleInfo[]>;
-  listSamplesForUser(userCode: string): Promise<SampleInfo[]>;
-};
+export const createTRPCContext = async (opts: { headers: Headers }) => {
+  const session = await authApi.getSession({ headers: opts.headers });
 
-export type CommonApiPort = {
-  callDepartmentAuth(
-    userCode: string,
-    departmentType: string,
-  ): Promise<{ status: boolean }>;
+  return {
+    session,
+    services: {
+      post: createPostService(db),
+    },
+  };
 };
 ```
 
-### Step 2: Write Deps Types and Business Logic
+### Routers
 
-Write business logic as pure functions in `lib/services/{domain}/index.ts`.
+- Keep routers thin: validate input, select authorization middleware, call one service operation, and return the result.
+- Use `publicProcedure` for public operations and `protectedProcedure` for authenticated operations.
+- Define routers with `satisfies TRPCRouterRecord`.
+- Do not import a database client, Drizzle schema, or global service singleton.
 
 ```ts
-// lib/services/common/index.ts
-import type { CommonApiPort, SamplePort } from "../ports/common-port";
+export const postRouter = {
+  all: publicProcedure.query(({ ctx }) => ctx.services.post.listPosts()),
 
-export type CommonDeps = {
-  sample: SamplePort;
-  commonApi: CommonApiPort;
-  isAdmin: (userCode: string) => Promise<boolean>;
-};
+  byId: publicProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(({ ctx, input }) => ctx.services.post.getPostById(input.id)),
+} satisfies TRPCRouterRecord;
+```
 
-export async function authenticateSample(
-  deps: CommonDeps,
-  input: AuthSampleInput,
-): Promise<AuthSampleResult> {
-  const sample = await deps.sample.findSampleByCode(input.sampleCode);
-  if (!sample) {
-    throw new TRPCError({ code: "NOT_FOUND" });
-  }
+### Services
 
-  // ...
+- Define service factories in `packages/service`.
+- Pass the database or an explicit port into the factory.
+- Keep framework-specific request and response types out of service code.
+- Export factories and types with named exports.
+
+```ts
+export function createPostService(database: Database) {
+  return {
+    listPosts: () => database.query.Post.findMany(),
+  };
 }
 ```
 
-Do not depend directly on the database or external APIs from this layer. Use dependencies passed through `deps`.
+For domains with substantial business logic or multiple I/O providers, split the service into ports, adapters, and use cases while preserving the same dependency direction:
 
-### Step 3: Implement Adapters
-
-Implement ports in `lib/adaptors/db/` or `lib/adaptors/external/`.
-
-```ts
-// lib/adaptors/db/sample.ts
-import { eq } from "@acme/db-backbone";
-import { db } from "@acme/db-backbone/client";
-import { TmSample } from "@acme/db-backbone/schema";
-
-import type { SamplePort } from "../../services/ports/common-port";
-
-export const sampleAdaptor: SamplePort = {
-  async findSampleByCode(sampleCode) {
-    const [row] = await db
-      .select()
-      .from(TmSample)
-      .where(eq(TmSample.sampleCode, sampleCode))
-      .limit(1);
-
-    return row ?? null;
-  },
-};
+```text
+router -> usecase -> service -> port <- adapter
 ```
 
-External API adapters belong in `lib/adaptors/external/`, such as `common-api.ts` or `payments-api.ts`.
+## Adding a Router
 
-### Step 4: Compose Dependencies
+1. Add shared Zod input contracts to `packages/validators` when the web client also needs them.
+2. Add or extend a dependency-injected service in `packages/service`.
+3. Compose the service in `createTRPCContext` under `ctx.services`.
+4. Add a thin router in `packages/trpc/src/router/{domain}.ts`.
+5. Register it in `packages/trpc/src/root.ts`.
+6. Export browser-safe types only through `@acme/trpc/client`.
+7. Add tests for service behavior and representative router authorization or validation paths.
 
-Inject adapters in `lib/usecases/composition/{domain}-deps.ts`.
+## Output Schemas
 
-```ts
-// lib/usecases/composition/common-deps.ts
-import type { CommonDeps } from "../../services/common";
-import { sampleAdaptor } from "../../adaptors/db/sample";
-import { commonApiAdaptor } from "../../adaptors/external/common-api";
-
-export const defaultCommonDeps: CommonDeps = {
-  sample: sampleAdaptor,
-  commonApi: commonApiAdaptor,
-  isAdmin: isAdminUser,
-};
-```
-
-### Step 5: Add usecase Wrappers and Call Them from Routers
-
-```ts
-// lib/usecases/common/index.ts
-import { authenticateSample } from "../../services/common";
-import { defaultCommonDeps } from "../composition/common-deps";
-
-export const runAuthSample = (input: AuthSampleInput) =>
-  authenticateSample(defaultCommonDeps, input);
-```
-
-```ts
-// router/common.ts
-const commonRouter = {
-  authSample: protectedProcedure
-    .input(authSampleInputSchema)
-    .mutation(async ({ input }) => runAuthSample(input)),
-} satisfies TRPCRouterRecord;
-```
-
-## Adding a New Router
-
-1. Define input and output DTO types in `lib/types/{domain}.ts`.
-2. Define port interfaces in `lib/services/ports/{domain}-port.ts`.
-3. Implement database adapters in `lib/adaptors/db/{domain}.ts`.
-4. Implement external API adapters in `lib/adaptors/external/{domain}-api.ts` when needed.
-5. Add dependencies and business logic in `lib/services/{domain}/index.ts`.
-6. Compose dependencies in `lib/usecases/composition/{domain}-deps.ts`.
-7. Add `run*` wrappers in `lib/usecases/{domain}/index.ts`.
-8. Add the thin entry layer in `router/{domain}.ts`.
-9. Register the router in `packages/trpc/src/root.ts`:
-
-```ts
-export const appRouter = createTRPCRouter({
-  domain: createTRPCRouter(domainRouter),
-});
-```
-
-## Zod Output Schemas
-
-Always add `.output()` when a procedure returns a complex shape, such as many columns or nested objects. It is also required when TypeScript reports TS7056 because the inferred type exceeds the maximum length.
+Add `.output()` when a procedure returns a complex or nested shape, when the response is an external contract that needs runtime validation, or when TypeScript reports TS7056 because the inferred type is too large.
 
 ```ts
 const itemSchema = z.object({
-  receivedDate: z.string(),
-  itemNo: z.number().int(),
+  id: z.string().uuid(),
+  title: z.string(),
 });
 
-list: protectedProcedure
-  .input(listInputSchema)
-  .output(z.array(itemSchema))
-  .query(async ({ input }) => {
-    // ...
-  });
-```
-
-For large routers:
-
-```ts
-const inspectionRouter = {
-  // ...
+const itemRouter = {
+  list: publicProcedure
+    .output(z.array(itemSchema))
+    .query(({ ctx }) => ctx.services.item.list()),
 } satisfies TRPCRouterRecord;
-
-export const largeRouter: AnyRouter = createTRPCRouter({
-  inspection: createTRPCRouter(inspectionRouter),
-}) as AnyRouter;
 ```
+
+## Browser Boundary
+
+Client Components must import from `@acme/trpc/client`, never `@acme/trpc`. The server entry imports authentication, Drizzle, and Node-only database code; the client entry contains only constants, error helpers, and types.
 
 ## Common Mistakes
 
-| Mistake                                       | Correct approach                                                         |
-| --------------------------------------------- | ------------------------------------------------------------------------ |
-| Writing Drizzle queries directly in `router/` | Create an adapter in `lib/adaptors/db/` and call it through a port.      |
-| Calling `fetch` directly in `router/`         | Create an external API adapter in `lib/adaptors/external/`.              |
-| Defining `Deps` types in `router/`            | Define them in `lib/services/{domain}/index.ts`.                         |
-| Leaving `.output(z.unknown())` in place       | Replace it with an explicit Zod output schema.                           |
-| Triggering TS7056 with deeply nested routers  | Use `satisfies TRPCRouterRecord` internally and export with `AnyRouter`. |
+| Mistake | Correct approach |
+| --- | --- |
+| Writing Drizzle queries in a router | Add the operation to a dependency-injected service or adapter. |
+| Calling an external API directly from a router | Inject an external API port into the service. |
+| Importing a global service singleton | Compose the service in the request context and use `ctx.services`. |
+| Importing `@acme/trpc` in a Client Component | Import browser-safe values and types from `@acme/trpc/client`. |
+| Leaving `.output(z.unknown())` in place | Define an explicit Zod response schema. |

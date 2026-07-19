@@ -9,6 +9,7 @@
 
 import { authApi } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
+import { createPostService } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
@@ -35,7 +36,9 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
   return {
     authApi,
     session,
-    db,
+    services: {
+      post: createPostService(db),
+    },
   };
 };
 /**
@@ -71,19 +74,10 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createTRPCRouter = t.router;
 
 /**
- * Middleware for timing procedure execution and adding an articifial delay in development.
- *
- * You can remove this if you don't like it, but it can help catch unwanted waterfalls by simulating
- * network latency that would occur in production but not in localhost development.
+ * Middleware for lightweight procedure timing.
  */
 const timingMiddleware = t.middleware(async ({ next, path }) => {
   const start = Date.now();
-
-  if (t._config.isDev) {
-    // artificial delay in dev 100-500ms
-    const waitMs = Math.floor(Math.random() * 400) + 100;
-    await new Promise((resolve) => setTimeout(resolve, waitMs));
-  }
 
   const result = await next();
 
