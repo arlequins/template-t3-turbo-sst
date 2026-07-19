@@ -19,7 +19,7 @@
     "@acme/db-backbone": "workspace:^",
     "@acme/env": "workspace:*",
     "@acme/service": "workspace:^",
-    "@aws-sdk/client-sfn": "^3.1089.0"
+    "@aws-sdk/client-sfn": "^3.1090.0"
   },
   "devDependencies": {
     "@acme/tsconfig": "workspace:*",
