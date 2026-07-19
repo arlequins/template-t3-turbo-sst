@@ -3,25 +3,26 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./env": "./env.ts"
+    ".": "./src/index.ts"
   },
   "license": "MIT",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "format": "biome format .",
     "lint": "biome lint .",
+    "test": "vitest run",
     "with-env": "dotenv -e ../../.env --",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@acme/db-backbone": "workspace:*",
-    "@t3-oss/env-core": "^0.13.11",
+    "@acme/env": "workspace:*",
+    "jose": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@acme/tsconfig": "workspace:*",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

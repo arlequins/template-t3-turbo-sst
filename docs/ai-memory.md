@@ -36,7 +36,7 @@ This page is a durable context note for AI agents working in this repository.
 - `packages/shared`: shared utilities, constants, and seed helpers.
 - `packages/types`: shared type definitions.
 - `packages/ui`: shared React UI.
-- `packages/auth`: auth stubs and auth-related helpers.
+- `packages/auth`: OIDC discovery and JWT access-token validation for API sessions.
 - `tooling/*`: shared repository tooling packages.
 
 ## Command Memory
@@ -76,6 +76,7 @@ This page is a durable context note for AI agents working in this repository.
 - Environment access should be centralized through `@acme/env`.
 - Tests should start with pure shared packages and use Vitest.
 - Database schema changes require committed Drizzle SQL and metadata; applied seed files are immutable.
+- Browser authentication uses Authorization Code + PKCE; APIs validate JWT access tokens against OIDC discovery and JWKS metadata.
 
 ## Review Memory
 

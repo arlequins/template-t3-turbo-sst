@@ -27,10 +27,21 @@ export const clientEnv = createEnv({
           : DEFAULT_LOCALHOST_API_URL,
       z.url(),
     ),
+    NEXT_PUBLIC_OIDC_AUTHORITY: z.url(),
+    NEXT_PUBLIC_OIDC_CLIENT_ID: z.string().min(1),
+    NEXT_PUBLIC_OIDC_SCOPE: z
+      .string()
+      .min(1)
+      .refine((scope) => scope.split(/\s+/).includes("openid"), {
+        message: "OIDC scope must include openid",
+      }),
   },
   runtimeEnv: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_OIDC_AUTHORITY: process.env.NEXT_PUBLIC_OIDC_AUTHORITY,
+    NEXT_PUBLIC_OIDC_CLIENT_ID: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID,
+    NEXT_PUBLIC_OIDC_SCOPE: process.env.NEXT_PUBLIC_OIDC_SCOPE,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,

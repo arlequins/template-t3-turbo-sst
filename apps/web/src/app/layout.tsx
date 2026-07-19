@@ -2,6 +2,7 @@ import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 import type { Metadata, Viewport } from "next";
 
+import { OidcAuthProvider } from "~/auth/provider";
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/styles.css";
@@ -24,7 +25,9 @@ export default function RootLayout(props: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body className="bg-background text-foreground min-h-screen font-sans antialiased">
         <ThemeProvider>
-          <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          <OidcAuthProvider>
+            <TRPCReactProvider>{props.children}</TRPCReactProvider>
+          </OidcAuthProvider>
           <div className="absolute right-4 bottom-4">
             <ThemeToggle />
           </div>

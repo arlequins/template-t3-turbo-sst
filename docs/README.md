@@ -10,6 +10,8 @@
 - [AI collaboration convention](conventions/ai.md)
 - [Semantic versioning](semantic-versioning.md)
 - [Application architecture](architecture.md)
+- [OpenID Connect authentication](authentication.md)
+- [Template improvement TODO](todo.md)
 
 ## AI Context
 

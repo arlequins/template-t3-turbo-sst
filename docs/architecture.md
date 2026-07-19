@@ -20,6 +20,7 @@ Browser
 | `packages/trpc` | tRPC context, middleware, routers, input/output contracts, and browser-safe router types. |
 | `packages/service` | Framework-independent application operations. Services receive their dependencies instead of importing a global database client. |
 | `packages/db-backbone` | Drizzle schema, PostgreSQL client, migrations, and seeds. |
+| `packages/auth` | OIDC discovery, JWKS-backed JWT access-token validation, and application sessions. |
 
 ## Request Flow
 
@@ -27,7 +28,8 @@ Browser
 2. The tRPC client sends an HTTP request to `${NEXT_PUBLIC_API_URL}/api/trpc`.
 3. Hono applies request IDs, security headers, and CORS before forwarding the request to tRPC.
 4. tRPC creates request-scoped services backed by the Drizzle database client.
-5. The router validates input and delegates the operation to a service.
+5. Protected procedures use the OIDC `sub` claim as the stable application user ID.
+6. The router validates input and delegates the operation to a service.
 
 The web app must never import the server entry point `@acme/trpc` from a Client Component. Use `@acme/trpc/client`, which exports only constants, error helpers, and types that are safe to bundle for the browser.
 
