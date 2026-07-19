@@ -23,7 +23,7 @@
     "@acme/trpc": "workspace:*",
     "@t3-oss/env-core": "^0.13.11",
     "@tanstack/react-router": "^1.170.18",
-    "@tanstack/react-start": "^1.168.28",
+    "@tanstack/react-start": "^1.168.32",
     "@trpc/server": "catalog:",
     "nitro": "3.0.260610-beta",
     "react": "catalog:react19",
