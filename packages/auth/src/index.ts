@@ -1,4 +1,4 @@
-import { serverEnv } from "@acme/env";
+import { serverEnv } from "@acme/env/server-env";
 import type { JWTPayload, JWTVerifyGetKey } from "jose";
 import { createRemoteJWKSet, errors, jwtVerify } from "jose";
 import { z } from "zod/v4";
