@@ -18,6 +18,10 @@
     "./client-env": {
       "types": "./dist/client-env.d.ts",
       "default": "./dist/client-env.js"
+    },
+    "./server-env": {
+      "types": "./dist/env-server.d.ts",
+      "default": "./dist/env-server.js"
     }
   },
   "license": "MIT",
