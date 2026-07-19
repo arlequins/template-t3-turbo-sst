@@ -14,7 +14,7 @@
 | Infrastructure as code    | **SST Ion** on **AWS** (S3, CloudFront, Lambda, …)                                                                  |
 | Database                  | **Drizzle ORM** · **postgres.js** (Node; swap the client yourself for edge-only)                                    |
 | Validation / UI           | **Zod** · shared **React** UI (`packages/ui`)                                                                       |
-| Auth (default)            | **Stubs** only (e.g. bearer) — replace before production                                                            |
+| Authentication            | **OpenID Connect** Authorization Code + PKCE · JWKS-backed JWT access-token validation                               |
 
 > **How this differs from a stock T3 template**  
 > The name echoes t3-turbo, but this repo goes beyond **Next + a minimal package split**: **web, API, and batch** are defined in one place with **SST**, plus `@acme/env`, Secrets Manager wiring, optional VPC, and other **ops/deploy** layers. It does **not** map 1:1 to upstream create-t3-turbo, and there is no migration guide.
@@ -124,6 +124,7 @@ Day to day, **`env:pull` into your machine** is often enough; use **`env:push`**
 Set `NEXT_PUBLIC_*` and other env for the target stage before deploy.
 
 See [Application Architecture](./docs/architecture.md) for layer boundaries, request flow, and extension rules.
+See [OpenID Connect Authentication](./docs/authentication.md) for provider registration and security requirements.
 
 ## Before you publish a fork (checklist)
 

@@ -11,7 +11,7 @@ Shared **`@acme/*`** packages consumed by `apps/*` and each other. Replace the s
 | `@acme/trpc` | tRPC routers and server/client wiring |
 | `@acme/ui` | Shared React UI |
 | `@acme/validators` | Zod schemas shared across API and web |
-| `@acme/auth` | Auth stubs / helpers |
+| `@acme/auth` | Provider-neutral OIDC access-token verification and sessions |
 | `@acme/service` | Domain / application services |
 
 Dependency versions for several tools (Drizzle, `postgres`, `tsx`, …) are centralized in the repo root [`pnpm-workspace.yaml`](../pnpm-workspace.yaml) **`catalog:`** and referenced from individual `package.json` files as `"catalog:"`.

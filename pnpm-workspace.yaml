@@ -16,6 +16,8 @@ catalog:
   drizzle-orm: ^0.45.2
   drizzle-zod: ^0.8.3
   hono: ^4.12.31
+  jose: ^6.2.3
+  oidc-client-ts: ^3.5.0
   postgres: ^3.4.9
   superjson: 2.2.6
   tailwindcss: ^4.3.3

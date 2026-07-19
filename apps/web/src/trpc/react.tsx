@@ -53,9 +53,9 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
         httpBatchStreamLink({
           transformer: SuperJSON,
           url: getTrpcBatchHttpUrl(),
-          headers() {
+          async headers() {
             const headers = new Headers();
-            const token = getAccessToken();
+            const token = await getAccessToken();
             if (token) {
               headers.set("Authorization", `Bearer ${token}`);
             }
