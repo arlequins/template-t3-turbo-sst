@@ -24,6 +24,10 @@
       "dependsOn": ["^topo", "^build"],
       "outputs": [".cache/tsbuildinfo.json"]
     },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
     "clean": {
       "cache": false
     },
@@ -74,13 +78,14 @@
     "VPC_ID",
     "SUBNET_IDS",
     "SECURITY_GROUP_IDS",
-    "NITRO_PRESET",
     "DATABASE_HOST",
     "DATABASE_PORT",
     "DATABASE_USER",
     "DATABASE_PASSWORD",
     "DATABASE_NAME",
-    "POSTGRES_POOL_MAX"
+    "POSTGRES_POOL_MAX",
+    "API_CORS_ORIGINS",
+    "API_PORT"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",
@@ -98,7 +103,6 @@
     "STAGE",
     "SST_AWS_PROFILE",
     "SST_AWS_REGION",
-    "NITRO_PRESET",
     "AWS_PROFILE",
     "AWS_REGION",
     "ENV_TARGET",

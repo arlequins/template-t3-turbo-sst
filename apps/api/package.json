@@ -4,15 +4,16 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "pnpm with-env vite dev",
-    "build": "pnpm with-env vite build",
-    "start": "pnpm with-env vite start",
+    "dev": "pnpm with-env tsx watch src/dev.ts",
+    "build": "tsc --noEmit",
+    "start": "pnpm with-env tsx src/dev.ts",
     "sst:dev": "pnpm with-env sst dev",
     "sst:deploy": "pnpm with-env sst deploy",
     "sst:install": "sst install",
     "sst:remove": "pnpm with-env sst remove",
     "format": "biome format .",
     "lint": "biome lint .",
+    "test": "pnpm with-env vitest run",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
@@ -21,26 +22,16 @@
     "@acme/db-backbone": "workspace:*",
     "@acme/env": "workspace:*",
     "@acme/trpc": "workspace:*",
-    "@t3-oss/env-core": "^0.13.11",
-    "@tanstack/react-router": "^1.170.18",
-    "@tanstack/react-start": "^1.168.32",
     "@trpc/server": "catalog:",
-    "nitro": "3.0.260610-beta",
-    "react": "catalog:react19",
-    "react-dom": "catalog:react19",
-    "zod": "catalog:"
+    "hono": "catalog:"
   },
   "devDependencies": {
-    "@acme/tailwind-config": "workspace:*",
     "@acme/tsconfig": "workspace:*",
-    "@tailwindcss/vite": "catalog:",
+    "@hono/node-server": "catalog:",
     "@types/node": "catalog:",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
-    "@vitejs/plugin-react": "catalog:",
     "sst": "4.17.1",
-    "tailwindcss": "catalog:",
+    "tsx": "catalog:",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vitest": "catalog:"
   }
 }

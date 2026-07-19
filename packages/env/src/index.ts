@@ -8,10 +8,8 @@ import { serverEnv } from "./env-server.js";
 export { type DatabaseEnv, loadDatabaseEnv } from "./database.js";
 export { clientEnv } from "./env-client.js";
 export {
-  DEFAULT_NITRO_PRESET,
   DEFAULT_SST_AWS_REGION,
   globalEnv,
-  nitroPreset,
   serverEnv,
   sstAwsRegion,
 } from "./env-server.js";
@@ -39,6 +37,8 @@ export const LambdaEnvironment = {
   DATABASE_USER: serverEnv.DATABASE_USER!,
   DATABASE_PASSWORD: serverEnv.DATABASE_PASSWORD!,
   DATABASE_NAME: serverEnv.DATABASE_NAME!,
+  API_CORS_ORIGINS:
+    serverEnv.API_CORS_ORIGINS ?? clientEnv.NEXT_PUBLIC_SITE_URL,
 
   NEXT_PUBLIC_SITE_URL: clientEnv.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_API_URL: clientEnv.NEXT_PUBLIC_API_URL,

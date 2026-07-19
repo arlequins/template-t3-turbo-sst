@@ -21,33 +21,23 @@ type SstAppConfig = {
 
 declare const $config: (config: {
   app: (input?: { stage?: string }) => SstAppConfig | Promise<SstAppConfig>;
-  run: () => void | Promise<void>;
+  run: () => Record<string, unknown> | Promise<Record<string, unknown>>;
 }) => unknown;
 
 declare const sst: {
   aws: {
-    TanStackStart: new (
+    Function: new (
       name: string,
-      args?: {
-        path?: string;
-        buildCommand?: string;
+      args: {
+        handler: string;
         environment?: Record<string, string>;
+        url?: boolean;
         vpc?: {
           subnets: string[];
           securityGroups: string[];
         };
-        domain?: string | Record<string, unknown>;
         link?: unknown[];
-        dev?:
-          | false
-          | {
-              autostart?: boolean;
-              command?: string;
-              directory?: string;
-              title?: string;
-              url?: string;
-            };
       } & Record<string, unknown>,
-    ) => unknown;
+    ) => { url: string };
   };
 };

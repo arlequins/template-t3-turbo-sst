@@ -33,6 +33,7 @@
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "sst:ws": "node ./scripts/sst-workspace.mjs",
+    "test": "turbo run test",
     "env:pull": "pnpm -F @acme/sst-bootstrap run env:pull --",
     "env:push": "pnpm -F @acme/sst-bootstrap run env:push --"
   },

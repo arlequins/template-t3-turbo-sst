@@ -4,7 +4,7 @@ Shared **`@acme/*`** packages consumed by `apps/*` and each other. Replace the s
 
 | Package | Role |
 | --- | --- |
-| [`@acme/db`](./db/README.md) | Drizzle schema, postgres client, migrations, **TS seeds** (via `@acme/shared`) |
+| [`@acme/db-backbone`](./db-backbone/README.md) | Drizzle schema, postgres client, migrations, **TS seeds** (via `@acme/shared`) |
 | [`@acme/env`](./env) | Zod-validated env (`serverEnv`, `clientEnv`), stages, DB URL helpers, VPC from env |
 | [`@acme/shared`](./shared/README.md) | Cross-cutting utilities (e.g. `runDrizzleSeeds`) |
 | [`@acme/types`](./types/README.md) | Shared TypeScript types (`SeedContext`, …) |
