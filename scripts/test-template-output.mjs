@@ -44,7 +44,11 @@ async function copyRepository() {
   for (const relativePath of files) {
     const source = join(root, relativePath);
     const destination = join(target, relativePath);
-    const sourceStat = await stat(source);
+    const sourceStat = await stat(source).catch((error) => {
+      if (error.code === "ENOENT") return undefined;
+      throw error;
+    });
+    if (!sourceStat) continue;
     await mkdir(dirname(destination), { recursive: true });
     if (sourceStat.isDirectory())
       await cp(source, destination, { recursive: true });

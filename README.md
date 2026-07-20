@@ -148,11 +148,13 @@ The E2E runner starts an isolated PostgreSQL 18 container, verifies that product
 pnpm ui-add
 ```
 
-### New package (Turbo generator)
+### Workspace and domain generators
 
 ```bash
-pnpm turbo gen init
+pnpm turbo gen
 ```
+
+Generate runnable applications, compiled packages, or a complete DIP-aligned tRPC domain. See [Developer Experience](./docs/developer-experience.md) for the generator, environment synchronization, changed-workspace checks, Dev Container, and example CRUD commands.
 
 ## Per-stage `.env` and Secrets
 

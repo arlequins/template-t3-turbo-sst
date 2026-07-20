@@ -1,21 +1,24 @@
 {
-  "name": "@acme/{{ name }}",
+  "name": "{{ scope }}/{{ name }}",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    }
   },
   "license": "MIT",
   "scripts": {
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsc",
+    "dev": "tsc --watch",
     "format": "biome format .",
     "lint": "biome lint .",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "devDependencies": {
-    "@acme/tsconfig": "workspace:*",
+    "{{ scope }}/tsconfig": "workspace:*",
     "typescript": "catalog:"
   }
 }

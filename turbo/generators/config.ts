@@ -1,87 +1,137 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import type { PlopTypes } from "@turbo/gen";
 
-type PackageJson = {
-  name: string;
-  scripts: Record<string, string>;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-};
+const SLUG_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+function packageScope() {
+  const packageJson = JSON.parse(
+    readFileSync("packages/ui/package.json", "utf8"),
+  ) as { name: string };
+  return packageJson.name.slice(0, packageJson.name.indexOf("/"));
+}
+
+function sanitizeName(value: string) {
+  const scope = packageScope();
+  const name = value.startsWith(`${scope}/`)
+    ? value.slice(scope.length + 1)
+    : value;
+  if (!SLUG_PATTERN.test(name)) {
+    throw new Error("Name must be a lowercase kebab-case slug");
+  }
+  return name;
+}
+
+function camelCase(value: string) {
+  return value.replace(/-([a-z0-9])/g, (_, character: string) =>
+    character.toUpperCase(),
+  );
+}
+
+function pascalCase(value: string) {
+  const camel = camelCase(value);
+  return camel[0]?.toUpperCase() + camel.slice(1);
+}
+
+function scaffoldActions(kind: "apps" | "packages") {
+  const template = kind === "apps" ? "app" : "package";
+  return [
+    {
+      type: "add",
+      path: `${kind}/{{ name }}/package.json`,
+      templateFile: `templates/${template}/package.json.hbs`,
+    },
+    {
+      type: "add",
+      path: `${kind}/{{ name }}/tsconfig.json`,
+      templateFile: `templates/${template}/tsconfig.json.hbs`,
+    },
+    {
+      type: "add",
+      path: `${kind}/{{ name }}/src/index.ts`,
+      templateFile: `templates/${template}/index.ts.hbs`,
+    },
+    () => {
+      execFileSync("pnpm", ["install", "--no-frozen-lockfile"], {
+        stdio: "inherit",
+      });
+      return `${kind === "apps" ? "Application" : "Package"} scaffolded`;
+    },
+  ];
+}
+
+function addDomainToContract(domain: string) {
+  const path = "packages/trpc/src/contract.test.ts";
+  const source = readFileSync(path, "utf8");
+  const match = source.match(
+    /expect\(procedureNames\(AppRouter\)\)\.toEqual\((\[[^\]]+\])\)/,
+  );
+  if (!match?.[1]) throw new Error("Unable to update the tRPC contract test");
+  const routers = JSON.parse(match[1]) as string[];
+  const next = [...new Set([...routers, camelCase(domain)])].sort();
+  writeFileSync(path, source.replace(match[1], JSON.stringify(next)), "utf8");
+}
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
-  plop.setGenerator("init", {
-    description: "Generate a new package for the Acme Monorepo",
-    prompts: [
-      {
-        type: "input",
-        name: "name",
-        message:
-          "What is the name of the package? (You can skip the `@acme/` prefix)",
-      },
-      {
-        type: "input",
-        name: "deps",
-        message:
-          "Enter a space separated list of dependencies you would like to install",
-      },
-    ],
+  plop.setHelper("scope", packageScope);
+  plop.setHelper("camelCase", camelCase);
+  plop.setHelper("pascalCase", pascalCase);
+
+  const namePrompt = {
+    type: "input" as const,
+    name: "name",
+    message: "Name (lowercase kebab-case)",
+    filter: sanitizeName,
+  };
+
+  plop.setGenerator("app", {
+    description: "Generate a TypeScript application workspace",
+    prompts: [namePrompt],
+    actions: scaffoldActions("apps"),
+  });
+
+  plop.setGenerator("package", {
+    description: "Generate a compiled TypeScript package workspace",
+    prompts: [namePrompt],
+    actions: scaffoldActions("packages"),
+  });
+
+  plop.setGenerator("domain", {
+    description: "Generate a DIP-aligned tRPC domain module",
+    prompts: [namePrompt],
     actions: [
-      (answers) => {
-        if ("name" in answers && typeof answers.name === "string") {
-          if (answers.name.startsWith("@acme/")) {
-            answers.name = answers.name.replace("@acme/", "");
-          }
-        }
-        return "Config sanitized";
-      },
-      {
+      ...[
+        ["types/{{ name }}.ts", "types.ts.hbs"],
+        ["services/ports/{{ name }}-port.ts", "port.ts.hbs"],
+        ["services/{{ name }}/index.ts", "service.ts.hbs"],
+        ["adaptors/{{ name }}.ts", "adaptor.ts.hbs"],
+        ["usecases/composition/{{ name }}-deps.ts", "composition.ts.hbs"],
+        ["usecases/{{ name }}/index.ts", "usecase.ts.hbs"],
+        ["router/{{ name }}.ts", "router.ts.hbs"],
+      ].map(([path, template]) => ({
         type: "add",
-        path: "packages/{{ name }}/package.json",
-        templateFile: "templates/package.json.hbs",
-      },
+        path: `packages/trpc/src/${path}`,
+        templateFile: `templates/domain/${template}`,
+      })),
       {
-        type: "add",
-        path: "packages/{{ name }}/tsconfig.json",
-        templateFile: "templates/tsconfig.json.hbs",
-      },
-      {
-        type: "add",
-        path: "packages/{{ name }}/src/index.ts",
-        template: "export const name = '{{ name }}';",
+        type: "modify",
+        path: "packages/trpc/src/root.ts",
+        pattern: /import \{ createTRPCRouter \} from "\.\/trpc";/,
+        template:
+          'import { {{ camelCase name }}Router } from "./router/{{ name }}";\nimport { createTRPCRouter } from "./trpc";',
       },
       {
         type: "modify",
-        path: "packages/{{ name }}/package.json",
-        async transform(content, answers) {
-          if ("deps" in answers && typeof answers.deps === "string") {
-            const pkg = JSON.parse(content) as PackageJson;
-            for (const dep of answers.deps.split(" ").filter(Boolean)) {
-              const version = await fetch(
-                `https://registry.npmjs.org/-/package/${dep}/dist-tags`,
-              )
-                .then((res) => res.json())
-                .then((json) => json.latest);
-              if (!pkg.dependencies) pkg.dependencies = {};
-              pkg.dependencies[dep] = `^${version}`;
-            }
-            return JSON.stringify(pkg, null, 2);
-          }
-          return content;
-        },
+        path: "packages/trpc/src/root.ts",
+        pattern: /export const AppRouter = createTRPCRouter\(\{\n/,
+        template:
+          "export const AppRouter = createTRPCRouter({\n  {{ camelCase name }}: {{ camelCase name }}Router,\n",
       },
-      async (answers) => {
-        /**
-         * Install deps and format everything
-         */
-        if ("name" in answers && typeof answers.name === "string") {
-          // execSync("pnpm dlx sherif@latest --fix", {
-          //   stdio: "inherit",
-          // });
-          execSync("pnpm i", { stdio: "inherit" });
-          execSync(`pnpm biome format packages/${answers.name} --write`);
-          return "Package scaffolded";
-        }
-        return "Package not scaffolded";
+      (answers) => {
+        const name = sanitizeName(String(answers.name));
+        addDomainToContract(name);
+        execFileSync("pnpm", ["check:fix"], { stdio: "inherit" });
+        return "Domain module scaffolded and registered";
       },
     ],
   });
