@@ -10,7 +10,10 @@ permissions:
 
 jobs:
   deploy:
-    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      vars.AWS_PREVIEW_ROLE_ARN != ''
     strategy:
       matrix:
         application: [api, web]
@@ -22,7 +25,10 @@ jobs:
       role_arn: ${{ vars.AWS_PREVIEW_ROLE_ARN }}
 
   remove:
-    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: >-
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      vars.AWS_PREVIEW_ROLE_ARN != ''
     strategy:
       matrix:
         application: [web, api]

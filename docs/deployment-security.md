@@ -9,6 +9,8 @@ Store role ARNs as GitHub variables. Role ARNs identify resources and are not cr
 - repository: `AWS_PREVIEW_ROLE_ARN`
 - `production` environment: `AWS_PRODUCTION_ROLE_ARN`
 
+Preview jobs remain skipped until `AWS_PREVIEW_ROLE_ARN` is configured.
+
 Set `AWS_REGION` as an environment variable. Do not store AWS access keys in GitHub.
 
 Start with the trust-policy template in [`docs/iam/github-oidc-trust-policy.json`](./iam/github-oidc-trust-policy.json). Replace placeholders before applying it. The deployment permission policy is intentionally not universal: generate it from CloudTrail after a sandbox deployment, then constrain actions and resources to the stacks, state bucket, asset bucket, and roles owned by this repository.
@@ -21,7 +23,7 @@ Preview deployments only run for branches in the same repository. Fork pull requ
 
 ## Security checks
 
-The Security workflow performs dependency review, CodeQL analysis, full-history secret scanning, production-license policy validation, and SPDX JSON SBOM generation. Repository administrators should also enable GitHub secret scanning and push protection.
+The Security workflow performs dependency review, CodeQL analysis, full-history secret scanning, production-license policy validation, and SPDX JSON SBOM generation. Enable GitHub's Dependency Graph, then set the repository variable `DEPENDENCY_REVIEW_ENABLED=true` to make dependency-review failures blocking. Before that opt-in, unsupported Dependency Review results are reported without failing the workflow. Repository administrators should also enable GitHub secret scanning and push protection.
 
 The license policy rejects AGPL and GPL production dependencies by default. Adjust `scripts/check-licenses.mjs` only after legal review.
 
