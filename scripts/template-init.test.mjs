@@ -1,0 +1,65 @@
+import assert from "node:assert/strict";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, it } from "node:test";
+
+import {
+  initializeTemplate,
+  parseArgs,
+  validateOptions,
+} from "./template-init.mjs";
+
+describe("template:init", () => {
+  it("parses and validates explicit options", () => {
+    const options = parseArgs([
+      "--",
+      "--name",
+      "customer-portal",
+      "--scope",
+      "@company",
+      "--dry-run",
+    ]);
+    assert.equal(options.dryRun, true);
+    assert.doesNotThrow(() => validateOptions(options));
+    assert.throws(() =>
+      validateOptions({ name: "Bad Name", scope: "company" }),
+    );
+  });
+
+  it("previews without writing and then initializes tracked text files", async () => {
+    const root = await mkdtemp(join(tmpdir(), "template-init-"));
+    const packagePath = join(root, "package.json");
+    const sstPath = join(root, "apps/web/sst.config.ts");
+    await mkdir(join(root, "apps/web"), { recursive: true });
+    await writeFile(
+      packagePath,
+      '{"name":"template-t3-turbo-sst","dependencies":{"@acme/env":"workspace:*"}}\n',
+    );
+    await writeFile(sstPath, 'name: "web"; // example.com @acme/web\n');
+    const files = ["package.json", "apps/web/sst.config.ts"];
+    const options = {
+      name: "customer-portal",
+      scope: "@company",
+      domain: "customer.example.org",
+      description: "Customer portal",
+    };
+
+    assert.deepEqual(
+      await initializeTemplate({ ...options, dryRun: true }, { root, files }),
+      files,
+    );
+    assert.match(await readFile(packagePath, "utf8"), /template-t3-turbo-sst/);
+
+    await initializeTemplate(options, { root, files });
+    assert.deepEqual(JSON.parse(await readFile(packagePath, "utf8")), {
+      name: "customer-portal",
+      description: "Customer portal",
+      dependencies: { "@company/env": "workspace:*" },
+    });
+    assert.equal(
+      await readFile(sstPath, "utf8"),
+      'name: "customer-portal-web"; // customer.example.org @company/web\n',
+    );
+  });
+});
