@@ -1,43 +1,36 @@
 # template-t3-turbo-sst
 
-**v1.0.1** — A pnpm monorepo template inspired by [T3](https://create.t3.gg/) and [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo), extended around **AWS SST (Ion)** and **batch pipelines**. Use it as a GitHub template or clone and rename.
+**v1.0.1** - A reusable pnpm monorepo template for a client-only Next.js
+frontend, Hono and tRPC API, Drizzle PostgreSQL persistence, OIDC authentication,
+and optional SST batch and deployment infrastructure.
 
-## Tech stack (summary)
+## Stack
 
-| Layer                     | Stack                                                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Runtime / package manager | Node.js · **pnpm** workspaces (see [`engines`](./package.json))                                                     |
-| Monorepo                  | **Turborepo** · shared dependency versions via **pnpm `catalog:`** ([`pnpm-workspace.yaml`](./pnpm-workspace.yaml)) |
-| Frontend                  | **Next.js** (App Router, client-only static export) · **Tailwind CSS** · **tRPC** client                             |
-| API                       | **Hono** · **tRPC** server · Node.js locally and AWS Lambda in production                                           |
-| Batch / orchestration     | **SST** `StepFunctions` · **Lambda** · **EventBridge** (`CronV2`) — see `apps/batch`                                |
-| Infrastructure as code    | **SST Ion** on **AWS** (S3, CloudFront, Lambda, …)                                                                  |
-| Database                  | **Drizzle ORM** · **postgres.js** (Node; swap the client yourself for edge-only)                                    |
-| Validation / UI           | **Zod** · shared **React** UI (`packages/ui`)                                                                       |
-| Authentication            | **OpenID Connect** Authorization Code + PKCE · JWKS-backed JWT access-token validation                               |
+| Area | Technology |
+| --- | --- |
+| Workspace | pnpm catalogs, Turborepo, TypeScript, Biome |
+| Web | Next.js App Router, client-only static export, React, Tailwind CSS |
+| API | Hono, tRPC, local Node.js server, AWS Lambda deployment |
+| Database | PostgreSQL, Drizzle ORM, migrations, and idempotent seeds |
+| Authentication | OpenID Connect Authorization Code with PKCE and JWT validation |
+| Infrastructure | SST Ion, CloudFront, Lambda, Step Functions, EventBridge |
+| Testing | Vitest, PostgreSQL integration tests, Playwright, accessibility checks |
 
-> **How this differs from a stock T3 template**  
-> The name echoes t3-turbo, but this repo goes beyond **Next + a minimal package split**: **web, API, and batch** are defined in one place with **SST**, plus `@acme/env`, Secrets Manager wiring, optional VPC, and other **ops/deploy** layers. It does **not** map 1:1 to upstream create-t3-turbo, and there is no migration guide.
+Internal packages use the placeholder scope `@acme/*`. The initializer replaces
+it when creating a project.
 
 ## Requirements
 
-Match the Node and pnpm versions in [`package.json` → `engines`](./package.json). Docker is required for the zero-setup local database and E2E tests.
+- Node.js and pnpm versions matching [`package.json`](./package.json)
+- Docker for local PostgreSQL and end-to-end tests
+- AWS credentials only for cloud-backed SST commands
 
-## Repository layout
+Use the Node.js version in [`.nvmrc`](./.nvmrc). The preinstall check reports an
+actionable error when the runtime does not match.
 
-```text
-.github/           CI (lint, format, typecheck, …)
-apps/
-  web/             Next.js static export → SST StaticSite (S3 / CloudFront)
-  api/             Hono + tRPC → Node.js locally / AWS Lambda Function URL (SST)
-  batch/           Step Functions pipelines + EventBridge Cron + handler Lambdas
-packages/          @acme/db-backbone, @acme/trpc, @acme/ui, @acme/env, @acme/validators, @acme/types, @acme/shared, … — see [`packages/README.md`](./packages/README.md)
-tooling/           tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
-```
+## Create a Project
 
-- **Package scope:** `@acme/*` — replace with your org when you fork.
-
-Initialize a new repository with a preview first:
+Preview repository-wide replacements before applying them:
 
 ```bash
 pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --dry-run
@@ -45,162 +38,130 @@ pnpm template:init -- --name customer-portal --scope @company --domain customer.
 pnpm install
 ```
 
-The command updates tracked text files, package names, SST application names, repository metadata, and example domains. It refuses to write into a dirty worktree unless `--force` is provided.
+The initializer updates package names, SST application names, repository
+metadata, and example domains. It refuses to modify a dirty worktree unless
+`--force` is provided.
 
-The required runtime is checked before installation. Use Node.js from `.nvmrc` and the pnpm version declared in `packageManager`.
-
-After initialization, run `pnpm install` and `pnpm check:fix` before the regular test and typecheck commands. Identifier and domain replacement can legitimately change line wrapping.
-
-Use `--preset minimal` for the `web + api + trpc + db` execution path. Optional modules can be selected independently with `--features auth,batch,sst,example-ui`; omitted modules remain as dormant examples so they can be enabled later without restoring deleted source.
-
-Add `--prune` to physically remove omitted modules, their workspace dependencies, and their feature-specific commands. Prune mode removes `pnpm-lock.yaml`; `pnpm install` regenerates a lockfile for the selected composition.
-- **Database:** set `DATABASE_*` in the root `.env` (see [`.env.example`](./.env.example)). Not Vercel Postgres by default.
-
-## Quick start
-
-### 1. Install
+The default preset retains the complete template. For a smaller starting point:
 
 ```bash
+pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --preset minimal --prune
 pnpm install
 ```
 
-Do not add empty folders under `apps/` without a `package.json` (workspace tools such as sherif will warn).
+The minimal preset keeps `web + api + trpc + db`. Use `--features` to select
+`auth`, `batch`, `sst`, or `example-ui`. `--prune` physically removes omitted
+modules and the lockfile; the next install creates a lockfile for the selected
+composition.
 
-### 2. Environment
+## Local Quickstart
 
-Use a **root** `.env` for the database and shared variables. [`.env.example`](./.env.example) contains a complete localhost configuration.
-
-- **Manual:** copy [`.env.example`](./.env.example) and fill in values.
-- **AWS Secrets Manager:** see comments in [`.env.example`](./.env.example) and use `pnpm env:pull` / `pnpm env:push` ([scripts](tooling/sst-bootstrap/scripts/)).
-
-Example (adjust secret names to your layout):
-
-```bash
-pnpm env:pull -- --secret-name environments --env-target root
-```
-
-### 3. Local development
-
-Start PostgreSQL, apply migrations and seeds, then launch the local OIDC provider, Hono API, and Next.js app:
+Start PostgreSQL, apply migrations and seeds, and launch the local OIDC provider,
+API, and web app:
 
 ```bash
 cp .env.localhost.example .env.localhost
+pnpm install
 pnpm dev:local
 ```
 
-Open `http://localhost:3000`. The local OIDC login accepts any non-empty username and password. The template database uses host port `55433` to avoid conflicts with an existing PostgreSQL installation. Stop it with `pnpm db:stop`.
+Open `http://localhost:3000`. The development identity provider accepts any
+non-empty username and password. PostgreSQL uses host port `55433` by default.
+Stop the database with `pnpm db:stop`.
 
-The API exposes `/health/live` for process liveness and `/health/ready` for PostgreSQL-backed readiness. `/health` remains a compatibility alias for liveness.
+The API endpoints are:
 
-### 4. Database setup
+- Liveness: `http://localhost:5000/health/live`
+- PostgreSQL-backed readiness: `http://localhost:5000/health/ready`
+- tRPC: `http://localhost:5000/api/trpc`
 
-With a valid `.env`, apply committed migrations and then pending seeds:
+See [Application Architecture](./docs/architecture.md) for request flow and
+workspace boundaries, and [OpenID Connect Authentication](./docs/authentication.md)
+for provider configuration.
 
-```bash
-pnpm db:setup
-```
+## Common Commands
 
-For schema development, generate and validate a migration:
+| Command | Purpose |
+| --- | --- |
+| `pnpm dev:local` | Start the complete local application stack. |
+| `pnpm dev` | Run development tasks when dependencies are already available. |
+| `pnpm dev:sst` | Run web, API, and batch through cloud-backed SST development. |
+| `pnpm check` / `pnpm check:fix` | Check or fix Biome formatting and lint rules. |
+| `pnpm typecheck` | Typecheck every workspace. |
+| `pnpm test` | Run unit and contract tests. |
+| `pnpm test:e2e` | Run isolated PostgreSQL and browser end-to-end tests. |
+| `pnpm db:setup` | Apply committed migrations and pending seeds. |
+| `pnpm turbo gen` | Generate an application, package, or tRPC domain. |
+
+Database schema changes use:
 
 ```bash
 pnpm db:create-migration --name=describe_change
 pnpm db:check
 ```
 
-See [`packages/db-backbone/README.md`](./packages/db-backbone/README.md) for the migration workflow and [`packages/shared/README.md`](./packages/shared/README.md) for the seed runner.
+See [`packages/db-backbone/README.md`](./packages/db-backbone/README.md) for the
+migration workflow and [Database Operations](./docs/database-operations.md) for
+backup, restore, and deployment ordering.
 
-### 5. Cloud-connected development
+## Environment and Secrets
+
+- `.env.localhost.example` is the complete local-stack configuration.
+- `.env.example` documents shared and cloud-oriented variables.
+- `pnpm env:check` verifies environment schemas and examples stay synchronized.
+- `pnpm env:pull` and `pnpm env:push` synchronize supported values with AWS
+  Secrets Manager.
+
+Application code should access validated environment values through `@acme/env`
+instead of reading `process.env` throughout the codebase.
+
+## Template Qualification
+
+Validate SST configuration without SST sign-in or AWS credentials:
 
 ```bash
-pnpm dev:sst
-# Next.js only: pnpm dev:next
-```
-
-For batch-only local runs, see `pnpm batch:run` or `apps/batch/scripts/dev.ts`.
-
-Validate SST providers, generated types, and deployment configuration without AWS credentials:
-
-```bash
+cp .env.example .env
 pnpm test:sst
 ```
 
-This does not emulate or deploy AWS infrastructure. See [SST local testing](./docs/sst-local-testing.md) for the authentication-free boundary and the commands that still require an AWS sandbox.
-
-Template maintainers can qualify a complete generated repository with:
+Validate complete generated repositories:
 
 ```bash
 pnpm test:template-output full
 pnpm test:template-output minimal
 ```
 
-### End-to-end tests
+These checks do not emulate AWS. Cloud deployment, preview stages, and sandbox
+smoke tests still require AWS credentials. See [SST Local Testing](./docs/sst-local-testing.md)
+and [Template Readiness](./docs/template-readiness.md).
 
-```bash
-pnpm exec playwright install chromium
-pnpm test:e2e
-```
+## Deployment
 
-The E2E runner starts an isolated PostgreSQL 18 container, verifies that production sample seeding is rejected, applies test seeds twice to check idempotency, starts the local OIDC provider, API, and web app, then verifies PKCE sign-in, protected tRPC CRUD, and sign-out. Test containers and data are removed afterward.
+- Web builds as a static export for S3 and CloudFront.
+- API deploys through a Lambda Function URL or API Gateway HTTP API preset.
+- Batch workflows use Step Functions, Lambda, and EventBridge schedules.
 
-### Add a UI component
+Read [Deployment and Supply-Chain Security](./docs/deployment-security.md) before
+configuring GitHub OIDC roles or production environments. Deployment-specific
+commands and tradeoffs live in [`apps/api/README.md`](./apps/api/README.md) and
+[`apps/batch/README.md`](./apps/batch/README.md).
 
-```bash
-pnpm ui-add
-```
+## Documentation
 
-### Workspace and domain generators
+Use the [documentation index](./docs/README.md) to find architecture,
+development, operations, security, and engineering conventions. Package-level
+details live beside their implementation under `apps/*/README.md` and
+`packages/*/README.md`.
 
-```bash
-pnpm turbo gen
-```
+## Publishing a Fork
 
-Generate runnable applications, compiled packages, or a complete DIP-aligned tRPC domain. See [Developer Experience](./docs/developer-experience.md) for the generator, environment synchronization, changed-workspace checks, Dev Container, and example CRUD commands.
+1. Run `pnpm template:init` and prune unused modules.
+2. Replace example identity, domain, seed, and IAM values.
+3. Configure branch protection, deployment environments, and cloud roles.
+4. Update `LICENSE`, `NOTICE`, ownership, support, and incident contacts.
+5. Run local, generated-template, and relevant cloud qualification checks.
 
-## Per-stage `.env` and Secrets
+## Changelog and License
 
-When using stage-specific files such as `.env.develop` with Secrets Manager:
-
-```bash
-# Secrets Manager → repo-root .env.develop
-pnpm env:pull -- --env-file .env.develop
-pnpm env:pull -- --out .env.develop
-
-# Local .env.develop → Secrets Manager (only when needed)
-pnpm env:push -- --env-file .env.develop
-pnpm env:push -- --file .env.develop
-```
-
-Day to day, **`env:pull` into your machine** is often enough; use **`env:push`** only when updating secrets in the cloud.
-
-## Deployment (overview)
-
-- **Web:** static output from `next build` → SST `StaticSite`.
-- **API:** Hono on an AWS Lambda Function URL. Deploy with `pnpm -F @acme/api sst:deploy`.
-- **Batch:** `apps/batch` `sst.config.ts` — Step Functions + Cron. [`apps/batch/README.md`](./apps/batch/README.md); add steps: [`apps/batch/config/README.md`](./apps/batch/config/README.md).
-
-Set `NEXT_PUBLIC_*` and other env for the target stage before deploy.
-
-See [Application Architecture](./docs/architecture.md) for layer boundaries, request flow, and extension rules.
-See [OpenID Connect Authentication](./docs/authentication.md) for provider registration and security requirements.
-
-## Before you publish a fork (checklist)
-
-1. Run **`pnpm template:init`** to replace the package scope, project name, SST application names, metadata, and example domains.
-2. Edit **`LICENSE`** (copyright); update **`NOTICE`** if your policy requires it.
-3. Add [`.github/FUNDING.yml`](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/displaying-a-sponsor-button-in-your-repository) if you want a Sponsor button.
-4. Pin dependencies when ready (`pnpm` overrides / lockfile policy).
-
-## Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md).
-
-## License
-
-[MIT License](./LICENSE). Attribution in [NOTICE](./NOTICE) (upstream [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo), etc.).
-
-`apps/web/next.config.js` sets **`typescript.ignoreBuildErrors: false`** so `next build` runs TypeScript checks. Set it to `true` only as a temporary escape hatch.
-
-## References
-
-- Ideas derived from the [T3](https://github.com/t3-oss/create-t3-app) / [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo) ecosystem.
-- Monorepo layout: [t3-turbo blog post](https://jumr.dev/blog/t3-turbo).
+See [CHANGELOG.md](./CHANGELOG.md). The project is available under the
+[MIT License](./LICENSE), with upstream attribution in [NOTICE](./NOTICE).

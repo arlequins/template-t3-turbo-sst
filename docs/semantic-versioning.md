@@ -1,4 +1,4 @@
-# Semantic Versioning and Commit-based Version Management
+# Semantic Versioning and Commit-Based Version Management
 
 This document defines how this repository uses Semantic Versioning and how Conventional Commits influence version decisions.
 

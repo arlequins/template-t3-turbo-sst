@@ -37,11 +37,16 @@ The web app must never import the server entry point `@acme/trpc` from a Client 
 
 ## Local Development
 
-Copy `.env.example` to `.env`, configure PostgreSQL, and run:
+For the complete local stack, create the local environment file and run:
 
 ```bash
-pnpm dev
+cp .env.localhost.example .env.localhost
+pnpm dev:local
 ```
+
+This starts PostgreSQL, applies migrations and seeds, and runs the local OIDC
+provider, API, and web app. Use `pnpm dev` only when required dependencies and
+environment variables are already available.
 
 The defaults are:
 

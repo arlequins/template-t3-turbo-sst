@@ -7,19 +7,25 @@ Use Vitest.
 - It fits Vite, tsx, ESM, TypeScript, and monorepo workflows well.
 - It is straightforward to manage through pnpm catalogs.
 
-## Initial Rollout
+## Test Layers
 
-Start with pure shared packages:
+- Use unit tests for pure validators, utilities, and service behavior.
+- Use contract tests for public tRPC input and output shapes.
+- Use PostgreSQL integration tests for migrations, seeds, adapters, and
+  representative service paths.
+- Use Playwright for browser authentication and critical user journeys.
+- Keep AWS sandbox smoke tests separate from credential-free pull-request jobs.
 
-1. `@acme/validators`, especially Zod schemas.
-2. `@acme/shared`, especially constants, utilities, and seed helpers.
-
-Then expand to `@acme/env`, `@acme/service`, and `@acme/trpc`.
+Operational details and the flaky-test policy live in
+[Test Operations](../testing-operations.md).
 
 ## Policy
 
-- Prefer mocks for database and external service dependencies, using `vi.mock` or manual test doubles.
-- Consider real database integration tests after the pure layers have sufficient coverage.
+- Prefer dependency injection and manual test doubles for database and external
+  service dependencies. Use `vi.mock` when a module boundary cannot reasonably
+  be injected.
+- Use a real isolated PostgreSQL instance when SQL behavior, migrations,
+  transactions, or constraints are part of the contract.
 - Apply the existing Biome formatter, linter, and import-order conventions to
   test code.
 - There is no mandatory coverage percentage yet. At minimum, cover public API happy paths and representative edge cases.
@@ -33,9 +39,10 @@ Then expand to `@acme/env`, `@acme/service`, and `@acme/trpc`.
 
 ## CI and Turbo Integration
 
-- Add `test` and `test:coverage` tasks to `turbo.json`.
+- Define workspace test tasks in `turbo.json` and declare cache outputs when a
+  task writes reports.
 - Run all workspace tests from the root with `pnpm test`.
-- Add a test job to `.github/workflows/ci.yml` and run it in parallel with lint, format, and typecheck jobs.
+- Run tests in CI alongside lint, format, and typecheck jobs.
 - Run Playwright E2E tests in a separate CI job with isolated external dependencies.
 - Do not run tests in pre-commit hooks. Keep pre-commit fast and stop at typecheck.
 

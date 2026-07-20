@@ -1,6 +1,39 @@
 # Documentation
 
-## Conventions
+Use this page as the entry point for project documentation. The root
+[README](../README.md) covers installation and the shortest path to a running
+local application; the pages below explain design decisions and ongoing work.
+
+## Start Here
+
+1. [Application architecture](architecture.md) explains workspace boundaries
+   and the browser-to-database request flow.
+2. [Developer experience](developer-experience.md) covers generators, fast
+   feedback commands, and template qualification.
+3. [Template readiness](template-readiness.md) lists the capabilities to retain
+   or deliberately remove when adapting the template.
+
+## Development
+
+- [OpenID Connect authentication](authentication.md): provider registration,
+  local identity provider, token validation, and application authorization.
+- [Database operations](database-operations.md): migration order, backups,
+  restore verification, and failure recovery.
+- [SST local testing](sst-local-testing.md): what can be validated without SST
+  sign-in or AWS credentials.
+- [Test operations](testing-operations.md): test layers, external test
+  environments, and flaky-test policy.
+
+## Deployment and Operations
+
+- [Deployment and supply-chain security](deployment-security.md): GitHub OIDC,
+  protected environments, security checks, and response headers.
+- [Incident runbook](incident-runbook.md): triage, mitigation, recovery, and
+  observability integration points.
+- [Semantic versioning](semantic-versioning.md): release impact and repository
+  version policy.
+
+## Engineering Conventions
 
 - [Git, branches, commits, and releases](conventions/git.md)
 - [Monorepo operations](conventions/monorepo.md)
@@ -8,12 +41,16 @@
 - [tRPC router convention](conventions/trpc.md)
 - [TypeScript, imports, exports, constants, and types](conventions/typescript.md)
 - [AI collaboration convention](conventions/ai.md)
-- [Semantic versioning](semantic-versioning.md)
-- [Application architecture](architecture.md)
-- [SST local testing](sst-local-testing.md)
-- [OpenID Connect authentication](authentication.md)
-- [Template improvement TODO](todo.md)
 
 ## AI Context
 
-- [AI memory](ai-memory.md)
+- [AI memory](ai-memory.md) is a compact repository map for coding agents. It
+  supplements the engineering conventions and does not override them.
+
+## Document Boundaries
+
+- Put setup commands and the first successful local run in the root README.
+- Put stable engineering rules under `docs/conventions/`.
+- Put operational procedures in a dedicated top-level page under `docs/`.
+- Update both the implementation and its canonical document in the same PR.
+- Link to the canonical page instead of copying procedures into multiple files.
