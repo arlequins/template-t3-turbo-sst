@@ -40,10 +40,10 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Database Operations
 
-- [ ] Define deployment migration order and prevent concurrent migrations with a PostgreSQL advisory lock.
-- [ ] Add backup and restore scripts with a side-by-side restore verification workflow.
-- [ ] Physically separate production reference seeds from sample data.
-- [ ] Document migration failure recovery and application rollback procedures.
+- [x] Define deployment migration order and prevent concurrent migrations with a PostgreSQL advisory lock.
+- [x] Add backup and restore scripts with a side-by-side restore verification workflow.
+- [x] Physically separate production reference seeds from sample data.
+- [x] Document migration failure recovery and application rollback procedures.
 
 ## Authorization
 

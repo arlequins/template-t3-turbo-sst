@@ -27,7 +27,7 @@
     "push": "pnpm with-env drizzle-kit push",
     "create-migration": "pnpm with-env drizzle-kit generate",
     "check-migrations": "pnpm with-env drizzle-kit check",
-    "migrate": "pnpm with-env drizzle-kit migrate",
+    "migrate": "pnpm with-env tsx ./scripts/migrate.ts",
     "seed": "pnpm with-env tsx ./scripts/seed.ts",
     "studio": "pnpm with-env drizzle-kit studio",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false && tsc --noEmit -p tsconfig.drizzle.json",
