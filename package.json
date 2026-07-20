@@ -36,6 +36,7 @@
     "lint:ws": "pnpm dlx sherif@latest",
     "postinstall": "pnpm lint:ws",
     "prepare": "husky",
+    "security:licenses": "node scripts/check-licenses.mjs",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "sst:ws": "node ./scripts/sst-workspace.mjs",
