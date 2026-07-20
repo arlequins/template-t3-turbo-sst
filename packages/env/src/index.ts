@@ -50,6 +50,9 @@ export const LambdaEnvironment = {
   ...(serverEnv.OIDC_JWKS_URI
     ? { OIDC_JWKS_URI: serverEnv.OIDC_JWKS_URI }
     : {}),
+  ...(serverEnv.OIDC_PROVIDERS_JSON
+    ? { OIDC_PROVIDERS_JSON: serverEnv.OIDC_PROVIDERS_JSON }
+    : {}),
   OIDC_ALLOWED_ALGORITHMS: serverEnv.OIDC_ALLOWED_ALGORITHMS ?? "RS256",
   API_CORS_ORIGINS:
     serverEnv.API_CORS_ORIGINS ?? clientEnv.NEXT_PUBLIC_SITE_URL,

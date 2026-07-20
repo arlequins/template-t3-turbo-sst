@@ -26,9 +26,11 @@ export default $config({
       LambdaEnvironment,
       resolveApiDeploymentConfig,
       serverEnv,
+      sstAwsRegion,
       vpcFromEnv,
     } = await import("@acme/env");
 
+    const region = sstAwsRegion();
     const vpc = vpcFromEnv();
     const deployment = resolveApiDeploymentConfig({
       customDomain: serverEnv.API_CUSTOM_DOMAIN,
@@ -83,7 +85,7 @@ export default $config({
             width: 12,
             height: 6,
             properties: {
-              region: serverEnv.SST_AWS_REGION,
+              region,
               title: "API requests, errors, latency, and cold starts",
               metrics: [
                 ["Template/Api", "RequestCount", "stage", $app.stage],

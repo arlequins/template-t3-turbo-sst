@@ -45,6 +45,17 @@ describe("template:init", () => {
       [...resolveFeatures({ features: "auth,sst" })],
       ["auth", "sst"],
     );
+    assert.deepEqual(
+      [...resolveFeatures({ preset: "minimal", features: "auth,sst" })],
+      ["auth", "sst"],
+    );
+    const minimalAuthPaths = pathsToPrune({
+      preset: "minimal",
+      features: "auth",
+      prune: true,
+    });
+    assert.ok(!minimalAuthPaths.includes("packages/auth"));
+    assert.ok(minimalAuthPaths.includes("apps/batch"));
     assert.throws(() => resolveFeatures({ features: "unknown" }));
 
     const router = transformContent(

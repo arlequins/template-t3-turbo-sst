@@ -11,7 +11,7 @@ For file naming, mocking, and test design rules, see the
 - AWS sandbox smoke tests validate both deployment presets on a schedule and on demand.
 - k6 baseline load tests are manual and target a dedicated non-production endpoint.
 
-Configure `AWS_SMOKE_FUNCTION_URL`, `AWS_SMOKE_GATEWAY_URL`, and `LOAD_TEST_API_URL` as repository variables. Do not run load tests against production without an approved capacity and incident plan.
+Configure `AWS_SMOKE_FUNCTION_URL`, `AWS_SMOKE_GATEWAY_URL`, and `LOAD_TEST_API_URL` as repository variables. Scheduled AWS smoke tests are skipped until both smoke URLs are configured. Do not run load tests against production without an approved capacity and incident plan.
 
 ## Flaky-test Policy
 

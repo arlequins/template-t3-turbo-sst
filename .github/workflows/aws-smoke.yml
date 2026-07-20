@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   smoke:
+    if: vars.AWS_SMOKE_FUNCTION_URL != '' && vars.AWS_SMOKE_GATEWAY_URL != ''
     strategy:
       matrix:
         preset: [function-url, api-gateway]

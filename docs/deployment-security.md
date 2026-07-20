@@ -2,7 +2,7 @@
 
 ## AWS OIDC Setup
 
-Create separate AWS IAM roles for preview and production. Configure GitHub's OIDC provider as the federated principal and restrict the `sub` claim to this repository. Use `repo:OWNER/REPOSITORY:pull_request` for preview and `repo:OWNER/REPOSITORY:environment:production` for production.
+Create separate AWS IAM roles for preview and production. Configure GitHub's OIDC provider as the federated principal and restrict the `sub` claim to this repository. Preview jobs use dynamic GitHub Environments, so allow `repo:OWNER/REPOSITORY:environment:pr-*` for the preview role. Allow only `repo:OWNER/REPOSITORY:environment:production` for the production role.
 
 Store role ARNs as GitHub variables. Role ARNs identify resources and are not credentials:
 
@@ -13,7 +13,7 @@ Preview jobs remain skipped until `AWS_PREVIEW_ROLE_ARN` is configured.
 
 Set `AWS_REGION` as an environment variable. Do not store AWS access keys in GitHub.
 
-Start with the trust-policy template in [`docs/iam/github-oidc-trust-policy.json`](./iam/github-oidc-trust-policy.json). Replace placeholders before applying it. The deployment permission policy is intentionally not universal: generate it from CloudTrail after a sandbox deployment, then constrain actions and resources to the stacks, state bucket, asset bucket, and roles owned by this repository.
+Start with the trust-policy template in [`docs/iam/github-oidc-trust-policy.json`](./iam/github-oidc-trust-policy.json). Replace placeholders and retain only the subject appropriate for each role before applying it. The deployment permission policy is intentionally not universal: generate it from CloudTrail after a sandbox deployment, then constrain actions and resources to the stacks, state bucket, asset bucket, and roles owned by this repository.
 
 ## Environments and Branch Protection
 
