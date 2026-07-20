@@ -5,7 +5,7 @@ This list tracks improvements that make the repository safer and easier to reuse
 ## High Priority
 
 - [x] Replace the permissive authentication stub with OIDC Authorization Code + PKCE in the browser and JWT access-token validation in the API.
-- [ ] Restrict sample seeds to `offline` and `test`, or require an explicit `SEED_SAMPLE_DATA=true` opt-in.
+- [x] Restrict sample seeds to `offline` and `test`, or require an explicit `SEED_SAMPLE_DATA=true` opt-in.
 - [x] Add a local PostgreSQL `compose.yml` and `db:start` / `db:stop` commands for a zero-setup development path.
 - [x] Add `DATABASE_SSL_MODE=disable|require|verify-full` instead of forcing one TLS behavior for every environment.
 - [x] Run migration, seed idempotency, and representative tRPC CRUD integration tests against PostgreSQL in CI.
