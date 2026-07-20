@@ -64,6 +64,8 @@ export const serverEnv = createEnv({
     API_THROTTLE_RATE_LIMIT: z.coerce.number().positive().optional(),
     /** API Gateway maximum request burst. */
     API_THROTTLE_BURST_LIMIT: z.coerce.number().int().positive().optional(),
+    /** Optional SNS topic receiving CloudWatch alarm notifications. */
+    ALERT_TOPIC_ARN: z.string().startsWith("arn:aws:sns:").optional(),
   },
   runtimeEnv: {
     SST_STAGE: process.env.SST_STAGE,
@@ -93,6 +95,7 @@ export const serverEnv = createEnv({
     API_WAF_ENABLED: process.env.API_WAF_ENABLED,
     API_THROTTLE_RATE_LIMIT: process.env.API_THROTTLE_RATE_LIMIT,
     API_THROTTLE_BURST_LIMIT: process.env.API_THROTTLE_BURST_LIMIT,
+    ALERT_TOPIC_ARN: process.env.ALERT_TOPIC_ARN,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,

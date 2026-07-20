@@ -47,8 +47,55 @@ export default $config({
             },
           }
         : {}),
-      environment: LambdaEnvironment,
+      environment: { ...LambdaEnvironment, SST_STAGE: $app.stage },
     };
+    const alarmActions = serverEnv.ALERT_TOPIC_ARN
+      ? [serverEnv.ALERT_TOPIC_ARN]
+      : [];
+    const metric = (name: string) => ({
+      namespace: "Template/Api",
+      metricName: name,
+      dimensions: { stage: $app.stage },
+      period: 300,
+      statistic: "Sum",
+    });
+    new aws.cloudwatch.MetricAlarm("ApiServerErrors", {
+      ...metric("ServerErrorCount"),
+      evaluationPeriods: 1,
+      threshold: 1,
+      comparisonOperator: "GreaterThanOrEqualToThreshold",
+      alarmActions,
+    });
+    new aws.cloudwatch.MetricAlarm("ApiLatency", {
+      ...metric("RequestDuration"),
+      statistic: "Average",
+      evaluationPeriods: 2,
+      threshold: 2_000,
+      comparisonOperator: "GreaterThanThreshold",
+      alarmActions,
+    });
+    new aws.cloudwatch.Dashboard("ApiDashboard", {
+      dashboardName: `${$app.name}-${$app.stage}`,
+      dashboardBody: JSON.stringify({
+        widgets: [
+          {
+            type: "metric",
+            width: 12,
+            height: 6,
+            properties: {
+              region: serverEnv.SST_AWS_REGION,
+              title: "API requests, errors, latency, and cold starts",
+              metrics: [
+                ["Template/Api", "RequestCount", "stage", $app.stage],
+                [".", "ServerErrorCount", ".", "."],
+                [".", "RequestDuration", ".", ".", { stat: "Average" }],
+                [".", "ColdStart", ".", "."],
+              ],
+            },
+          },
+        ],
+      }),
+    });
 
     if (deployment.preset === ApiDeploymentPreset.API_GATEWAY) {
       const api = new sst.aws.ApiGatewayV2("Api", {

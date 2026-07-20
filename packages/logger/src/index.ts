@@ -100,3 +100,5 @@ export function createLogger(options: CreateLoggerOptions): Logger {
 
   return build(options.bindings ?? {});
 }
+
+export * from "./telemetry";

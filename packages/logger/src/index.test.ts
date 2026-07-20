@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { LogRecord } from "./index";
 import { createLogger } from "./index";
+import { createTelemetry } from "./telemetry";
 
 describe("createLogger", () => {
   it("emits structured child bindings", () => {
@@ -43,6 +44,22 @@ describe("createLogger", () => {
     expect(records[0]).toMatchObject({
       authorization: "[REDACTED]",
       nested: { accessToken: "[REDACTED]", safe: "visible" },
+    });
+  });
+});
+
+describe("createTelemetry", () => {
+  it("emits CloudWatch embedded metric format", () => {
+    const lines: string[] = [];
+    const telemetry = createTelemetry({
+      service: "api",
+      metricSink: (line) => lines.push(line),
+    });
+    telemetry.metric("RequestCount", 1, "Count", { stage: "test" });
+    expect(JSON.parse(lines[0] ?? "{}")).toMatchObject({
+      RequestCount: 1,
+      stage: "test",
+      _aws: { CloudWatchMetrics: [{ Namespace: "Template/Application" }] },
     });
   });
 });
