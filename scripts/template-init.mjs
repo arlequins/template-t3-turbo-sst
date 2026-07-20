@@ -99,7 +99,7 @@ export function pathsToPrune(options) {
     );
   }
   if (!features.has("example-ui")) {
-    paths.push("apps/web/src/components/posts.tsx");
+    paths.push("apps/web/src/components/posts.tsx", "scripts/example-crud.mjs");
   }
 
   return paths.sort();
@@ -154,6 +154,9 @@ function prunePackageJson(relativePath, source, options) {
       `${options.scope}/validators`,
       "@tanstack/react-form",
     ]);
+  }
+  if (!features.has("example-ui") && relativePath === "package.json") {
+    removeScripts(packageJson, ["example:remove", "example:regenerate"]);
   }
 
   return `${JSON.stringify(packageJson, undefined, 2)}\n`;

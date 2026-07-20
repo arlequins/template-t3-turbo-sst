@@ -68,9 +68,9 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Developer Experience
 
-- [ ] Add Dev Container and Codespaces configuration.
-- [ ] Add generators for applications, packages, and domain modules.
-- [ ] Verify environment schema and example files remain synchronized.
-- [ ] Add a changed-workspace fast-check command.
-- [ ] Add commands to remove and regenerate example CRUD functionality.
-- [ ] Continuously verify the quickstart path from initialization to first deployment.
+- [x] Add Dev Container and Codespaces configuration.
+- [x] Add generators for applications, packages, and domain modules.
+- [x] Verify environment schema and example files remain synchronized.
+- [x] Add a changed-workspace fast-check command.
+- [x] Add commands to remove and regenerate example CRUD functionality.
+- [x] Continuously verify the quickstart path from initialization to first deployment.

@@ -126,6 +126,7 @@
     "AWS_REGION",
     "ENV_TARGET",
     "SM_PREFIX",
-    "STATE_MACHINE_ARN"
+    "STATE_MACHINE_ARN",
+    "CHANGE_BASE"
   ]
 }

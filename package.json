@@ -30,6 +30,7 @@
     "dev:sst": "turbo run sst:dev --continue -F @acme/web -F @acme/api -F @acme/batch",
     "batch:run": "pnpm -C apps/batch with-env pnpm dlx tsx scripts/dev.ts",
     "check": "biome check .",
+    "check:changed": "node scripts/check-changed.mjs",
     "check:fix": "biome check . --write",
     "format": "biome format .",
     "format:fix": "biome format . --write",
@@ -51,8 +52,12 @@
     "test:e2e": "node scripts/test-e2e.mjs",
     "test:e2e:headed": "node scripts/test-e2e.mjs --headed",
     "test:migration-upgrade": "node scripts/test-migration-upgrade.mjs",
+    "test:generators": "node scripts/test-generators.mjs",
     "env:pull": "pnpm -F @acme/sst-bootstrap run env:pull --",
-    "env:push": "pnpm -F @acme/sst-bootstrap run env:push --"
+    "env:push": "pnpm -F @acme/sst-bootstrap run env:push --",
+    "env:check": "node scripts/check-env-sync.mjs",
+    "example:remove": "node scripts/example-crud.mjs remove",
+    "example:regenerate": "node scripts/example-crud.mjs regenerate"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
