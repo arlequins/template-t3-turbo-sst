@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,12 +43,13 @@ export function resolveFeatures(options) {
 }
 
 export function parseArgs(args) {
-  const options = { dryRun: false, force: false };
+  const options = { dryRun: false, force: false, prune: false };
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
     if (argument === "--") continue;
     if (argument === "--dry-run") options.dryRun = true;
     else if (argument === "--force") options.force = true;
+    else if (argument === "--prune") options.prune = true;
     else if (argument?.startsWith("--")) {
       const key = argument.slice(2);
       const value = args[index + 1];
@@ -59,6 +60,106 @@ export function parseArgs(args) {
     } else throw new Error(`Unknown argument: ${argument}`);
   }
   return options;
+}
+
+export function pathsToPrune(options) {
+  if (!options.prune) return [];
+  const features = resolveFeatures(options);
+  const paths = ["pnpm-lock.yaml"];
+
+  if (!features.has("auth")) {
+    paths.push(
+      "apps/web/src/app/auth",
+      "apps/web/src/auth",
+      "apps/web/src/lib/client-auth.ts",
+      "packages/auth",
+      "packages/trpc/src/router/auth.ts",
+      "playwright.config.ts",
+      "tests/e2e/auth.test.ts",
+      "tooling/oidc-mock",
+    );
+  }
+  if (!features.has("batch")) paths.push("apps/batch");
+  if (!features.has("sst")) {
+    paths.push(
+      "apps/api/sst-env.d.ts",
+      "apps/api/sst-globals.d.ts",
+      "apps/api/sst.config.ts",
+      "apps/web/sst-env.d.ts",
+      "apps/web/sst-globals.d.ts",
+      "apps/web/sst.config.ts",
+      "scripts/sst-workspace.mjs",
+      "scripts/test-sst.mjs",
+      "tooling/sst-bootstrap",
+    );
+  }
+  if (!features.has("example-ui")) {
+    paths.push("apps/web/src/components/posts.tsx");
+  }
+
+  return paths.sort();
+}
+
+function removeDependencies(packageJson, dependencies) {
+  for (const field of DEPENDENCY_FIELDS) {
+    for (const dependency of dependencies)
+      delete packageJson[field]?.[dependency];
+  }
+}
+
+function removeScripts(packageJson, scripts) {
+  for (const script of scripts) delete packageJson.scripts?.[script];
+}
+
+function prunePackageJson(relativePath, source, options) {
+  const features = resolveFeatures(options);
+  const packageJson = JSON.parse(source);
+
+  if (!features.has("auth")) {
+    if (relativePath === "package.json") {
+      removeDependencies(packageJson, ["@playwright/test"]);
+      removeScripts(packageJson, ["test:e2e", "test:e2e:headed"]);
+    }
+    if (relativePath === "apps/api/package.json") {
+      removeDependencies(packageJson, [`${options.scope}/auth`]);
+    }
+    if (relativePath === "apps/web/package.json") {
+      removeDependencies(packageJson, ["oidc-client-ts"]);
+    }
+    if (relativePath === "packages/trpc/package.json") {
+      removeDependencies(packageJson, [`${options.scope}/auth`]);
+    }
+  }
+
+  if (!features.has("sst") && relativePath.startsWith("apps/")) {
+    removeDependencies(packageJson, ["sst"]);
+    removeScripts(packageJson, [
+      "sst:deploy",
+      "sst:dev",
+      "sst:install",
+      "sst:remove",
+    ]);
+  }
+
+  if (!features.has("example-ui") && relativePath === "apps/web/package.json") {
+    removeDependencies(packageJson, [
+      `${options.scope}/validators`,
+      "@tanstack/react-form",
+    ]);
+  }
+
+  return `${JSON.stringify(packageJson, undefined, 2)}\n`;
+}
+
+function removeOidcClientEnvironment(source) {
+  return source
+    .replace(
+      / {4}NEXT_PUBLIC_OIDC_AUTHORITY: z\.url\(\),[\s\S]*? {8}message: "OIDC scope must include openid",\n {6}\}\),\n/,
+      "",
+    )
+    .split("\n")
+    .filter((line) => !line.includes("NEXT_PUBLIC_OIDC_"))
+    .join("\n");
 }
 
 export function validateOptions(options) {
@@ -177,6 +278,24 @@ export function transformContent(relativePath, source, options) {
         )
         .replace("    [user],", "    [],");
     }
+    if (
+      options.prune &&
+      (relativePath === "apps/web/src/env.ts" ||
+        relativePath === "packages/env/src/env-client.ts")
+    ) {
+      output = removeOidcClientEnvironment(output);
+    }
+    if (options.prune && relativePath === "packages/env/src/index.ts") {
+      output = output
+        .replace(
+          / {2}OIDC_ISSUER_URL:[\s\S]*? {2}OIDC_ALLOWED_ALGORITHMS: serverEnv\.OIDC_ALLOWED_ALGORITHMS \?\? "RS256",\n/,
+          "",
+        )
+        .replace(
+          / {2}NEXT_PUBLIC_OIDC_AUTHORITY:[\s\S]*? {2}NEXT_PUBLIC_OIDC_SCOPE: clientEnv\.NEXT_PUBLIC_OIDC_SCOPE,\n/,
+          "",
+        );
+    }
   }
 
   if (
@@ -198,7 +317,22 @@ export function transformContent(relativePath, source, options) {
     )}\n`;
   }
   if (/(^|\/)package\.json(?:\.hbs)?$/.test(relativePath)) {
+    if (options.prune) output = prunePackageJson(relativePath, output, options);
     output = sortDependencyKeys(output);
+  }
+  if (
+    options.prune &&
+    !features.has("sst") &&
+    (relativePath === "apps/web/tsconfig.json" ||
+      relativePath === "apps/api/tsconfig.json")
+  ) {
+    const tsconfig = JSON.parse(output);
+    if (Array.isArray(tsconfig.include)) {
+      tsconfig.include = tsconfig.include.filter(
+        (path) => !path.startsWith("sst") && !path.includes("/sst"),
+      );
+    }
+    output = `${JSON.stringify(tsconfig, undefined, 2)}\n`;
   }
   return output;
 }
@@ -240,6 +374,12 @@ export async function initializeTemplate(options, runtime = {}) {
     changed.push(relativePath);
     if (!options.dryRun) await writeFile(path, output, "utf8");
   }
+  for (const relativePath of pathsToPrune(options)) {
+    changed.push(`delete:${relativePath}`);
+    if (!options.dryRun) {
+      await rm(resolve(root, relativePath), { recursive: true, force: true });
+    }
+  }
   return changed;
 }
 
@@ -261,7 +401,7 @@ if (isCli) {
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error(
-      "pnpm template:init -- --name my-app --scope @company [--preset full|minimal] [--features auth,batch,sst,example-ui] [--description text] [--domain example.org] [--dry-run] [--force]",
+      "pnpm template:init -- --name my-app --scope @company [--preset full|minimal] [--features auth,batch,sst,example-ui] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
     );
     process.exitCode = 1;
   }

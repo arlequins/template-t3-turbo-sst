@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import {
   initializeTemplate,
   parseArgs,
+  pathsToPrune,
   resolveFeatures,
   transformContent,
   validateOptions,
@@ -27,6 +28,15 @@ describe("template:init", () => {
     assert.throws(() =>
       validateOptions({ name: "Bad Name", scope: "company" }),
     );
+  });
+
+  it("plans physical feature removal only when prune mode is enabled", () => {
+    assert.deepEqual(pathsToPrune({ preset: "minimal" }), []);
+    const paths = pathsToPrune({ preset: "minimal", prune: true });
+    assert.ok(paths.includes("apps/batch"));
+    assert.ok(paths.includes("packages/auth"));
+    assert.ok(paths.includes("tooling/sst-bootstrap"));
+    assert.ok(paths.includes("pnpm-lock.yaml"));
   });
 
   it("supports a minimal preset and independently selected features", async () => {
@@ -121,5 +131,44 @@ describe("template:init", () => {
       await readFile(sstPath, "utf8"),
       'name: "customer-portal-web"; // customer.example.org @company/web\n',
     );
+  });
+
+  it("removes pruned paths and their package dependencies", async () => {
+    const root = await mkdtemp(join(tmpdir(), "template-prune-"));
+    const packagePath = join(root, "apps/web/package.json");
+    const authPath = join(root, "packages/auth/index.ts");
+    await mkdir(join(root, "apps/web"), { recursive: true });
+    await mkdir(join(root, "packages/auth"), { recursive: true });
+    await writeFile(
+      packagePath,
+      JSON.stringify({
+        name: "@acme/web",
+        scripts: { "sst:dev": "sst dev" },
+        dependencies: {
+          "@acme/validators": "workspace:*",
+          "@tanstack/react-form": "catalog:",
+          "oidc-client-ts": "catalog:",
+          react: "catalog:react19",
+        },
+        devDependencies: { sst: "1.0.0" },
+      }),
+    );
+    await writeFile(authPath, "export const auth = true;\n");
+
+    await initializeTemplate(
+      {
+        name: "app",
+        scope: "@company",
+        preset: "minimal",
+        prune: true,
+      },
+      { root, files: ["apps/web/package.json", "packages/auth/index.ts"] },
+    );
+
+    const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
+    assert.deepEqual(packageJson.dependencies, { react: "catalog:react19" });
+    assert.deepEqual(packageJson.devDependencies, {});
+    assert.deepEqual(packageJson.scripts, {});
+    await assert.rejects(access(join(root, "packages/auth")));
   });
 });

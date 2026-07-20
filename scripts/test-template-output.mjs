@@ -98,9 +98,14 @@ try {
     `${preset} generated application`,
     "--preset",
     preset,
+    ...(preset === "minimal" ? ["--prune"] : []),
   ]);
+  run("git", ["add", "--all"]);
   await assertTemplateIdentityRemoved();
 
+  if (preset === "minimal") {
+    run(pnpm, ["install", "--no-frozen-lockfile"]);
+  }
   run(pnpm, ["install", "--frozen-lockfile"]);
   for (const command of ["check:fix", "check", "test", "typecheck", "build"]) {
     run(pnpm, [command]);

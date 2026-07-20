@@ -52,6 +52,8 @@ The required runtime is checked before installation. Use Node.js from `.nvmrc` a
 After initialization, run `pnpm install` and `pnpm check:fix` before the regular test and typecheck commands. Identifier and domain replacement can legitimately change line wrapping.
 
 Use `--preset minimal` for the `web + api + trpc + db` execution path. Optional modules can be selected independently with `--features auth,batch,sst,example-ui`; omitted modules remain as dormant examples so they can be enabled later without restoring deleted source.
+
+Add `--prune` to physically remove omitted modules, their workspace dependencies, and their feature-specific commands. Prune mode removes `pnpm-lock.yaml`; `pnpm install` regenerates a lockfile for the selected composition.
 - **Database:** set `DATABASE_*` in the root `.env` (see [`.env.example`](./.env.example)). Not Vercel Postgres by default.
 
 ## Quick start
