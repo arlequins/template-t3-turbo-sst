@@ -34,6 +34,19 @@ catalogs:
 - Use `"@acme/<package>": "workspace:*"` for internal package dependencies.
 - Internal packages should be `"private": true` and should not be published to npm unless the repository explicitly defines a publication workflow.
 
+## Automated Dependency Updates
+
+Renovate uses [`.github/renovate.json`](../../.github/renovate.json) and follows these rules:
+
+- Patch, pin, digest, and weekly lockfile updates may merge automatically after all configured CI checks pass.
+- Minor updates may merge automatically only when the installed package is already at version `1.0.0` or later. Treat `0.x` minor updates as potentially breaking and review them manually.
+- All major updates require manual review.
+- TypeScript, the Next.js and React runtime, SST, Drizzle, and authentication library majors are grouped into separate stack-specific PRs. Do not combine those migrations with unrelated dependency updates.
+- npm releases observe a minimum release age before routine update PRs become eligible, reducing exposure to immediately withdrawn or compromised releases.
+- Renovate PR titles use `chore(deps): ...` so they satisfy the repository's Conventional Commits checks.
+
+Automerge still depends on CI being present and meaningful. Keep lint, format, typecheck, unit tests, migration checks, and E2E jobs enabled for dependency PRs. Security alerts can require a faster manual update than the routine schedule.
+
 ## Dependency Key Order with sherif
 
 - `sherif` checks dependency key order in each `package.json`.
