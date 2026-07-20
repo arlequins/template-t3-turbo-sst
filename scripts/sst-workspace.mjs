@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 
-const PACKAGES = { web: "@acme/web", api: "@acme/api", batch: "@acme/batch" };
+const PACKAGES = {
+  web: "@acme/web",
+  api: "@acme/api",
+  batch: "@acme/batch",
+};
 const TO_SCRIPT = {
   dev: "sst:dev",
   deploy: "sst:deploy",

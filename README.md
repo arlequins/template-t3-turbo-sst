@@ -46,6 +46,8 @@ pnpm install
 ```
 
 The command updates tracked text files, package names, SST application names, repository metadata, and example domains. It refuses to write into a dirty worktree unless `--force` is provided.
+
+Use `--preset minimal` for the `web + api + trpc + db` execution path. Optional modules can be selected independently with `--features auth,batch,sst,example-ui`; omitted modules remain as dormant examples so they can be enabled later without restoring deleted source.
 - **Database:** set `DATABASE_*` in the root `.env` (see [`.env.example`](./.env.example)). Not Vercel Postgres by default.
 
 ## Quick start
