@@ -18,6 +18,7 @@
   "dependencies": {
     "@acme/db-backbone": "workspace:^",
     "@acme/env": "workspace:*",
+    "@acme/logger": "workspace:*",
     "@acme/service": "workspace:^",
     "@aws-sdk/client-sfn": "^3.1090.0"
   },
