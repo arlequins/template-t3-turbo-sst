@@ -19,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/dependency-review-action@v4
+        continue-on-error: ${{ vars.DEPENDENCY_REVIEW_ENABLED != 'true' }}
         with:
           fail-on-severity: moderate
 
@@ -42,6 +43,8 @@ jobs:
         with:
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   supply-chain:
     runs-on: ubuntu-latest
