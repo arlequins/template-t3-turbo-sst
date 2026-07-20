@@ -10,7 +10,38 @@ pnpm --filter @acme/api sst:deploy
 
 | Path | Purpose |
 | --- | --- |
-| `GET /health` | Service health and request ID. |
+| `GET /health/live` | Process liveness and request ID. |
+| `GET /health/ready` | Readiness, including PostgreSQL connectivity. |
+| `GET /health` | Compatibility alias for liveness. |
 | `/api/trpc/*` | tRPC queries and mutations. |
 
 `src/app.ts` is runtime-independent. `src/dev.ts` serves it with Node for local development, and `src/lambda.ts` adapts the same app to AWS Lambda.
+
+## AWS deployment presets
+
+Set `API_DEPLOYMENT_PRESET` before running `pnpm --filter @acme/api sst:deploy`.
+
+| Preset | Best fit | Throttling | WAF | Custom domain |
+| --- | --- | --- | --- | --- |
+| `function-url` (default) | Internal APIs, prototypes, and low-traffic services that favor minimum cost and configuration | No API-level throttle. Use reserved concurrency or application controls. | Set `API_WAF_ENABLED=true` to add an SST Router backed by CloudFront and WAF. | `API_CUSTOM_DOMAIN` adds the same Router edge layer. |
+| `api-gateway` | Public APIs that need managed access logs, route controls, and request throttling | `API_THROTTLE_RATE_LIMIT` and `API_THROTTLE_BURST_LIMIT`; defaults are 100 and 200. | API Gateway HTTP APIs do not accept the template's direct WAF option. Add CloudFront/WAF in front or use a REST API when direct API Gateway WAF association is required. | `API_CUSTOM_DOMAIN` configures the API Gateway domain directly. |
+
+Examples:
+
+```dotenv
+# Direct Lambda Function URL
+API_DEPLOYMENT_PRESET=function-url
+
+# Function URL behind CloudFront, WAF, and a Route 53 domain
+API_DEPLOYMENT_PRESET=function-url
+API_CUSTOM_DOMAIN=api.example.com
+API_WAF_ENABLED=true
+
+# API Gateway HTTP API with stage throttling
+API_DEPLOYMENT_PRESET=api-gateway
+API_CUSTOM_DOMAIN=api.example.com
+API_THROTTLE_RATE_LIMIT=250
+API_THROTTLE_BURST_LIMIT=500
+```
+
+The deployment rejects throttling on `function-url` and direct WAF on `api-gateway` so unsupported combinations do not silently produce an unprotected endpoint. CORS remains in Hono for identical local and AWS behavior.

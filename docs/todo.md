@@ -14,7 +14,7 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 - [x] Add `pnpm template:init` to rename `@acme`, SST application names, package metadata, and example domains safely.
 - [x] Make batch, authentication, SST deployment, and example UI modules selectable generator options while keeping `web + api + trpc + db` as the minimal preset.
-- [ ] Offer documented API deployment presets for Lambda Function URLs and API Gateway, including throttling, WAF, and custom-domain tradeoffs.
+- [x] Offer documented API deployment presets for Lambda Function URLs and API Gateway, including throttling, WAF, and custom-domain tradeoffs.
 
 ## Operations
 
