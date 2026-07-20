@@ -29,6 +29,7 @@ export const clientEnv = createEnv({
     ),
     NEXT_PUBLIC_OIDC_AUTHORITY: z.url(),
     NEXT_PUBLIC_OIDC_CLIENT_ID: z.string().min(1),
+    NEXT_PUBLIC_OIDC_RESOURCE: z.url().optional(),
     NEXT_PUBLIC_OIDC_SCOPE: z
       .string()
       .min(1)
@@ -41,6 +42,7 @@ export const clientEnv = createEnv({
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
     NEXT_PUBLIC_OIDC_AUTHORITY: process.env.NEXT_PUBLIC_OIDC_AUTHORITY,
     NEXT_PUBLIC_OIDC_CLIENT_ID: process.env.NEXT_PUBLIC_OIDC_CLIENT_ID,
+    NEXT_PUBLIC_OIDC_RESOURCE: process.env.NEXT_PUBLIC_OIDC_RESOURCE,
     NEXT_PUBLIC_OIDC_SCOPE: process.env.NEXT_PUBLIC_OIDC_SCOPE,
   },
   emptyStringAsUndefined: true,

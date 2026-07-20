@@ -38,10 +38,19 @@ OIDC_ALLOWED_ALGORITHMS=RS256
 # Static browser client
 NEXT_PUBLIC_OIDC_AUTHORITY=https://idp.example.com
 NEXT_PUBLIC_OIDC_CLIENT_ID=example-spa
+NEXT_PUBLIC_OIDC_RESOURCE=https://api.example.com
 NEXT_PUBLIC_OIDC_SCOPE=openid profile email
 ```
 
 `OIDC_AUDIENCE` and `OIDC_ALLOWED_ALGORITHMS` accept comma-separated values. The JWKS URI is discovered from the provider by default; set `OIDC_JWKS_URI` only when an explicit override is required.
+
+`NEXT_PUBLIC_OIDC_RESOURCE` is optional. Set it when the provider uses OAuth 2.0 Resource Indicators to select the API audience.
+
+## Local Provider
+
+`pnpm dev:local` starts the development-only `@acme/oidc-mock` provider with PostgreSQL, the API, and the web app. It uses in-memory accounts and signing keys and must never be deployed as a production identity provider.
+
+The complete local configuration is in `.env.localhost.example`. The Playwright suite uses `.env.e2e` and an isolated database to verify PKCE sign-in, JWT validation through discovery and JWKS, protected tRPC CRUD, and sign-out.
 
 The API accepts only asymmetric signing algorithms: RS256/384/512, PS256/384/512, ES256/384/512, and EdDSA. Keep the allowlist as narrow as the provider permits.
 

@@ -9,6 +9,7 @@ export type DatabaseEnv = {
   password: string;
   database: string;
   poolMax: number;
+  sslMode: "disable" | "require" | "verify-full";
 };
 
 /**
@@ -25,6 +26,9 @@ const databaseConnectionSchema = z.object({
     (val) => (val === "" || val === undefined ? undefined : val),
     z.coerce.number().int().min(1).max(500).default(10),
   ),
+  DATABASE_SSL_MODE: z
+    .enum(["disable", "require", "verify-full"])
+    .default("require"),
 });
 
 /** Shared by `@acme/db-backbone` `client.ts` and `drizzle.config.ts`. */
@@ -36,6 +40,7 @@ export function loadDatabaseEnv(): DatabaseEnv {
     DATABASE_PASSWORD: serverEnv.DATABASE_PASSWORD,
     DATABASE_NAME: serverEnv.DATABASE_NAME,
     POSTGRES_POOL_MAX: serverEnv.POSTGRES_POOL_MAX,
+    DATABASE_SSL_MODE: serverEnv.DATABASE_SSL_MODE,
   });
   return {
     host: row.DATABASE_HOST,
@@ -44,5 +49,6 @@ export function loadDatabaseEnv(): DatabaseEnv {
     password: row.DATABASE_PASSWORD,
     database: row.DATABASE_NAME,
     poolMax: row.POSTGRES_POOL_MAX,
+    sslMode: row.DATABASE_SSL_MODE,
   };
 }

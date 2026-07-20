@@ -18,6 +18,9 @@ catalog:
   hono: ^4.12.31
   jose: ^6.2.3
   oidc-client-ts: ^3.5.0
+  oidc-provider: ^9.9.1
+  "@playwright/test": ^1.61.1
+  "@types/oidc-provider": ^9.5.0
   postgres: ^3.4.9
   superjson: 2.2.6
   tailwindcss: ^4.3.3
