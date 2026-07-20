@@ -10,12 +10,56 @@ describe("API app", () => {
     logger: createLogger({ service: "api", sink: () => {} }),
   });
 
-  it("reports service health", async () => {
-    const response = await app.request("/health");
+  it("reports process liveness without checking dependencies", async () => {
+    const response = await app.request("/health/live");
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toMatchObject({ status: "ok" });
+    await expect(response.json()).resolves.toMatchObject({
+      checks: { process: "ok" },
+      status: "ok",
+    });
     expect(response.headers.get("x-request-id")).toBeTruthy();
+  });
+
+  it("reports readiness when required dependencies are available", async () => {
+    const readyApp = createApiApp({
+      corsOrigins: ["http://localhost:3000"],
+      logger: createLogger({ service: "api", sink: () => {} }),
+      readinessCheck: async () => {},
+    });
+
+    const response = await readyApp.request("/health/ready");
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      checks: { database: "ok" },
+      status: "ok",
+    });
+  });
+
+  it("reports unavailable when a required dependency fails", async () => {
+    const records: LogRecord[] = [];
+    const unavailableApp = createApiApp({
+      corsOrigins: ["http://localhost:3000"],
+      logger: createLogger({
+        service: "api",
+        sink: (record) => records.push(record),
+      }),
+      readinessCheck: async () => {
+        throw new Error("database unavailable");
+      },
+    });
+
+    const response = await unavailableApp.request("/health/ready");
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      checks: { database: "unavailable" },
+      status: "unavailable",
+    });
+    expect(records).toContainEqual(
+      expect.objectContaining({ message: "health.readiness.failed" }),
+    );
   });
 
   it("returns a structured not-found response", async () => {
