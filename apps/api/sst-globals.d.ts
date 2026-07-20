@@ -75,3 +75,10 @@ declare const sst: {
     ) => { url: string };
   };
 };
+
+declare const aws: {
+  cloudwatch: {
+    MetricAlarm: new (name: string, args: Record<string, unknown>) => unknown;
+    Dashboard: new (name: string, args: Record<string, unknown>) => unknown;
+  };
+};

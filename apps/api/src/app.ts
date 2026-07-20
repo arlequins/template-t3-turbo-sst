@@ -1,7 +1,7 @@
 import { db } from "@acme/db-backbone/client";
 import { clientEnv, serverEnv } from "@acme/env";
-import type { Logger } from "@acme/logger";
-import { createLogger } from "@acme/logger";
+import type { ErrorReporter, Logger, Telemetry } from "@acme/logger";
+import { createLogger, createTelemetry, noopErrorReporter } from "@acme/logger";
 import { AppRouter, createTRPCContext, TRPC_HTTP_PATH } from "@acme/trpc";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { sql } from "drizzle-orm";
@@ -21,7 +21,12 @@ export type CreateApiAppOptions = {
   corsOrigins?: string[];
   logger?: Logger;
   readinessCheck?: () => Promise<void>;
+  externalReadinessChecks?: Record<string, () => Promise<void>>;
+  errorReporter?: ErrorReporter;
+  telemetry?: Telemetry;
 };
+
+let coldStart = true;
 
 async function checkDatabaseReadiness(): Promise<void> {
   await db.execute(sql`select 1`);
@@ -39,13 +44,14 @@ function configuredCorsOrigins(): string[] {
 function handleTrpcRequest(
   request: Request,
   logger: Logger,
+  telemetry: Telemetry,
 ): Promise<Response> {
   return fetchRequestHandler({
     endpoint: TRPC_HTTP_PATH,
     req: request,
     router: AppRouter,
     createContext: () =>
-      createTRPCContext({ headers: request.headers, logger }),
+      createTRPCContext({ headers: request.headers, logger, telemetry }),
     onError({ error, path }) {
       logger.error("trpc.request.failed", {
         error,
@@ -60,6 +66,12 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
   const corsOrigins = options.corsOrigins ?? configuredCorsOrigins();
   const rootLogger = options.logger ?? createLogger({ service: "api" });
   const readinessCheck = options.readinessCheck ?? checkDatabaseReadiness;
+  const externalChecks = options.externalReadinessChecks ?? {};
+  const errorReporter = options.errorReporter ?? noopErrorReporter;
+  const telemetry =
+    options.telemetry ??
+    createTelemetry({ service: "api", metricNamespace: "Template/Api" });
+  const stage = process.env.SST_STAGE ?? "local";
 
   app.use("*", requestId());
   app.use("*", async (context, next) => {
@@ -67,14 +79,27 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
     const logger = rootLogger.child({ requestId: context.get("requestId") });
     context.set("logger", logger);
 
-    await next();
+    await telemetry.trace(
+      "http.request",
+      { "http.method": context.req.method, "http.route": context.req.path },
+      next,
+    );
 
+    const durationMs = Date.now() - startedAt;
     logger.info("http.request.completed", {
-      durationMs: Date.now() - startedAt,
+      durationMs,
       method: context.req.method,
       path: context.req.path,
       status: context.res.status,
     });
+    telemetry.metric("RequestCount", 1, "Count", { stage });
+    telemetry.metric("RequestDuration", durationMs, "Milliseconds", { stage });
+    if (context.res.status >= 500)
+      telemetry.metric("ServerErrorCount", 1, "Count", { stage });
+    if (coldStart) {
+      coldStart = false;
+      telemetry.metric("ColdStart", 1, "Count", { stage });
+    }
   });
   app.use("*", secureHeaders());
   app.use(
@@ -110,6 +135,7 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
   app.get("/health/ready", async (context) => {
     try {
       await readinessCheck();
+      for (const check of Object.values(externalChecks)) await check();
       return context.json({
         status: "ok" as const,
         checks: { database: "ok" as const },
@@ -129,10 +155,10 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
   });
 
   app.all(TRPC_HTTP_PATH, (context) =>
-    handleTrpcRequest(context.req.raw, context.get("logger")),
+    handleTrpcRequest(context.req.raw, context.get("logger"), telemetry),
   );
   app.all(`${TRPC_HTTP_PATH}/*`, (context) =>
-    handleTrpcRequest(context.req.raw, context.get("logger")),
+    handleTrpcRequest(context.req.raw, context.get("logger"), telemetry),
   );
 
   app.notFound((context) =>
@@ -144,6 +170,11 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
 
   app.onError((error, context) => {
     context.get("logger").error("http.request.failed", { error });
+    void errorReporter.report(error, {
+      method: context.req.method,
+      path: context.req.path,
+      requestId: context.get("requestId"),
+    });
     return context.json(
       { error: "Internal Server Error", requestId: context.get("requestId") },
       500,

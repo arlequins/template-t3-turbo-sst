@@ -10,7 +10,7 @@
 import type { Permission } from "@acme/auth";
 import { authApi, hasPermission, provisionSessionUser } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
-import type { Logger } from "@acme/logger";
+import type { Logger, Telemetry } from "@acme/logger";
 import { createPostService } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -34,12 +34,17 @@ import { formatTrpcErrorShape } from "./errors";
 export const createTRPCContext = async (opts: {
   headers: Headers;
   logger: Logger;
+  telemetry: Telemetry;
 }) => {
   const tokenSession = await authApi.getSession({
     headers: opts.headers,
   });
   const session = tokenSession
-    ? await provisionSessionUser(databaseUserProvisioning, tokenSession)
+    ? await opts.telemetry.trace(
+        "db.user.provision",
+        { "db.system": "postgresql" },
+        () => provisionSessionUser(databaseUserProvisioning, tokenSession),
+      )
     : null;
   if (session) {
     opts.logger.info("auth.login.succeeded", {
@@ -51,6 +56,7 @@ export const createTRPCContext = async (opts: {
   return {
     authApi,
     logger: opts.logger,
+    telemetry: opts.telemetry,
     session,
     services: {
       post: createPostService(
@@ -98,7 +104,11 @@ export const createTRPCRouter = t.router;
 const timingMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const start = Date.now();
 
-  const result = await next();
+  const result = await ctx.telemetry.trace(
+    "trpc.procedure",
+    { "trpc.path": path },
+    next,
+  );
 
   ctx.logger.info("trpc.procedure.completed", {
     durationMs: Date.now() - start,

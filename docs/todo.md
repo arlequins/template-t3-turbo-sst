@@ -54,10 +54,10 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Observability
 
-- [ ] Add replaceable OpenTelemetry tracing for HTTP, tRPC, and database operations.
-- [ ] Add CloudWatch metrics, dashboards, alarms, and Lambda cold-start measurements.
-- [ ] Add a replaceable error-reporting adapter.
-- [ ] Support optional external dependency readiness checks and publish an incident runbook.
+- [x] Add replaceable OpenTelemetry tracing for HTTP, tRPC, and database operations.
+- [x] Add CloudWatch metrics, dashboards, alarms, and Lambda cold-start measurements.
+- [x] Add a replaceable error-reporting adapter.
+- [x] Support optional external dependency readiness checks and publish an incident runbook.
 
 ## Test Coverage
 
