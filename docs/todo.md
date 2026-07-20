@@ -32,11 +32,11 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Deployment and Supply Chain
 
-- [ ] Add GitHub Actions AWS OIDC deployment without long-lived access keys.
-- [ ] Add pull-request preview stages and automatic cleanup after merge.
-- [ ] Document production approvals, branch protection, and least-privilege IAM examples.
-- [ ] Add dependency review, CodeQL, secret scanning guidance, SBOM generation, and license checks.
-- [ ] Harden production security headers and Content Security Policy.
+- [x] Add GitHub Actions AWS OIDC deployment without long-lived access keys.
+- [x] Add pull-request preview stages and automatic cleanup after merge.
+- [x] Document production approvals, branch protection, and least-privilege IAM examples.
+- [x] Add dependency review, CodeQL, secret scanning guidance, SBOM generation, and license checks.
+- [x] Harden API security headers and document a deploy-time Content Security Policy for variable web origins.
 
 ## Database Operations
 
