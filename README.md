@@ -112,6 +112,14 @@ pnpm dev:sst
 
 For batch-only local runs, see `pnpm batch:run` or `apps/batch/scripts/dev.ts`.
 
+Validate SST providers, generated types, and deployment configuration without AWS credentials:
+
+```bash
+pnpm test:sst
+```
+
+This does not emulate or deploy AWS infrastructure. See [SST local testing](./docs/sst-local-testing.md) for the authentication-free boundary and the commands that still require an AWS sandbox.
+
 ### End-to-end tests
 
 ```bash

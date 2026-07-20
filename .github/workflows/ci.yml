@@ -61,6 +61,21 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+  sst-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Copy env
+        shell: bash
+        run: cp .env.example .env
+
+      - name: Validate SST without AWS credentials
+        run: pnpm test:sst
+
   test:
     runs-on: ubuntu-latest
     steps:

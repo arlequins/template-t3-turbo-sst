@@ -55,6 +55,7 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm format` / `pnpm format:fix` | Run Biome formatter checks, optionally with fixes.       |
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
 | `pnpm test`                       | Run workspace tests through Turborepo.                   |
+| `pnpm test:sst`                   | Validate SST providers and configs without AWS credentials. |
 | `pnpm test:e2e`                   | Run isolated PostgreSQL and browser E2E tests.            |
 | `pnpm template:init -- --dry-run …` | Preview safe repository and package renaming.             |
 | `pnpm db:start` / `pnpm db:stop`  | Start or stop the local PostgreSQL container.             |

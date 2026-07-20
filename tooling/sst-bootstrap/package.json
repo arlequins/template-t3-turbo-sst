@@ -5,8 +5,9 @@
   "scripts": {
     "env:pull": "node ./scripts/pull-secret-env.mjs",
     "env:push": "node ./scripts/push-secret-env.mjs",
-    "sst:install": "sst install",
-    "typecheck": "tsc --noEmit"
+    "sst:install": "pnpm with-env sst install",
+    "typecheck": "tsc --noEmit",
+    "with-env": "dotenv -e ../../.env --"
   },
   "devDependencies": {
     "@acme/env": "workspace:*",

@@ -48,7 +48,13 @@ describe("template:init", () => {
       "package.json",
       JSON.stringify({
         name: "template-t3-turbo-sst",
-        scripts: { "batch:run": "batch", "dev:sst": "sst", test: "test" },
+        scripts: {
+          "batch:run": "batch",
+          "dev:sst": "sst",
+          "sst:ws": "sst",
+          test: "test",
+          "test:sst": "sst-test",
+        },
       }),
       { name: "app", scope: "@company", preset: "minimal" },
     );

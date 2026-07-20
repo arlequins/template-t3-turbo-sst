@@ -67,6 +67,7 @@ Run common tasks from the repository root through Turborepo.
 | `pnpm lint` / `pnpm lint:fix`     | Biome lint, optionally with automatic fixes.      |
 | `pnpm format` / `pnpm format:fix` | Biome format, optionally with automatic fixes.    |
 | `pnpm typecheck`                  | Run TypeScript checks.                            |
+| `pnpm test:sst`                   | Validate SST providers and configs without AWS credentials. |
 | `pnpm clean`                      | Remove untracked files, including `node_modules`. |
 | `pnpm db:*` / `pnpm sst:ws`       | Database and SST workspace helper scripts.        |
 
