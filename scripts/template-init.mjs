@@ -27,13 +27,14 @@ function sortDependencyKeys(source) {
 }
 
 export function resolveFeatures(options) {
-  if (options.preset === "minimal") return new Set();
   const requested = options.features
     ? options.features
         .split(",")
         .map((feature) => feature.trim())
         .filter(Boolean)
-    : OPTIONAL_FEATURES;
+    : options.preset === "minimal"
+      ? []
+      : OPTIONAL_FEATURES;
   const unknown = requested.filter(
     (feature) => !OPTIONAL_FEATURES.includes(feature),
   );
