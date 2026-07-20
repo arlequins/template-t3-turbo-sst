@@ -21,3 +21,56 @@ This list tracks improvements that make the repository safer and easier to reuse
 - [x] Add structured logging and propagate the Hono request ID through tRPC and service logs.
 - [x] Split health checks into liveness and readiness endpoints, with readiness checking required dependencies such as PostgreSQL.
 - [x] Limit automated dependency merging to compatible patch and minor releases; isolate major updates for TypeScript, Next.js, SST, Drizzle, and authentication libraries.
+
+## Template Qualification
+
+- [x] Generate full and minimal presets in isolated repositories and run install, check, test, typecheck, and build in CI.
+- [ ] Add a scaffold mode that removes unselected feature files and dependencies instead of retaining dormant examples.
+- [x] Fail generated-template validation when the original package scope, project name, or example domain remains.
+- [x] Fail installation early with actionable Node.js and pnpm version guidance.
+- [x] Run template initializer tests on Linux, macOS, and Windows.
+
+## Deployment and Supply Chain
+
+- [ ] Add GitHub Actions AWS OIDC deployment without long-lived access keys.
+- [ ] Add pull-request preview stages and automatic cleanup after merge.
+- [ ] Document production approvals, branch protection, and least-privilege IAM examples.
+- [ ] Add dependency review, CodeQL, secret scanning guidance, SBOM generation, and license checks.
+- [ ] Harden production security headers and Content Security Policy.
+
+## Database Operations
+
+- [ ] Define deployment migration order and prevent concurrent migrations with a PostgreSQL advisory lock.
+- [ ] Add backup and restore scripts with a side-by-side restore verification workflow.
+- [ ] Physically separate production reference seeds from sample data.
+- [ ] Document migration failure recovery and application rollback procedures.
+
+## Authorization
+
+- [ ] Provision an application user on first successful OIDC login.
+- [ ] Add dependency-injected RBAC ports and protected tRPC procedure examples.
+- [ ] Test token expiry, silent-renew failure, and logout propagation.
+- [ ] Add a multi-provider issuer configuration model and authentication audit logs.
+
+## Observability
+
+- [ ] Add replaceable OpenTelemetry tracing for HTTP, tRPC, and database operations.
+- [ ] Add CloudWatch metrics, dashboards, alarms, and Lambda cold-start measurements.
+- [ ] Add a replaceable error-reporting adapter.
+- [ ] Support optional external dependency readiness checks and publish an incident runbook.
+
+## Test Coverage
+
+- [ ] Add AWS sandbox smoke tests for Function URL and API Gateway presets.
+- [ ] Add migration upgrade compatibility tests and tRPC contract regression tests.
+- [ ] Add Playwright accessibility and mobile viewport coverage.
+- [ ] Add baseline authentication and API load tests with flaky-test policy documentation.
+
+## Developer Experience
+
+- [ ] Add Dev Container and Codespaces configuration.
+- [ ] Add generators for applications, packages, and domain modules.
+- [ ] Verify environment schema and example files remain synchronized.
+- [ ] Add a changed-workspace fast-check command.
+- [ ] Add commands to remove and regenerate example CRUD functionality.
+- [ ] Continuously verify the quickstart path from initialization to first deployment.

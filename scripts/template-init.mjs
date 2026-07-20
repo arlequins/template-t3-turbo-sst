@@ -6,6 +6,25 @@ import { fileURLToPath } from "node:url";
 const TEMPLATE_NAME = "template-t3-turbo-sst";
 const TEMPLATE_SCOPE = "@acme";
 const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui"];
+const DEPENDENCY_FIELDS = [
+  "dependencies",
+  "devDependencies",
+  "optionalDependencies",
+  "peerDependencies",
+];
+
+function sortDependencyKeys(source) {
+  const packageJson = JSON.parse(source);
+  for (const field of DEPENDENCY_FIELDS) {
+    if (!packageJson[field]) continue;
+    packageJson[field] = Object.fromEntries(
+      Object.entries(packageJson[field]).sort(([left], [right]) =>
+        left.localeCompare(right),
+      ),
+    );
+  }
+  return `${JSON.stringify(packageJson, undefined, 2)}\n`;
+}
 
 export function resolveFeatures(options) {
   if (options.preset === "minimal") return new Set();
@@ -148,6 +167,16 @@ export function transformContent(relativePath, source, options) {
     if (relativePath === "apps/web/src/auth/status.tsx") {
       output = "export function AuthStatus() {\n  return null;\n}\n";
     }
+    if (relativePath === "apps/web/src/trpc/react.tsx") {
+      output = output
+        .replace('import { useAuth } from "~/auth/provider";\n', "")
+        .replace(/ {2}const \{ user \} = useAuth\(\);\n\n?/, "")
+        .replace(
+          / {12}headers\(\) \{\n {14}const headers = new Headers\(\);\n {14}if \(user\?\.access_token && !user\.expired\) \{\n {16}headers\.set\("Authorization", `Bearer \$\{user\.access_token\}`\);\n {14}\}\n {14}return headers;\n {12}\},/,
+          "            headers: () => new Headers(),",
+        )
+        .replace("    [user],", "    [],");
+    }
   }
 
   if (
@@ -167,6 +196,9 @@ export function transformContent(relativePath, source, options) {
       undefined,
       2,
     )}\n`;
+  }
+  if (/(^|\/)package\.json(?:\.hbs)?$/.test(relativePath)) {
+    output = sortDependencyKeys(output);
   }
   return output;
 }
@@ -223,7 +255,9 @@ if (isCli) {
     );
     for (const file of changed) console.log(`- ${file}`);
     if (!options.dryRun)
-      console.log("Run pnpm install, pnpm check, and pnpm typecheck next.");
+      console.log(
+        "Run pnpm install, pnpm check:fix, pnpm test, and pnpm typecheck next.",
+      );
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error(

@@ -29,7 +29,7 @@ describe("template:init", () => {
     );
   });
 
-  it("supports a minimal preset and independently selected features", () => {
+  it("supports a minimal preset and independently selected features", async () => {
     assert.deepEqual([...resolveFeatures({ preset: "minimal" })], []);
     assert.deepEqual(
       [...resolveFeatures({ features: "auth,sst" })],
@@ -59,6 +59,32 @@ describe("template:init", () => {
       { name: "app", scope: "@company", preset: "minimal" },
     );
     assert.deepEqual(JSON.parse(rootPackage).scripts, { test: "test" });
+
+    const scopedPackage = transformContent(
+      "apps/batch/package.json",
+      JSON.stringify({
+        dependencies: {
+          "@acme/env": "workspace:*",
+          "@aws-sdk/client-sfn": "latest",
+        },
+      }),
+      { name: "app", scope: "@company" },
+    );
+    assert.deepEqual(Object.keys(JSON.parse(scopedPackage).dependencies), [
+      "@aws-sdk/client-sfn",
+      "@company/env",
+    ]);
+
+    const trpcProvider = transformContent(
+      "apps/web/src/trpc/react.tsx",
+      await readFile(
+        new URL("../apps/web/src/trpc/react.tsx", import.meta.url),
+        "utf8",
+      ),
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(trpcProvider, /useAuth|access_token|\[user\]/);
+    assert.match(trpcProvider, /headers: \(\) => new Headers\(\)/);
   });
 
   it("previews without writing and then initializes tracked text files", async () => {
