@@ -93,6 +93,8 @@ export function transformContent(relativePath, source, options) {
       delete packageJson.scripts["dev:sst"];
       delete packageJson.scripts["env:pull"];
       delete packageJson.scripts["env:push"];
+      delete packageJson.scripts["sst:ws"];
+      delete packageJson.scripts["test:sst"];
     }
     output = `${JSON.stringify(packageJson, undefined, 2)}\n`;
   }

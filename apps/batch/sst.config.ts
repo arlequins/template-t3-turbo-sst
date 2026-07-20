@@ -1,7 +1,5 @@
 /// <reference path="./sst-globals.d.ts" />
 
-import { serverEnv } from "@acme/env";
-
 function toPascalCase(slug: string): string {
   return slug
     .split(/[-_\s]+/)

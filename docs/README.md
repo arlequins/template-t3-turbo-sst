@@ -10,6 +10,7 @@
 - [AI collaboration convention](conventions/ai.md)
 - [Semantic versioning](semantic-versioning.md)
 - [Application architecture](architecture.md)
+- [SST local testing](sst-local-testing.md)
 - [OpenID Connect authentication](authentication.md)
 - [Template improvement TODO](todo.md)
 

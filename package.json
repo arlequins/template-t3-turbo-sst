@@ -39,6 +39,7 @@
     "ui-add": "turbo run ui-add",
     "sst:ws": "node ./scripts/sst-workspace.mjs",
     "test": "pnpm test:template-init && turbo run test",
+    "test:sst": "node scripts/test-sst.mjs",
     "test:template-init": "node --test scripts/template-init.test.mjs",
     "template:init": "node scripts/template-init.mjs",
     "test:e2e": "node scripts/test-e2e.mjs",
