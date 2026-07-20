@@ -24,6 +24,8 @@ export type RunDrizzleSeedsOptions<TDb> = {
   db: TDb;
   /** Default: `drizzle` schema, `__drizzle_seeds` table. */
   ledger?: DrizzleSeedLedger;
+  /** Paths relative to `scriptDir`. Default: `seeds/reference`. */
+  seedDirectories?: string[];
 };
 
 /**
@@ -39,8 +41,6 @@ export async function runDrizzleSeeds<TDb>(
   const ledger = options.ledger ?? defaultLedger;
 
   const ledgerTable = sql.raw(`"${ledger.schema}"."${ledger.table}"`);
-  const seedsRoot = join(scriptDir, "seeds");
-
   /** Minimal Drizzle `db` / transaction `tx` shape (cast from each package’s client). */
   type DrizzleSeedDb = {
     execute: (query: unknown) => Promise<unknown>;
@@ -73,22 +73,27 @@ export async function runDrizzleSeeds<TDb>(
   }
 
   async function listTsSeeds(): Promise<{ name: string; path: string }[]> {
-    let entries: Dirent[];
-    try {
-      entries = await readdir(seedsRoot, { withFileTypes: true });
-    } catch (e: unknown) {
-      const code =
-        e && typeof e === "object" && "code" in e ? e.code : undefined;
-      if (code === "ENOENT") return [];
-      throw e;
-    }
-
     const out: { name: string; path: string }[] = [];
-    for (const e of entries) {
-      if (!e.isFile() || e.name.startsWith("_") || !e.name.endsWith(".ts")) {
-        continue;
+    for (const directory of options.seedDirectories ?? ["seeds/reference"]) {
+      const directoryPath = join(scriptDir, directory);
+      let entries: Dirent[];
+      try {
+        entries = await readdir(directoryPath, { withFileTypes: true });
+      } catch (e: unknown) {
+        const code =
+          e && typeof e === "object" && "code" in e ? e.code : undefined;
+        if (code === "ENOENT") continue;
+        throw e;
       }
-      out.push({ name: e.name, path: join(seedsRoot, e.name) });
+      for (const e of entries) {
+        if (!e.isFile() || e.name.startsWith("_") || !e.name.endsWith(".ts")) {
+          continue;
+        }
+        out.push({
+          name: `${directory}/${e.name}`,
+          path: join(directoryPath, e.name),
+        });
+      }
     }
     return out.sort((a, b) => a.name.localeCompare(b.name, "en"));
   }
@@ -100,7 +105,7 @@ export async function runDrizzleSeeds<TDb>(
 
   const files = await listTsSeeds();
   if (files.length === 0) {
-    console.log(`No .ts files under ${seedsRoot}.`);
+    console.log("No seed files selected.");
     return;
   }
 

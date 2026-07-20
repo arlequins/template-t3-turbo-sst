@@ -5,7 +5,7 @@
 /// <reference types="node" />
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-
+import { serverEnv } from "@acme/env";
 import { runDrizzleSeeds } from "@acme/shared/seed";
 
 import { closeDatabasePool, db } from "../src/client";
@@ -13,7 +13,9 @@ import { closeDatabasePool, db } from "../src/client";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 try {
-  await runDrizzleSeeds({ scriptDir: __dirname, db });
+  const seedDirectories = ["seeds/reference"];
+  if (serverEnv.SEED_SAMPLE_DATA) seedDirectories.push("seeds/sample");
+  await runDrizzleSeeds({ scriptDir: __dirname, db, seedDirectories });
 } finally {
   await closeDatabasePool();
 }
