@@ -112,6 +112,7 @@
     "VERCEL_ENV",
     "VERCEL_URL",
     "npm_lifecycle_event",
+    "npm_config_user_agent",
     "SECRET_NAME",
     "SECRETS_MANAGER_PLAIN_KEY",
     "SSM_ENV_PATH",

@@ -16,6 +16,36 @@ env:
   HUSKY: "0"
 
 jobs:
+  template-portability:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Test runtime and template initializer
+        run: pnpm test:runtime && pnpm test:template-init
+
+  template-output:
+    strategy:
+      matrix:
+        preset: [full, minimal]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Qualify generated preset
+        run: pnpm test:template-output ${{ matrix.preset }}
+
   lint:
     runs-on: ubuntu-latest
     steps:
