@@ -79,6 +79,7 @@ export function pathsToPrune(options) {
       "packages/trpc/src/adaptors/auth-user.ts",
       "packages/trpc/src/router/auth.ts",
       "playwright.config.ts",
+      "tests/e2e/accessibility.test.ts",
       "tests/e2e/auth.test.ts",
       "tooling/oidc-mock",
     );
@@ -121,7 +122,10 @@ function prunePackageJson(relativePath, source, options) {
 
   if (!features.has("auth")) {
     if (relativePath === "package.json") {
-      removeDependencies(packageJson, ["@playwright/test"]);
+      removeDependencies(packageJson, [
+        "@axe-core/playwright",
+        "@playwright/test",
+      ]);
       removeScripts(packageJson, ["test:e2e", "test:e2e:headed"]);
     }
     if (relativePath === "apps/api/package.json") {
@@ -251,6 +255,14 @@ export function transformContent(relativePath, source, options) {
       output = output
         .replace('import { authRouter } from "./router/auth";\n', "")
         .replace("  auth: authRouter,\n", "");
+    }
+    if (relativePath === "packages/trpc/src/contract.test.ts") {
+      output = output
+        .replace('["auth", "post"]', '["post"]')
+        .replace(
+          '    expect(procedureNames(AppRouter._def.record.auth)).toEqual(["me"]);\n',
+          "",
+        );
     }
     if (relativePath === "packages/trpc/src/router/post.ts") {
       output = output

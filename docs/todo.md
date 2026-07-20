@@ -61,10 +61,10 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Test Coverage
 
-- [ ] Add AWS sandbox smoke tests for Function URL and API Gateway presets.
-- [ ] Add migration upgrade compatibility tests and tRPC contract regression tests.
-- [ ] Add Playwright accessibility and mobile viewport coverage.
-- [ ] Add baseline authentication and API load tests with flaky-test policy documentation.
+- [x] Add AWS sandbox smoke tests for Function URL and API Gateway presets.
+- [x] Add migration upgrade compatibility tests and tRPC contract regression tests.
+- [x] Add Playwright accessibility and mobile viewport coverage.
+- [x] Add baseline API load tests and document authentication load-test and flaky-test policies.
 
 ## Developer Experience
 

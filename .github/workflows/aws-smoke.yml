@@ -1,0 +1,34 @@
+name: AWS sandbox smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "31 4 * * 2"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    strategy:
+      matrix:
+        preset: [function-url, api-gateway]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - name: Select sandbox URL
+        id: endpoint
+        env:
+          FUNCTION_URL: ${{ vars.AWS_SMOKE_FUNCTION_URL }}
+          GATEWAY_URL: ${{ vars.AWS_SMOKE_GATEWAY_URL }}
+        run: |
+          if [ "${{ matrix.preset }}" = "function-url" ]; then
+            echo "url=$FUNCTION_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=$GATEWAY_URL" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Smoke test
+        run: node scripts/smoke-api.mjs "${{ steps.endpoint.outputs.url }}"

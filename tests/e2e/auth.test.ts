@@ -3,7 +3,8 @@ import { expect, test } from "@playwright/test";
 test("signs in with PKCE, reaches the protected API, and signs out", async ({
   page,
   request,
-}) => {
+}, testInfo) => {
+  const postTitle = `E2E post ${testInfo.project.name}`;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5100";
   const readiness = await request.get(`${apiUrl}/health/ready`);
   expect(readiness.status()).toBe(200);
@@ -24,10 +25,10 @@ test("signs in with PKCE, reaches the protected API, and signs out", async ({
     "API session: Local Test User",
   );
 
-  await page.getByRole("textbox", { name: "Bug Title" }).fill("E2E post");
+  await page.getByRole("textbox", { name: "Bug Title" }).fill(postTitle);
   await page.getByRole("textbox", { name: "Content" }).fill("Created by E2E");
   await page.getByRole("button", { name: "Create" }).click();
-  const createdPost = page.getByRole("heading", { name: "E2E post" });
+  const createdPost = page.getByRole("heading", { name: postTitle });
   await expect(createdPost).toBeVisible();
   await createdPost
     .locator("../..")
