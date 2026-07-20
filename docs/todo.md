@@ -25,7 +25,7 @@ This list tracks improvements that make the repository safer and easier to reuse
 ## Template Qualification
 
 - [x] Generate full and minimal presets in isolated repositories and run install, check, test, typecheck, and build in CI.
-- [ ] Add a scaffold mode that removes unselected feature files and dependencies instead of retaining dormant examples.
+- [x] Add a scaffold mode that removes unselected feature files and dependencies instead of retaining dormant examples.
 - [x] Fail generated-template validation when the original package scope, project name, or example domain remains.
 - [x] Fail installation early with actionable Node.js and pnpm version guidance.
 - [x] Run template initializer tests on Linux, macOS, and Windows.
