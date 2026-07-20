@@ -26,6 +26,7 @@ export function OidcAuthProvider(props: { children: React.ReactNode }) {
     manager.events.addUserLoaded(onUserLoaded);
     manager.events.addUserUnloaded(onUserUnloaded);
     manager.events.addAccessTokenExpired(onUserUnloaded);
+    manager.events.addSilentRenewError(onUserUnloaded);
 
     void manager
       .getUser()
@@ -36,6 +37,7 @@ export function OidcAuthProvider(props: { children: React.ReactNode }) {
       manager.events.removeUserLoaded(onUserLoaded);
       manager.events.removeUserUnloaded(onUserUnloaded);
       manager.events.removeAccessTokenExpired(onUserUnloaded);
+      manager.events.removeSilentRenewError(onUserUnloaded);
     };
   }, []);
 

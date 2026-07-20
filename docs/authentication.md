@@ -80,3 +80,10 @@ Automatic silent renewal is disabled by default because refresh-token and iframe
 - Read the stable user ID from `ctx.session.user.id`, which maps to the OIDC `sub` claim.
 - Read provider-specific authorization claims from `ctx.session.claims` only through a documented authorization policy.
 - Never send an ID token to the API as an access token.
+# Application users and authorization
+
+After token verification, the API provisions an application user by the stable `(issuer, subject)` pair. Profile claims are synchronized on login, while authorization roles remain application-owned in `auth.user_role`. New users receive the `member` role. Never grant roles directly from untrusted token claims unless a project adds an explicit, provider-specific mapping policy.
+
+Use `permissionProcedure(Permission.X)` for protected tRPC operations. The default policy provides `viewer`, `member`, and `admin` roles through a dependency-injected provisioning port. Authentication success and authorization denial are emitted as structured audit events without tokens.
+
+For multiple identity providers, set `OIDC_PROVIDERS_JSON` to a JSON array of named configurations. The unverified issuer is used only to select a configuration; signature, issuer, audience, expiry, algorithm, and subject are then verified against that configuration.

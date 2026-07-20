@@ -7,5 +7,6 @@ export const authRouter = {
     id: ctx.session.user.id,
     name: ctx.session.user.name,
     email: ctx.session.user.email,
+    roles: ctx.session.user.roles,
   })),
 } satisfies TRPCRouterRecord;

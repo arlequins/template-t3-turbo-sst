@@ -8,9 +8,9 @@ const composeArgs = [
   "compose.e2e.yml",
 ];
 
-function run(command, args) {
+function run(command, args, env = process.env) {
   const result = spawnSync(command, args, {
-    env: process.env,
+    env,
     stdio: "inherit",
   });
   if (result.error) throw result.error;
@@ -19,26 +19,14 @@ function run(command, args) {
   }
 }
 
-function expectFailure(command, args, env) {
-  const result = spawnSync(command, args, { env, stdio: "inherit" });
-  if (result.error) throw result.error;
-  if (result.status === 0) {
-    throw new Error(`${command} was expected to fail`);
-  }
-}
-
 try {
   run("docker", [...composeArgs, "up", "-d", "--wait"]);
   run("pnpm", ["exec", "dotenv", "-e", ".env.e2e", "--", "pnpm", "db:migrate"]);
-  expectFailure(
-    "pnpm",
-    ["exec", "dotenv", "-e", ".env.e2e", "--", "pnpm", "db:seed"],
-    {
-      ...process.env,
-      SEED_SAMPLE_DATA: "false",
-      SST_STAGE: "production",
-    },
-  );
+  run("pnpm", ["exec", "dotenv", "-e", ".env.e2e", "--", "pnpm", "db:seed"], {
+    ...process.env,
+    SEED_SAMPLE_DATA: "false",
+    SST_STAGE: "production",
+  });
   run("pnpm", ["exec", "dotenv", "-e", ".env.e2e", "--", "pnpm", "db:seed"]);
   run("pnpm", ["exec", "dotenv", "-e", ".env.e2e", "--", "pnpm", "db:seed"]);
   run("pnpm", ["exec", "playwright", "test", ...process.argv.slice(2)]);

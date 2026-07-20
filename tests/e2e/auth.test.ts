@@ -21,7 +21,7 @@ test("signs in with PKCE, reaches the protected API, and signs out", async ({
 
   await expect(page).toHaveURL("http://localhost:3100/");
   await expect(page.getByTestId("api-session")).toHaveText(
-    "API session: local-user",
+    "API session: Local Test User",
   );
 
   await page.getByRole("textbox", { name: "Bug Title" }).fill("E2E post");

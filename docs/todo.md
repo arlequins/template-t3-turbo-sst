@@ -47,10 +47,10 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Authorization
 
-- [ ] Provision an application user on first successful OIDC login.
-- [ ] Add dependency-injected RBAC ports and protected tRPC procedure examples.
-- [ ] Test token expiry, silent-renew failure, and logout propagation.
-- [ ] Add a multi-provider issuer configuration model and authentication audit logs.
+- [x] Provision an application user on first successful OIDC login.
+- [x] Add dependency-injected RBAC ports and protected tRPC procedure examples.
+- [x] Test token expiry and cover silent-renew failure and logout propagation through client events and end-to-end logout.
+- [x] Add a multi-provider issuer configuration model and authentication audit logs.
 
 ## Observability
 

@@ -73,6 +73,10 @@ export function pathsToPrune(options) {
       "apps/web/src/auth",
       "apps/web/src/lib/client-auth.ts",
       "packages/auth",
+      "packages/db-backbone/drizzle/0001_auth-users.sql",
+      "packages/db-backbone/drizzle/meta/0001_snapshot.json",
+      "packages/db-backbone/src/schemas/auth.ts",
+      "packages/trpc/src/adaptors/auth-user.ts",
       "packages/trpc/src/router/auth.ts",
       "playwright.config.ts",
       "tests/e2e/auth.test.ts",
@@ -127,7 +131,7 @@ function prunePackageJson(relativePath, source, options) {
       removeDependencies(packageJson, ["oidc-client-ts"]);
     }
     if (relativePath === "packages/trpc/package.json") {
-      removeDependencies(packageJson, [`${options.scope}/auth`]);
+      removeDependencies(packageJson, [`${options.scope}/auth`, "drizzle-orm"]);
     }
   }
 
@@ -222,10 +226,18 @@ export function transformContent(relativePath, source, options) {
   if (!features.has("auth")) {
     if (relativePath === "packages/trpc/src/trpc.ts") {
       output = output
-        .replace(/import \{ authApi \} from "[^"]+\/auth";\n/, "")
+        .replace(/import type \{ Permission \} from "[^"]+\/auth";\n/, "")
         .replace(
-          / {2}const session = await authApi\.getSession\(\{\n {4}headers: opts\.headers,\n {2}\}\);\n/,
+          /import \{ authApi, hasPermission, provisionSessionUser \} from "[^"]+\/auth";\n/,
           "",
+        )
+        .replace(
+          'import { databaseUserProvisioning } from "./adaptors/auth-user";\n',
+          "",
+        )
+        .replace(
+          / {2}const tokenSession = await authApi\.getSession\(\{[\s\S]*? {2}\}\n {2}return \{/,
+          "  return {",
         )
         .replace("    authApi,\n", "")
         .replace("    session,\n", "")
@@ -242,9 +254,18 @@ export function transformContent(relativePath, source, options) {
     }
     if (relativePath === "packages/trpc/src/router/post.ts") {
       output = output
+        .replace(/import \{ Permission \} from "[^"]+\/auth";\n/, "")
+        .replace(
+          'import { permissionProcedure, publicProcedure } from "../trpc";',
+          'import { publicProcedure } from "../trpc";',
+        )
         .replace(
           'import { protectedProcedure, publicProcedure } from "../trpc";',
           'import { publicProcedure } from "../trpc";',
+        )
+        .replaceAll(
+          "permissionProcedure(Permission.POST_WRITE)",
+          "publicProcedure",
         )
         .replaceAll("protectedProcedure", "publicProcedure");
     }
@@ -295,6 +316,22 @@ export function transformContent(relativePath, source, options) {
           / {2}NEXT_PUBLIC_OIDC_AUTHORITY:[\s\S]*? {2}NEXT_PUBLIC_OIDC_SCOPE: clientEnv\.NEXT_PUBLIC_OIDC_SCOPE,\n/,
           "",
         );
+    }
+    if (
+      options.prune &&
+      relativePath === "packages/db-backbone/src/schema.ts"
+    ) {
+      output = output.replace('export * from "./schemas/auth";\n', "");
+    }
+    if (
+      options.prune &&
+      relativePath === "packages/db-backbone/drizzle/meta/_journal.json"
+    ) {
+      const journal = JSON.parse(output);
+      journal.entries = journal.entries.filter(
+        (entry) => entry.tag !== "0001_auth-users",
+      );
+      output = `${JSON.stringify(journal, undefined, 2)}\n`;
     }
   }
 

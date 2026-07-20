@@ -23,7 +23,7 @@ export function getUserManager(): UserManager {
     scope: env.NEXT_PUBLIC_OIDC_SCOPE,
     resource: env.NEXT_PUBLIC_OIDC_RESOURCE,
     automaticSilentRenew: false,
-    monitorSession: false,
+    monitorSession: true,
     stateStore: new WebStorageStateStore({ store: window.sessionStorage }),
     userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   });

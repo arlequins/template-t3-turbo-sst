@@ -7,14 +7,15 @@
  * The pieces you will need to use are documented accordingly near the end
  */
 
-import { authApi } from "@acme/auth";
+import type { Permission } from "@acme/auth";
+import { authApi, hasPermission, provisionSessionUser } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
 import type { Logger } from "@acme/logger";
 import { createPostService } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
-
+import { databaseUserProvisioning } from "./adaptors/auth-user";
 import { formatTrpcErrorShape } from "./errors";
 
 /**
@@ -34,9 +35,19 @@ export const createTRPCContext = async (opts: {
   headers: Headers;
   logger: Logger;
 }) => {
-  const session = await authApi.getSession({
+  const tokenSession = await authApi.getSession({
     headers: opts.headers,
   });
+  const session = tokenSession
+    ? await provisionSessionUser(databaseUserProvisioning, tokenSession)
+    : null;
+  if (session) {
+    opts.logger.info("auth.login.succeeded", {
+      issuer: session.user.issuer,
+      subject: session.user.subject,
+      userId: session.user.id,
+    });
+  }
   return {
     authApi,
     logger: opts.logger,
@@ -128,3 +139,17 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+export function permissionProcedure(permission: Permission) {
+  return protectedProcedure.use(({ ctx, next }) => {
+    if (!hasPermission(ctx.session.user.roles, permission)) {
+      ctx.logger.warn("auth.authorization.denied", {
+        permission,
+        roles: ctx.session.user.roles,
+        userId: ctx.session.user.id,
+      });
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    return next({ ctx });
+  });
+}
