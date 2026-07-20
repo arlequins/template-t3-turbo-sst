@@ -46,6 +46,7 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm install`                    | Install workspace dependencies and run workspace checks. |
 | `pnpm build`                      | Build all workspaces through Turborepo.                  |
 | `pnpm dev`                        | Start development tasks in watch mode.                   |
+| `pnpm dev:local`                  | Start local PostgreSQL, OIDC, API, and web.               |
 | `pnpm dev:next`                   | Start the web app and dependencies in watch mode.        |
 | `pnpm dev:sst`                    | Start web, API, and batch SST development tasks.         |
 | `pnpm check` / `pnpm check:fix`   | Run Biome lint, format, and assist checks.               |
@@ -53,6 +54,8 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm format` / `pnpm format:fix` | Run Biome formatter checks, optionally with fixes.       |
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
 | `pnpm test`                       | Run workspace tests through Turborepo.                   |
+| `pnpm test:e2e`                   | Run isolated PostgreSQL and browser E2E tests.            |
+| `pnpm db:start` / `pnpm db:stop`  | Start or stop the local PostgreSQL container.             |
 | `pnpm db:setup`                   | Apply migrations and then pending seeds.                 |
 | `pnpm db:check`                   | Validate committed Drizzle migration metadata.           |
 | `pnpm turbo gen init`             | Scaffold a new package.                                  |
@@ -77,6 +80,8 @@ This page is a durable context note for AI agents working in this repository.
 - Tests should start with pure shared packages and use Vitest.
 - Database schema changes require committed Drizzle SQL and metadata; applied seed files are immutable.
 - Browser authentication uses Authorization Code + PKCE; APIs validate JWT access tokens against OIDC discovery and JWKS metadata.
+- `@acme/oidc-mock` is development-only and must not be deployed as a production identity provider.
+- E2E tests own an isolated PostgreSQL container and must clean it up after the run.
 
 ## Review Memory
 

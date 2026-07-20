@@ -47,7 +47,12 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
     "*",
     cors({
       origin: corsOrigins,
-      allowHeaders: ["Authorization", "Content-Type", "X-Request-Id"],
+      allowHeaders: [
+        "Authorization",
+        "Content-Type",
+        "Trpc-Accept",
+        "X-Request-Id",
+      ],
       allowMethods: ["GET", "POST", "OPTIONS"],
       exposeHeaders: ["X-Request-Id"],
       maxAge: 86_400,

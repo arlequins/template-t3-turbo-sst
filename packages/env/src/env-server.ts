@@ -31,6 +31,7 @@ export const serverEnv = createEnv({
     DATABASE_PASSWORD: z.string().optional(),
     DATABASE_NAME: z.string().optional(),
     POSTGRES_POOL_MAX: z.string().optional(),
+    DATABASE_SSL_MODE: z.enum(["disable", "require", "verify-full"]).optional(),
     /** OIDC issuer expected in API access tokens. */
     OIDC_ISSUER_URL: z.url().optional(),
     /** OAuth resource-server audience expected in API access tokens. */
@@ -58,6 +59,7 @@ export const serverEnv = createEnv({
     DATABASE_PASSWORD: process.env.DATABASE_PASSWORD,
     DATABASE_NAME: process.env.DATABASE_NAME,
     POSTGRES_POOL_MAX: process.env.POSTGRES_POOL_MAX,
+    DATABASE_SSL_MODE: process.env.DATABASE_SSL_MODE,
     OIDC_ISSUER_URL: process.env.OIDC_ISSUER_URL,
     OIDC_AUDIENCE: process.env.OIDC_AUDIENCE,
     OIDC_JWKS_URI: process.env.OIDC_JWKS_URI,

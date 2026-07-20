@@ -38,12 +38,16 @@ describe("API app", () => {
       headers: {
         Origin: "http://localhost:3000",
         "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "authorization,trpc-accept",
       },
     });
 
     expect(response.status).toBe(204);
     expect(response.headers.get("access-control-allow-origin")).toBe(
       "http://localhost:3000",
+    );
+    expect(response.headers.get("access-control-allow-headers")).toContain(
+      "Trpc-Accept",
     );
   });
 });

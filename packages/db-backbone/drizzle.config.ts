@@ -20,6 +20,7 @@ export default {
     user: dbEnv.user,
     password: dbEnv.password,
     database: dbEnv.database,
+    ssl: dbEnv.sslMode === "disable" ? false : dbEnv.sslMode,
   },
   casing: "snake_case",
   strict: true,

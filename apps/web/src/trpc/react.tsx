@@ -10,11 +10,10 @@ import {
   loggerLink,
 } from "@trpc/client";
 import { createTRPCContext } from "@trpc/tanstack-react-query";
-import { useState } from "react";
+import { useMemo } from "react";
 import SuperJSON from "superjson";
-
+import { useAuth } from "~/auth/provider";
 import { env } from "~/env";
-import { getAccessToken } from "~/lib/client-auth";
 import { createQueryClient } from "./query-client";
 
 let browserQueryClient: QueryClient | undefined;
@@ -41,29 +40,31 @@ function getNodeEnv(): string {
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
+  const { user } = useAuth();
 
-  const [trpcClient] = useState(() =>
-    createTRPCClient<AppRouter>({
-      links: [
-        loggerLink({
-          enabled: (op) =>
-            getNodeEnv() === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
-        }),
-        httpBatchStreamLink({
-          transformer: SuperJSON,
-          url: getTrpcBatchHttpUrl(),
-          async headers() {
-            const headers = new Headers();
-            const token = await getAccessToken();
-            if (token) {
-              headers.set("Authorization", `Bearer ${token}`);
-            }
-            return headers;
-          },
-        }),
-      ],
-    }),
+  const trpcClient = useMemo(
+    () =>
+      createTRPCClient<AppRouter>({
+        links: [
+          loggerLink({
+            enabled: (op) =>
+              getNodeEnv() === "development" ||
+              (op.direction === "down" && op.result instanceof Error),
+          }),
+          httpBatchStreamLink({
+            transformer: SuperJSON,
+            url: getTrpcBatchHttpUrl(),
+            headers() {
+              const headers = new Headers();
+              if (user?.access_token && !user.expired) {
+                headers.set("Authorization", `Bearer ${user.access_token}`);
+              }
+              return headers;
+            },
+          }),
+        ],
+      }),
+    [user],
   );
 
   return (

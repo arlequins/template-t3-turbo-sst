@@ -36,6 +36,7 @@ Then expand to `@acme/env`, `@acme/service`, and `@acme/trpc`.
 - Add `test` and `test:coverage` tasks to `turbo.json`.
 - Run all workspace tests from the root with `pnpm test`.
 - Add a test job to `.github/workflows/ci.yml` and run it in parallel with lint, format, and typecheck jobs.
+- Run Playwright E2E tests in a separate CI job with isolated external dependencies.
 - Do not run tests in pre-commit hooks. Keep pre-commit fast and stop at typecheck.
 
 ## Mocking Examples

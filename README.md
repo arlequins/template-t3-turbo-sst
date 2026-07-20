@@ -21,7 +21,7 @@
 
 ## Requirements
 
-Match the Node and pnpm versions in [`package.json` → `engines`](./package.json).
+Match the Node and pnpm versions in [`package.json` → `engines`](./package.json). Docker is required for the zero-setup local database and E2E tests.
 
 ## Repository layout
 
@@ -50,7 +50,7 @@ Do not add empty folders under `apps/` without a `package.json` (workspace tools
 
 ### 2. Environment
 
-Use a **root** `.env` for the database and shared variables.
+Use a **root** `.env` for the database and shared variables. [`.env.example`](./.env.example) contains a complete localhost configuration.
 
 - **Manual:** copy [`.env.example`](./.env.example) and fill in values.
 - **AWS Secrets Manager:** see comments in [`.env.example`](./.env.example) and use `pnpm env:pull` / `pnpm env:push` ([scripts](tooling/sst-bootstrap/scripts/)).
@@ -61,7 +61,18 @@ Example (adjust secret names to your layout):
 pnpm env:pull -- --secret-name environments --env-target root
 ```
 
-### 3. Database setup
+### 3. Local development
+
+Start PostgreSQL, apply migrations and seeds, then launch the local OIDC provider, Hono API, and Next.js app:
+
+```bash
+cp .env.localhost.example .env.localhost
+pnpm dev:local
+```
+
+Open `http://localhost:3000`. The local OIDC login accepts any non-empty username and password. Stop PostgreSQL with `pnpm db:stop`.
+
+### 4. Database setup
 
 With a valid `.env`, apply committed migrations and then pending seeds:
 
@@ -78,7 +89,7 @@ pnpm db:check
 
 See [`packages/db-backbone/README.md`](./packages/db-backbone/README.md) for the migration workflow and [`packages/shared/README.md`](./packages/shared/README.md) for the seed runner.
 
-### 4. Develop
+### 5. Cloud-connected development
 
 ```bash
 pnpm dev:sst
@@ -86,6 +97,15 @@ pnpm dev:sst
 ```
 
 For batch-only local runs, see `pnpm batch:run` or `apps/batch/scripts/dev.ts`.
+
+### End-to-end tests
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+The E2E runner starts an isolated PostgreSQL 18 container, applies migrations and seeds, starts the local OIDC provider, API, and web app, then verifies PKCE sign-in, protected tRPC CRUD, and sign-out. Test containers and data are removed afterward.
 
 ### Add a UI component
 

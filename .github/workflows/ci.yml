@@ -78,3 +78,17 @@ jobs:
 
       - name: Check migrations
         run: pnpm db:check
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Test browser authentication
+        run: pnpm test:e2e

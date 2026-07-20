@@ -21,18 +21,13 @@ export function getUserManager(): UserManager {
     post_logout_redirect_uri: siteUrl("auth/logout-callback/"),
     response_type: "code",
     scope: env.NEXT_PUBLIC_OIDC_SCOPE,
+    resource: env.NEXT_PUBLIC_OIDC_RESOURCE,
     automaticSilentRenew: false,
     monitorSession: false,
     stateStore: new WebStorageStateStore({ store: window.sessionStorage }),
     userStore: new WebStorageStateStore({ store: window.sessionStorage }),
   });
   return userManager;
-}
-
-export async function getAccessToken(): Promise<string | null> {
-  if (typeof window === "undefined") return null;
-  const user = await getUserManager().getUser();
-  return user && !user.expired ? user.access_token : null;
 }
 
 export function startLogin(returnTo = window.location.pathname): Promise<void> {

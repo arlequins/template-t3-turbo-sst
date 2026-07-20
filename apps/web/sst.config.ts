@@ -39,6 +39,9 @@ export default $config({
         NEXT_PUBLIC_API_URL: clientEnv.NEXT_PUBLIC_API_URL,
         NEXT_PUBLIC_OIDC_AUTHORITY: clientEnv.NEXT_PUBLIC_OIDC_AUTHORITY,
         NEXT_PUBLIC_OIDC_CLIENT_ID: clientEnv.NEXT_PUBLIC_OIDC_CLIENT_ID,
+        ...(clientEnv.NEXT_PUBLIC_OIDC_RESOURCE
+          ? { NEXT_PUBLIC_OIDC_RESOURCE: clientEnv.NEXT_PUBLIC_OIDC_RESOURCE }
+          : {}),
         NEXT_PUBLIC_OIDC_SCOPE: clientEnv.NEXT_PUBLIC_OIDC_SCOPE,
       },
       build: {

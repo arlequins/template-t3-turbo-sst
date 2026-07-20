@@ -19,9 +19,7 @@ const client = postgres({
   max: dbEnv.poolMax,
   idle_timeout: 20,
   connect_timeout: 10,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: dbEnv.sslMode === "disable" ? false : dbEnv.sslMode,
 });
 
 export const db = drizzle({ client, schema, casing: "snake_case" });
