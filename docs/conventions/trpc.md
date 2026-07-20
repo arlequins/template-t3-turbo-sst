@@ -19,24 +19,32 @@ The Hono app owns HTTP concerns. tRPC owns typed API contracts and request middl
 ### Hono
 
 - Mount tRPC through the fetch adapter in `apps/api/src/app.ts`.
-- Keep CORS, request IDs, security headers, health checks, and ordinary HTTP endpoints here.
+- Keep CORS, request IDs, structured request logging, security headers, health checks, and ordinary HTTP endpoints here.
 - Do not place domain behavior or Drizzle queries in Hono handlers.
 
 ### tRPC Context
 
 - Build request-scoped dependencies in `packages/trpc/src/trpc.ts`.
 - Resolve authentication once per request.
+- Pass the request-scoped logger from Hono into tRPC and bind a component name for each service.
 - Expose application operations through `ctx.services`.
 - Keep concrete database construction out of routers.
 
 ```ts
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+  logger: Logger;
+}) => {
   const session = await authApi.getSession({ headers: opts.headers });
 
   return {
+    logger: opts.logger,
     session,
     services: {
-      post: createPostService(db),
+      post: createPostService(
+        db,
+        opts.logger.child({ component: "post-service" }),
+      ),
     },
   };
 };
@@ -62,14 +70,17 @@ export const postRouter = {
 ### Services
 
 - Define service factories in `packages/service`.
-- Pass the database or an explicit port into the factory.
+- Pass the database or an explicit port and a contextual `Logger` into the factory.
 - Keep framework-specific request and response types out of service code.
 - Export factories and types with named exports.
 
 ```ts
-export function createPostService(database: Database) {
+export function createPostService(database: Database, logger: Logger) {
   return {
-    listPosts: () => database.query.Post.findMany(),
+    listPosts: () => {
+      logger.debug("post.list");
+      return database.query.Post.findMany();
+    },
   };
 }
 ```

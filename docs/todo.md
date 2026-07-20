@@ -18,6 +18,6 @@ This list tracks improvements that make the repository safer and easier to reuse
 
 ## Operations
 
-- [ ] Add structured logging and propagate the Hono request ID through tRPC and service logs.
+- [x] Add structured logging and propagate the Hono request ID through tRPC and service logs.
 - [ ] Split health checks into liveness and readiness endpoints, with readiness checking required dependencies such as PostgreSQL.
 - [ ] Limit automated dependency merging to compatible patch and minor releases; isolate major updates for TypeScript, Next.js, SST, Drizzle, and authentication libraries.

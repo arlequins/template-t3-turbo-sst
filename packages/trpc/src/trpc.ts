@@ -9,6 +9,7 @@
 
 import { authApi } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
+import type { Logger } from "@acme/logger";
 import { createPostService } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
@@ -29,15 +30,22 @@ import { formatTrpcErrorShape } from "./errors";
  * @see https://trpc.io/docs/server/context
  */
 
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+export const createTRPCContext = async (opts: {
+  headers: Headers;
+  logger: Logger;
+}) => {
   const session = await authApi.getSession({
     headers: opts.headers,
   });
   return {
     authApi,
+    logger: opts.logger,
     session,
     services: {
-      post: createPostService(db),
+      post: createPostService(
+        db,
+        opts.logger.child({ component: "post-service" }),
+      ),
     },
   };
 };
@@ -76,13 +84,16 @@ export const createTRPCRouter = t.router;
 /**
  * Middleware for lightweight procedure timing.
  */
-const timingMiddleware = t.middleware(async ({ next, path }) => {
+const timingMiddleware = t.middleware(async ({ ctx, next, path }) => {
   const start = Date.now();
 
   const result = await next();
 
-  const end = Date.now();
-  console.log(`[TRPC] ${path} took ${end - start}ms to execute`);
+  ctx.logger.info("trpc.procedure.completed", {
+    durationMs: Date.now() - start,
+    procedure: path,
+    status: result.ok ? "ok" : "error",
+  });
 
   return result;
 });

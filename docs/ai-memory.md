@@ -31,6 +31,7 @@ This page is a durable context note for AI agents working in this repository.
 - `packages/trpc`: tRPC routers, procedures, and server-side tRPC setup.
 - `packages/service`: service-layer business operations.
 - `packages/db-backbone`: Drizzle schema, database client, migrations, and seeds.
+- `packages/logger`: structured server logging and contextual child loggers.
 - `packages/env`: environment variable schemas and loaders.
 - `packages/validators`: shared Zod schemas.
 - `packages/shared`: shared utilities, constants, and seed helpers.

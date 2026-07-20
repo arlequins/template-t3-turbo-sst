@@ -1,5 +1,5 @@
 {
-  "name": "@acme/service",
+  "name": "@acme/logger",
   "private": true,
   "type": "module",
   "exports": {
@@ -17,13 +17,6 @@
     "lint": "biome lint .",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
-  },
-  "dependencies": {
-    "@acme/db-backbone": "workspace:*",
-    "@acme/logger": "workspace:*",
-    "@acme/validators": "workspace:*",
-    "drizzle-orm": "catalog:",
-    "zod": "catalog:"
   },
   "devDependencies": {
     "@acme/tsconfig": "workspace:*",

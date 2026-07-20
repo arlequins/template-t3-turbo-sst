@@ -21,6 +21,7 @@
     "@acme/auth": "workspace:*",
     "@acme/db-backbone": "workspace:*",
     "@acme/env": "workspace:*",
+    "@acme/logger": "workspace:*",
     "@acme/trpc": "workspace:*",
     "@trpc/server": "catalog:",
     "hono": "catalog:"
