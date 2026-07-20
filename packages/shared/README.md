@@ -7,7 +7,8 @@ Small **cross-cutting** helpers used by multiple packages. Keep **domain logic**
 | Subpath             | Contents                                                                                                                                                          |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@acme/shared`      | Re-exports (see [`src/index.ts`](./src/index.ts))                                                                                                                 |
-| `@acme/shared/seed` | [`runDrizzleSeeds`](./src/seed.ts) — discover `seeds/*.ts` next to a caller `scriptDir`, run in order inside transactions, record names in a Drizzle ledger table |
+| `@acme/shared/seed` | [`runDrizzleSeeds`](./src/seed.ts) — discover and run ordered seeds and record their names                                                                         |
+| `@acme/shared/seed-safety` | Pure helpers that guard example data outside local and test environments                                                                                  |
 
 ### `runDrizzleSeeds` (summary)
 

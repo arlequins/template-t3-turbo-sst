@@ -105,7 +105,7 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-The E2E runner starts an isolated PostgreSQL 18 container, applies migrations and seeds, starts the local OIDC provider, API, and web app, then verifies PKCE sign-in, protected tRPC CRUD, and sign-out. Test containers and data are removed afterward.
+The E2E runner starts an isolated PostgreSQL 18 container, verifies that production sample seeding is rejected, applies test seeds twice to check idempotency, starts the local OIDC provider, API, and web app, then verifies PKCE sign-in, protected tRPC CRUD, and sign-out. Test containers and data are removed afterward.
 
 ### Add a UI component
 

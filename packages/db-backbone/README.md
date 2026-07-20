@@ -41,6 +41,7 @@ Deployments should run `pnpm db:migrate` as an explicit release step before star
 - **Entry:** [`scripts/seed.ts`](./scripts/seed.ts) calls `runDrizzleSeeds` from **`@acme/shared/seed`** with `scriptDir` set to this package’s `scripts/` directory.
 - **Files:** add `scripts/seeds/*.ts` (sorted by filename). Each file must **default-export** an async function `( { tx, stage } ) => void` (see [`@acme/types`](../types/README.md)).
 - **`stage`:** `resolveDeployStage()` from `@acme/env` (`production` \| `develop` \| `offline` \| `test`) — branch in TypeScript when SQL alone is not enough.
+- **Sample data safety:** example seeds must call `assertSampleSeedAllowed(rawSstStage(), serverEnv.SEED_SAMPLE_DATA)`. They run automatically only when `SST_STAGE` is exactly `offline` or `test`; set `SEED_SAMPLE_DATA=true` to opt in elsewhere. Reference-data seeds should not use this guard.
 - **Ledger:** applied seeds are recorded in **`drizzle.__drizzle_seeds`** (schema/table overridable via `runDrizzleSeeds` options; see [`packages/shared`](../shared/README.md)).
 - **Idempotency:** a seed filename runs once. Never edit an applied seed; add a new, higher-numbered file instead.
 

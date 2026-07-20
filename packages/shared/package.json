@@ -10,6 +10,10 @@
     "./seed": {
       "types": "./dist/seed.d.ts",
       "default": "./src/seed.ts"
+    },
+    "./seed-safety": {
+      "types": "./dist/seed-safety.d.ts",
+      "default": "./src/seed-safety.ts"
     }
   },
   "license": "MIT",
@@ -19,6 +23,7 @@
     "dev": "tsc",
     "format": "biome format .",
     "lint": "biome lint .",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {
@@ -29,6 +34,7 @@
   "devDependencies": {
     "@acme/tsconfig": "workspace:*",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
