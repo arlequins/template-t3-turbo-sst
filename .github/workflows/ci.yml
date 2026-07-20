@@ -16,6 +16,13 @@ env:
   HUSKY: "0"
 
 jobs:
+  migration-upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./tooling/github/setup
+      - run: pnpm test:migration-upgrade
+
   template-portability:
     strategy:
       matrix:

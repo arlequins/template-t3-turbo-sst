@@ -19,7 +19,9 @@
     "dev": "tsc",
     "format": "biome format .",
     "lint": "biome lint .",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "test": "pnpm with-env vitest run",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@acme/auth": "workspace:*",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@acme/tsconfig": "workspace:*",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }
