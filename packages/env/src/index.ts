@@ -5,6 +5,13 @@
 import { clientEnv } from "./env-client.js";
 import { serverEnv } from "./env-server.js";
 
+export {
+  type ApiDeploymentConfig,
+  type ApiDeploymentInput,
+  ApiDeploymentPreset,
+  type ApiDeploymentPreset as ApiDeploymentPresetType,
+  resolveApiDeploymentConfig,
+} from "./api-deployment.js";
 export { type DatabaseEnv, loadDatabaseEnv } from "./database.js";
 export { clientEnv } from "./env-client.js";
 export {

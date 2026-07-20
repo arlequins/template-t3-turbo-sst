@@ -1,6 +1,6 @@
 /// <reference path="./sst-globals.d.ts" />
 
-/** Hono API deployed as an AWS Lambda Function URL. */
+/** Hono API deployed through the endpoint selected by `API_DEPLOYMENT_PRESET`. */
 export default $config({
   async app(input) {
     const { serverEnv, sstAwsRegion, Stage } = await import("@acme/env");
@@ -21,13 +21,24 @@ export default $config({
     };
   },
   async run() {
-    const { vpcFromEnv, LambdaEnvironment } = await import("@acme/env");
+    const {
+      ApiDeploymentPreset,
+      LambdaEnvironment,
+      resolveApiDeploymentConfig,
+      serverEnv,
+      vpcFromEnv,
+    } = await import("@acme/env");
 
     const vpc = vpcFromEnv();
-
-    const api = new sst.aws.Function("Api", {
+    const deployment = resolveApiDeploymentConfig({
+      customDomain: serverEnv.API_CUSTOM_DOMAIN,
+      preset: serverEnv.API_DEPLOYMENT_PRESET,
+      throttleBurstLimit: serverEnv.API_THROTTLE_BURST_LIMIT,
+      throttleRateLimit: serverEnv.API_THROTTLE_RATE_LIMIT,
+      wafEnabled: serverEnv.API_WAF_ENABLED,
+    });
+    const handler = {
       handler: "src/lambda.handler",
-      url: true,
       ...(vpc
         ? {
             vpc: {
@@ -37,8 +48,41 @@ export default $config({
           }
         : {}),
       environment: LambdaEnvironment,
+    };
+
+    if (deployment.preset === ApiDeploymentPreset.API_GATEWAY) {
+      const api = new sst.aws.ApiGatewayV2("Api", {
+        cors: false,
+        ...(deployment.customDomain ? { domain: deployment.customDomain } : {}),
+        transform: {
+          stage: (args) => {
+            args.defaultRouteSettings = {
+              throttlingBurstLimit: deployment.throttleBurstLimit,
+              throttlingRateLimit: deployment.throttleRateLimit,
+            };
+          },
+        },
+      });
+
+      api.route("$default", handler);
+
+      return { apiUrl: api.url };
+    }
+
+    const router = deployment.useEdgeRouter
+      ? new sst.aws.Router("ApiRouter", {
+          ...(deployment.customDomain
+            ? { domain: deployment.customDomain }
+            : {}),
+          waf: deployment.wafEnabled,
+        })
+      : undefined;
+
+    const api = new sst.aws.Function("Api", {
+      ...handler,
+      url: router ? { router: { instance: router } } : true,
     });
 
-    return { apiUrl: api.url };
+    return { apiUrl: router?.url ?? api.url };
   },
 });

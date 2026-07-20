@@ -26,18 +26,52 @@ declare const $config: (config: {
 
 declare const sst: {
   aws: {
+    ApiGatewayV2: new (
+      name: string,
+      args: {
+        cors?: boolean;
+        domain?: string;
+        transform?: {
+          stage?: (args: {
+            defaultRouteSettings?: {
+              throttlingBurstLimit?: number;
+              throttlingRateLimit?: number;
+            };
+          }) => void;
+        };
+      },
+    ) => {
+      route: (
+        route: string,
+        handler: {
+          handler: string;
+          environment?: Record<string, string>;
+          vpc?: { subnets: string[]; securityGroups: string[] };
+        },
+      ) => unknown;
+      url: string;
+    };
     Function: new (
       name: string,
       args: {
         handler: string;
         environment?: Record<string, string>;
-        url?: boolean;
+        url?:
+          | boolean
+          | { router: { instance: { url: string }; path?: string } };
         vpc?: {
           subnets: string[];
           securityGroups: string[];
         };
         link?: unknown[];
       } & Record<string, unknown>,
+    ) => { url: string };
+    Router: new (
+      name: string,
+      args: {
+        domain?: string;
+        waf?: boolean;
+      },
     ) => { url: string };
   };
 };

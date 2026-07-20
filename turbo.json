@@ -96,7 +96,12 @@
     "OIDC_MOCK_PORT",
     "OIDC_MOCK_ISSUER",
     "API_CORS_ORIGINS",
-    "API_PORT"
+    "API_PORT",
+    "API_DEPLOYMENT_PRESET",
+    "API_CUSTOM_DOMAIN",
+    "API_WAF_ENABLED",
+    "API_THROTTLE_RATE_LIMIT",
+    "API_THROTTLE_BURST_LIMIT"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

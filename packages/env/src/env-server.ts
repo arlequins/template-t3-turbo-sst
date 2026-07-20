@@ -49,6 +49,19 @@ export const serverEnv = createEnv({
     API_CORS_ORIGINS: z.string().optional(),
     /** Local Hono server port. */
     API_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+    /** Public AWS endpoint used by the API deployment. */
+    API_DEPLOYMENT_PRESET: z.enum(["function-url", "api-gateway"]).optional(),
+    /** Optional Route 53 domain managed by SST. */
+    API_CUSTOM_DOMAIN: z.string().min(1).optional(),
+    /** Enable an edge WAF for the Function URL preset. */
+    API_WAF_ENABLED: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
+    /** API Gateway steady-state requests per second. */
+    API_THROTTLE_RATE_LIMIT: z.coerce.number().positive().optional(),
+    /** API Gateway maximum request burst. */
+    API_THROTTLE_BURST_LIMIT: z.coerce.number().int().positive().optional(),
   },
   runtimeEnv: {
     SST_STAGE: process.env.SST_STAGE,
@@ -72,6 +85,11 @@ export const serverEnv = createEnv({
     OIDC_ALLOWED_ALGORITHMS: process.env.OIDC_ALLOWED_ALGORITHMS,
     API_CORS_ORIGINS: process.env.API_CORS_ORIGINS,
     API_PORT: process.env.API_PORT,
+    API_DEPLOYMENT_PRESET: process.env.API_DEPLOYMENT_PRESET,
+    API_CUSTOM_DOMAIN: process.env.API_CUSTOM_DOMAIN,
+    API_WAF_ENABLED: process.env.API_WAF_ENABLED,
+    API_THROTTLE_RATE_LIMIT: process.env.API_THROTTLE_RATE_LIMIT,
+    API_THROTTLE_BURST_LIMIT: process.env.API_THROTTLE_BURST_LIMIT,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,

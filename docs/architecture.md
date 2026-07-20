@@ -56,7 +56,7 @@ The defaults are:
 ## Deployment
 
 - `apps/web/sst.config.ts` deploys the static Next.js export to S3 and CloudFront.
-- `apps/api/sst.config.ts` deploys the same Hono app used locally as an AWS Lambda Function URL.
+- `apps/api/sst.config.ts` deploys the same Hono app through a selectable Lambda Function URL or API Gateway HTTP API preset. See [`apps/api/README.md`](../apps/api/README.md#aws-deployment-presets) for operational tradeoffs.
 - Optional `SUBNET_IDS` and `SECURITY_GROUP_IDS` attach API and batch Lambdas to a VPC for private database access.
 
 After deploying the API, set `NEXT_PUBLIC_API_URL` to its public URL before building and deploying the web app.
