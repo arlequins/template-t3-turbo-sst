@@ -47,7 +47,7 @@ Renovate uses [`.github/renovate.json`](../../.github/renovate.json) and follows
 
 Automerge still depends on CI being present and meaningful. Keep lint, format, typecheck, unit tests, migration checks, and E2E jobs enabled for dependency PRs. Security alerts can require a faster manual update than the routine schedule.
 
-## Dependency Key Order with sherif
+## Dependency Key Order with Sherif
 
 - `sherif` checks dependency key order in each `package.json`.
 - If it fails, run `pnpm dlx sherif@latest --fix` or the repository workspace-fix script.
@@ -88,10 +88,11 @@ Commit message validation belongs in `.husky/commit-msg`; see [Git enforcement](
 Prefer the Turborepo generator over manual scaffolding.
 
 ```bash
-pnpm turbo gen init
+pnpm turbo gen
 ```
 
-The generator should prompt for the package name. The `@acme/` prefix may be added automatically by the generator.
+Select the `package` generator and provide a lowercase kebab-case name. The
+generator reads the active package scope from the initialized workspace.
 
 Generated files should include:
 
@@ -99,15 +100,18 @@ Generated files should include:
 | ---------------------------------- | ------------------------------------------------------------- |
 | `packages/<name>/package.json`     | `private: true`, `type: "module"`, scripts, and dependencies. |
 | `packages/<name>/tsconfig.json`    | Extends `@acme/tsconfig`.                                     |
-| `packages/<name>/src/index.ts`     | Empty or minimal package entry point.                         |
+| `packages/<name>/src/index.ts`     | Minimal named-export package entry point.                     |
 
 After running the generator:
 
-1. Export the public API from `packages/<name>/src/index.ts` with named exports.
-2. Add the `exports` field to `packages/<name>/package.json`.
-3. Add any required tasks to `turbo.json`.
-4. Run `pnpm install` from the root if the generator did not already do it.
-5. Run the workspace lint command to verify package key order.
+1. Add the package's public API with named exports.
+2. Add external dependencies through the pnpm catalog.
+3. Add any package-specific tasks to `turbo.json`.
+4. Run `pnpm install` from the root.
+5. Run `pnpm check`, `pnpm typecheck`, and the package tests.
+
+The `app` and `domain` generators cover runnable applications and complete tRPC
+domain slices. See [Developer Experience](../developer-experience.md#generators).
 
 ## Environment Variables and Secrets
 

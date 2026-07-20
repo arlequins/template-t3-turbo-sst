@@ -2,7 +2,7 @@
 
 SST Console sign-in is optional. This repository can validate application behavior, provider installation, generated SST platform types, and deployment configuration without an SST account or AWS credentials.
 
-## Authentication-free validation
+## Authentication-Free Validation
 
 Copy the example environment if `.env` does not exist, then run:
 
@@ -27,7 +27,7 @@ pnpm sst:ws api install
 pnpm --filter @acme/api typecheck
 ```
 
-## Local application runtime
+## Local Application Runtime
 
 Run the application stack without SST or AWS:
 
@@ -42,7 +42,7 @@ This uses local PostgreSQL, the development OIDC provider, the Node Hono server,
 pnpm test:e2e
 ```
 
-## What still requires AWS
+## What Still Requires AWS
 
 `sst dev`, `sst diff`, and `sst deploy` create, inspect, or update AWS-backed infrastructure and state. They require AWS credentials with the appropriate permissions. Setting `home: "local"` only moves SST state storage to the local machine; it does not emulate Lambda, API Gateway, CloudFront, Step Functions, or other AWS services.
 

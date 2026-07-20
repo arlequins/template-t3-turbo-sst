@@ -33,7 +33,7 @@ This document defines how AI coding agents should work in this repository.
 
 - Run commands from the repository root unless a package-specific command is clearly more appropriate.
 - Use workspace-aware commands such as `pnpm -F @acme/<package> <script>` for targeted checks.
-- When adding a package, prefer `pnpm turbo gen init`.
+- When adding an application, package, or tRPC domain, prefer `pnpm turbo gen`.
 - When adding or changing Turborepo tasks, update `turbo.json` with cacheability and `outputs` decisions.
 
 ## Verification

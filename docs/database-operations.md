@@ -1,6 +1,6 @@
 # Database Operations
 
-## Deployment order
+## Deployment Order
 
 1. Create and validate a custom-format backup.
 2. Run `pnpm db:migrate`. The command waits for a PostgreSQL advisory lock, so only one deployment applies migrations at a time.
@@ -10,7 +10,7 @@
 
 Migrations must remain backward compatible with the currently deployed application. Use expand/migrate/contract changes across separate releases for destructive schema changes.
 
-## Backup and restore verification
+## Backup and Restore Verification
 
 Install PostgreSQL client tools, then run:
 
@@ -21,7 +21,7 @@ pnpm db:restore:verify -- backups/pre-release.dump app_restore_check
 
 The restore command refuses to target `DATABASE_NAME`. Inspect the restored database separately, then delete it only after application and data checks pass.
 
-## Migration failure
+## Migration Failure
 
 1. Stop further deployments and retain the failed logs and migration identifier.
 2. Determine whether the migration transaction rolled back. Do not edit the migration journal manually.

@@ -1,6 +1,6 @@
 # Incident Runbook
 
-## Detection and triage
+## Detection and Triage
 
 CloudWatch alarms cover server errors and sustained average latency. The dashboard includes requests, errors, latency, and Lambda cold starts. Set `ALERT_TOPIC_ARN` to route alarms to an owned notification channel.
 
@@ -16,10 +16,10 @@ CloudWatch alarms cover server errors and sustained average latency. The dashboa
 - For authentication incidents, do not weaken issuer, audience, expiry, or signature verification.
 - For database incidents, follow [`database-operations.md`](./database-operations.md) and preserve a forensic backup.
 
-## Recovery and follow-up
+## Recovery and Follow-up
 
 Verify liveness, readiness, a representative authenticated transaction, and alarm recovery. Record timeline, impact, contributing conditions, actions, and owners. Add a regression test or alarm adjustment before closing the incident.
 
-## Integration ports
+## Integration Ports
 
 `@acme/logger` exposes OpenTelemetry-backed `Telemetry` and a replaceable `ErrorReporter`. Projects can register an OpenTelemetry SDK/exporter at process startup and inject a vendor error reporter without changing API or domain code. With no SDK or reporter configured, tracing and reporting safely remain no-op while CloudWatch EMF metrics continue through stdout.

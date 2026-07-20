@@ -61,7 +61,7 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm db:start` / `pnpm db:stop`  | Start or stop the local PostgreSQL container.             |
 | `pnpm db:setup`                   | Apply migrations and then pending seeds.                 |
 | `pnpm db:check`                   | Validate committed Drizzle migration metadata.           |
-| `pnpm turbo gen init`             | Scaffold a new package.                                  |
+| `pnpm turbo gen`                  | Scaffold an application, package, or tRPC domain.        |
 
 ## Coding Memory
 
