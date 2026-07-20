@@ -56,6 +56,7 @@ This page is a durable context note for AI agents working in this repository.
 | `pnpm typecheck`                  | Run TypeScript checks.                                   |
 | `pnpm test`                       | Run workspace tests through Turborepo.                   |
 | `pnpm test:e2e`                   | Run isolated PostgreSQL and browser E2E tests.            |
+| `pnpm template:init -- --dry-run …` | Preview safe repository and package renaming.             |
 | `pnpm db:start` / `pnpm db:stop`  | Start or stop the local PostgreSQL container.             |
 | `pnpm db:setup`                   | Apply migrations and then pending seeds.                 |
 | `pnpm db:check`                   | Validate committed Drizzle migration metadata.           |

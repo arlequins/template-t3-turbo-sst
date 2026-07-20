@@ -36,6 +36,16 @@ tooling/           tailwind, tsconfig, sst-bootstrap (Secrets ↔ .env)
 ```
 
 - **Package scope:** `@acme/*` — replace with your org when you fork.
+
+Initialize a new repository with a preview first:
+
+```bash
+pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --dry-run
+pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --description "Customer portal"
+pnpm install
+```
+
+The command updates tracked text files, package names, SST application names, repository metadata, and example domains. It refuses to write into a dirty worktree unless `--force` is provided.
 - **Database:** set `DATABASE_*` in the root `.env` (see [`.env.example`](./.env.example)). Not Vercel Postgres by default.
 
 ## Quick start
@@ -150,7 +160,7 @@ See [OpenID Connect Authentication](./docs/authentication.md) for provider regis
 
 ## Before you publish a fork (checklist)
 
-1. Replace **`@acme`** with your org scope everywhere.
+1. Run **`pnpm template:init`** to replace the package scope, project name, SST application names, metadata, and example domains.
 2. Edit **`LICENSE`** (copyright); update **`NOTICE`** if your policy requires it.
 3. Add [`.github/FUNDING.yml`](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/displaying-a-sponsor-button-in-your-repository) if you want a Sponsor button.
 4. Pin dependencies when ready (`pnpm` overrides / lockfile policy).
