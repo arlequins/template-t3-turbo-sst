@@ -70,7 +70,7 @@ cp .env.localhost.example .env.localhost
 pnpm dev:local
 ```
 
-Open `http://localhost:3000`. The local OIDC login accepts any non-empty username and password. Stop PostgreSQL with `pnpm db:stop`.
+Open `http://localhost:3000`. The local OIDC login accepts any non-empty username and password. The template database uses host port `55433` to avoid conflicts with an existing PostgreSQL installation. Stop it with `pnpm db:stop`.
 
 ### 4. Database setup
 
