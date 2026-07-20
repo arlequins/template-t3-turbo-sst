@@ -36,7 +36,7 @@ export function AuthStatus() {
           className="text-muted-foreground text-sm"
           data-testid="api-session"
         >
-          API session: {session.data.id}
+          API session: {session.data.name ?? session.data.id}
         </span>
       )}
       <Button variant="outline" onClick={() => void logout()}>

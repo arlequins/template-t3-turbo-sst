@@ -45,6 +45,8 @@ export const serverEnv = createEnv({
     OIDC_JWKS_URI: z.url().optional(),
     /** Comma-separated asymmetric JWT algorithms accepted by the API. */
     OIDC_ALLOWED_ALGORITHMS: z.string().optional(),
+    /** JSON array of named issuer, audience, JWKS, and algorithm configurations. */
+    OIDC_PROVIDERS_JSON: z.string().optional(),
     /** Comma-separated browser origins accepted by the Hono API. */
     API_CORS_ORIGINS: z.string().optional(),
     /** Local Hono server port. */
@@ -83,6 +85,7 @@ export const serverEnv = createEnv({
     OIDC_AUDIENCE: process.env.OIDC_AUDIENCE,
     OIDC_JWKS_URI: process.env.OIDC_JWKS_URI,
     OIDC_ALLOWED_ALGORITHMS: process.env.OIDC_ALLOWED_ALGORITHMS,
+    OIDC_PROVIDERS_JSON: process.env.OIDC_PROVIDERS_JSON,
     API_CORS_ORIGINS: process.env.API_CORS_ORIGINS,
     API_PORT: process.env.API_PORT,
     API_DEPLOYMENT_PRESET: process.env.API_DEPLOYMENT_PRESET,

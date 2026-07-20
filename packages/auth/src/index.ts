@@ -1,6 +1,6 @@
 import { serverEnv } from "@acme/env/server-env";
 import type { JWTPayload, JWTVerifyGetKey } from "jose";
-import { createRemoteJWKSet, errors, jwtVerify } from "jose";
+import { createRemoteJWKSet, decodeJwt, errors, jwtVerify } from "jose";
 import { z } from "zod/v4";
 
 const supportedAlgorithms = [
@@ -16,7 +16,8 @@ const supportedAlgorithms = [
   "EdDSA",
 ] as const;
 
-const oidcConfigSchema = z.object({
+export const oidcConfigSchema = z.object({
+  id: z.string().min(1).default("default"),
   issuer: z.url(),
   audience: z.array(z.string().min(1)).min(1),
   jwksUri: z.url().optional(),
@@ -40,8 +41,11 @@ export type OidcClaims = JWTPayload & {
 export type AuthSession = {
   user: {
     id: string;
+    issuer: string;
+    subject: string;
     name: string | null;
     email: string | null;
+    roles: import("./authorization").AppRole[];
   };
   claims: OidcClaims;
 };
@@ -61,6 +65,7 @@ function commaSeparatedValues(value: string): string[] {
 
 export function loadOidcConfig(): OidcConfig {
   return oidcConfigSchema.parse({
+    id: "default",
     issuer: serverEnv.OIDC_ISSUER_URL,
     audience: commaSeparatedValues(serverEnv.OIDC_AUDIENCE ?? ""),
     jwksUri: serverEnv.OIDC_JWKS_URI,
@@ -68,6 +73,14 @@ export function loadOidcConfig(): OidcConfig {
       serverEnv.OIDC_ALLOWED_ALGORITHMS ?? "RS256",
     ),
   });
+}
+
+export function loadOidcConfigs(): OidcConfig[] {
+  if (!serverEnv.OIDC_PROVIDERS_JSON) return [loadOidcConfig()];
+  return z
+    .array(oidcConfigSchema)
+    .min(1)
+    .parse(JSON.parse(serverEnv.OIDC_PROVIDERS_JSON));
 }
 
 function discoveryUrl(issuer: string): URL {
@@ -121,8 +134,9 @@ export function createJwtAccessTokenVerifier(
   };
 }
 
-async function createConfiguredVerifier(): Promise<AccessTokenVerifier> {
-  const config = loadOidcConfig();
+async function createConfiguredVerifier(
+  config: OidcConfig,
+): Promise<AccessTokenVerifier> {
   const jwksUri = await discoverJwksUri(config);
   const remoteJwks = createRemoteJWKSet(new URL(jwksUri), {
     cooldownDuration: 30_000,
@@ -131,13 +145,28 @@ async function createConfiguredVerifier(): Promise<AccessTokenVerifier> {
   return createJwtAccessTokenVerifier(config, remoteJwks);
 }
 
-let configuredVerifier: Promise<AccessTokenVerifier> | undefined;
+const configuredVerifiers = new Map<string, Promise<AccessTokenVerifier>>();
 
 async function verifyConfiguredAccessToken(token: string): Promise<OidcClaims> {
-  configuredVerifier ??= createConfiguredVerifier().catch((error: unknown) => {
-    configuredVerifier = undefined;
-    throw error;
-  });
+  const issuer = decodeJwt(token).iss;
+  const config = loadOidcConfigs().find(
+    (candidate) => candidate.issuer === issuer,
+  );
+  if (!config)
+    throw new errors.JWTClaimValidationFailed(
+      "untrusted issuer",
+      {},
+      "iss",
+      "check_failed",
+    );
+  let configuredVerifier = configuredVerifiers.get(config.id);
+  configuredVerifier ??= createConfiguredVerifier(config).catch(
+    (error: unknown) => {
+      configuredVerifiers.delete(config.id);
+      throw error;
+    },
+  );
+  configuredVerifiers.set(config.id, configuredVerifier);
   const verifier = await configuredVerifier;
   return verifier(token);
 }
@@ -190,10 +219,13 @@ export function createOidcAuth(
       return {
         user: {
           id: claims.sub,
+          issuer: claims.iss ?? "",
+          subject: claims.sub,
           name:
             stringClaim(claims, "name") ??
             stringClaim(claims, "preferred_username"),
           email: stringClaim(claims, "email"),
+          roles: [],
         },
         claims,
       };
@@ -202,3 +234,5 @@ export function createOidcAuth(
 }
 
 export const authApi = createOidcAuth();
+
+export * from "./authorization";

@@ -459,6 +459,9 @@ importers:
       '@trpc/server':
         specifier: 'catalog:'
         version: 11.18.0(typescript@5.9.3)
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.2(postgres@3.4.9)
       superjson:
         specifier: 'catalog:'
         version: 2.2.6
