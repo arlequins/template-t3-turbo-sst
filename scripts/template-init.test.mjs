@@ -7,6 +7,8 @@ import { describe, it } from "node:test";
 import {
   initializeTemplate,
   parseArgs,
+  resolveFeatures,
+  transformContent,
   validateOptions,
 } from "./template-init.mjs";
 
@@ -25,6 +27,32 @@ describe("template:init", () => {
     assert.throws(() =>
       validateOptions({ name: "Bad Name", scope: "company" }),
     );
+  });
+
+  it("supports a minimal preset and independently selected features", () => {
+    assert.deepEqual([...resolveFeatures({ preset: "minimal" })], []);
+    assert.deepEqual(
+      [...resolveFeatures({ features: "auth,sst" })],
+      ["auth", "sst"],
+    );
+    assert.throws(() => resolveFeatures({ features: "unknown" }));
+
+    const router = transformContent(
+      "packages/trpc/src/router/post.ts",
+      'import { protectedProcedure, publicProcedure } from "../trpc";\nconst create = protectedProcedure;\n',
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(router, /protectedProcedure/);
+
+    const rootPackage = transformContent(
+      "package.json",
+      JSON.stringify({
+        name: "template-t3-turbo-sst",
+        scripts: { "batch:run": "batch", "dev:sst": "sst", test: "test" },
+      }),
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.deepEqual(JSON.parse(rootPackage).scripts, { test: "test" });
   });
 
   it("previews without writing and then initializes tracked text files", async () => {

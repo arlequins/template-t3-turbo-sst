@@ -1,0 +1,4 @@
+{
+  "preset": "full",
+  "features": ["auth", "batch", "sst", "example-ui"]
+}
