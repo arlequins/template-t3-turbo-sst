@@ -72,6 +72,8 @@ pnpm dev:local
 
 Open `http://localhost:3000`. The local OIDC login accepts any non-empty username and password. The template database uses host port `55433` to avoid conflicts with an existing PostgreSQL installation. Stop it with `pnpm db:stop`.
 
+The API exposes `/health/live` for process liveness and `/health/ready` for PostgreSQL-backed readiness. `/health` remains a compatibility alias for liveness.
+
 ### 4. Database setup
 
 With a valid `.env`, apply committed migrations and then pending seeds:

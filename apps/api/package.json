@@ -24,6 +24,7 @@
     "@acme/logger": "workspace:*",
     "@acme/trpc": "workspace:*",
     "@trpc/server": "catalog:",
+    "drizzle-orm": "catalog:",
     "hono": "catalog:"
   },
   "devDependencies": {

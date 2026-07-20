@@ -47,7 +47,8 @@ The defaults are:
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:5000`
-- Health check: `http://localhost:5000/health`
+- Liveness: `http://localhost:5000/health/live`
+- Readiness (includes PostgreSQL): `http://localhost:5000/health/ready`
 - tRPC: `http://localhost:5000/api/trpc`
 
 `API_PORT` changes the local API port. `API_CORS_ORIGINS` accepts a comma-separated allowlist and defaults to `NEXT_PUBLIC_SITE_URL`.
