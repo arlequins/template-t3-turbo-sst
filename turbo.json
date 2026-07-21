@@ -35,27 +35,34 @@
       "cache": false
     },
     "pull": {
+      "dependsOn": ["^build"],
       "cache": false,
       "interactive": true
     },
     "push": {
+      "dependsOn": ["^build"],
       "cache": false,
       "interactive": true
     },
     "check-migrations": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "migrate": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "seed": {
+      "dependsOn": ["^build"],
       "cache": false
     },
     "studio": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },
     "sst:dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     },

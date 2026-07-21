@@ -46,6 +46,9 @@ function run(args, env = process.env) {
   }
 }
 
+console.log("Building SST configuration dependencies");
+run(["--filter", "@acme/env", "run", "build"], authFreeEnv);
+
 for (const packageName of sstPackages) {
   console.log(`\nSST provider check: ${packageName}`);
   run(["--filter", packageName, "run", "sst:install"], authFreeEnv);
