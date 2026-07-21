@@ -103,7 +103,9 @@ describe("template:init", () => {
           new URL("../apps/web/src/trpc/react.tsx", import.meta.url),
           "utf8",
         )
-      ).replaceAll("\n", "\r\n"),
+      )
+        .replace(/\r\n?/g, "\n")
+        .replaceAll("\n", "\r\n"),
       { name: "app", scope: "@company", preset: "minimal" },
     );
     assert.doesNotMatch(trpcProvider, /useAuth|access_token|\[user\]/);

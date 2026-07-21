@@ -49,6 +49,17 @@ const provider = new oidc.Provider(issuer, {
   },
   features: {
     devInteractions: { enabled: true },
+    rpInitiatedLogout: {
+      enabled: true,
+      async logoutSource(context, form) {
+        const autoSubmitForm = form.replace(
+          "</form>",
+          '<input type="hidden" name="logout" value="yes" /></form>',
+        );
+        context.type = "html";
+        context.body = `${autoSubmitForm}<script>document.getElementById("op.logoutForm").submit();</script>`;
+      },
+    },
     resourceIndicators: {
       enabled: true,
       async defaultResource() {
