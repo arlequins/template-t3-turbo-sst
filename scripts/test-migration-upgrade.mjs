@@ -7,7 +7,12 @@ const project = "template-migration-upgrade";
 const compose = ["compose", "-p", project, "-f", "compose.yml"];
 const env = {
   ...process.env,
+  DATABASE_HOST: "localhost",
+  DATABASE_NAME: "app",
+  DATABASE_PASSWORD: "postgres",
   DATABASE_PORT: "55435",
+  DATABASE_SSL_MODE: "disable",
+  DATABASE_USER: "postgres",
   POSTGRES_HOST_PORT: "55435",
 };
 
