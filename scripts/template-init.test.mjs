@@ -98,10 +98,12 @@ describe("template:init", () => {
 
     const trpcProvider = transformContent(
       "apps/web/src/trpc/react.tsx",
-      await readFile(
-        new URL("../apps/web/src/trpc/react.tsx", import.meta.url),
-        "utf8",
-      ),
+      (
+        await readFile(
+          new URL("../apps/web/src/trpc/react.tsx", import.meta.url),
+          "utf8",
+        )
+      ).replaceAll("\n", "\r\n"),
       { name: "app", scope: "@company", preset: "minimal" },
     );
     assert.doesNotMatch(trpcProvider, /useAuth|access_token|\[user\]/);

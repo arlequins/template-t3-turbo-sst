@@ -197,6 +197,7 @@ export function validateOptions(options) {
 export function transformContent(relativePath, source, options) {
   const features = resolveFeatures(options);
   let output = source
+    .replaceAll("\r\n", "\n")
     .split(TEMPLATE_SCOPE)
     .join(options.scope)
     .split(TEMPLATE_NAME)
