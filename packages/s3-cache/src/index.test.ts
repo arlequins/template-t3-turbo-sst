@@ -140,4 +140,18 @@ describe("createS3Cache", () => {
     ).toBeUndefined();
     expect(double.objects.size).toBe(0);
   });
+
+  it("normalizes long slash-delimited prefixes in linear time", async () => {
+    const double = createClientDouble();
+    const boundary = "/".repeat(100_000);
+    const cache = createS3Cache({
+      bucket: "cache-bucket",
+      client: double.client,
+      prefix: `${boundary}tenant/cache${boundary}`,
+    });
+
+    await cache.set("key", "value");
+
+    expect([...double.objects.keys()][0]).toMatch(/^tenant\/cache\//);
+  });
 });

@@ -58,7 +58,12 @@ type CacheState = Required<
 };
 
 function normalizeSegment(value: string, label: string): string {
-  const normalized = value.trim().replace(/^\/+|\/+$/g, "");
+  const trimmed = value.trim();
+  let start = 0;
+  let end = trimmed.length;
+  while (start < end && trimmed[start] === "/") start += 1;
+  while (end > start && trimmed[end - 1] === "/") end -= 1;
+  const normalized = trimmed.slice(start, end);
   if (!normalized || !/^[a-zA-Z0-9._/-]+$/.test(normalized)) {
     throw new Error(
       `${label} must contain only letters, numbers, ., _, -, or /`,
