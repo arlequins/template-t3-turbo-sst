@@ -29,6 +29,8 @@ local application; the pages below explain design decisions and ongoing work.
   collector configuration.
 - [UI development](ui-development.md): component tests, Storybook, and
   accessibility checks.
+- [S3 cache](s3-cache.md): API and database caching, TTL, invalidation, and
+  local configuration.
 
 ## Deployment and Operations
 

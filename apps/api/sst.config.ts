@@ -39,8 +39,10 @@ export default $config({
       throttleRateLimit: serverEnv.API_THROTTLE_RATE_LIMIT,
       wafEnabled: serverEnv.API_WAF_ENABLED,
     });
+    const cacheBucket = new sst.aws.Bucket("Cache");
     const handler = {
       handler: "src/lambda.handler",
+      link: [cacheBucket],
       ...(vpc
         ? {
             vpc: {
@@ -49,7 +51,12 @@ export default $config({
             },
           }
         : {}),
-      environment: { ...LambdaEnvironment, SST_STAGE: $app.stage },
+      environment: {
+        ...LambdaEnvironment,
+        S3_CACHE_BUCKET: cacheBucket.name,
+        S3_CACHE_PREFIX: `${$app.name}/${$app.stage}`,
+        SST_STAGE: $app.stage,
+      },
     };
     const alarmActions = serverEnv.ALERT_TOPIC_ARN
       ? [serverEnv.ALERT_TOPIC_ARN]

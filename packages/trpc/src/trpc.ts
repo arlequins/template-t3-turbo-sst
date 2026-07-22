@@ -16,6 +16,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
 import { databaseUserProvisioning } from "./adaptors/auth-user";
+import { getPostCache } from "./cache";
 import { formatTrpcErrorShape } from "./errors";
 
 /**
@@ -62,6 +63,7 @@ export const createTRPCContext = async (opts: {
       post: createPostService(
         db,
         opts.logger.child({ component: "post-service" }),
+        { cache: getPostCache() },
       ),
     },
   };
