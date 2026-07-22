@@ -12,5 +12,10 @@ export type ContentRepository = {
   update(
     id: string,
     input: { content: string; title: string },
-  ): Promise<ContentRecord | undefined>;
+    expectedVersion: number,
+  ): Promise<
+    | { status: "conflict" }
+    | { status: "not-found" }
+    | { status: "updated"; value: ContentRecord }
+  >;
 };

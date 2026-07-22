@@ -1,5 +1,17 @@
 # Generic Application Baseline
 
+## Retry Safety
+
+Use `createIdempotencyService` around commands that may be retried by clients,
+queues, or Lambda. Its application port separates key/fingerprint policy from
+the durable `createDrizzleIdempotencyStore` adapter. Completed results replay,
+payload mismatches conflict, failed operations release their claim, and expired
+claims can be acquired again.
+
+Mutable example records include a numeric `version`. Updates must provide the
+version read by the client; the Drizzle adapter increments it atomically and
+returns a conflict when another request has already changed the row.
+
 The example content feature demonstrates a complete application slice without
 turning the template into a blog product. Rename or remove the slice when a
 real domain is introduced.

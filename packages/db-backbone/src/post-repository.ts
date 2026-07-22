@@ -1,5 +1,5 @@
 import type { ContentListInput, ContentRepository } from "@acme/service";
-import { asc, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 
 import type { Database } from "./client";
 import { Post } from "./schema";
@@ -46,13 +46,22 @@ export function createDrizzlePostRepository(
       return created;
     },
 
-    async update(id, input) {
+    async update(id, input, expectedVersion) {
       const [updated] = await database
         .update(Post)
-        .set({ ...input, updatedAt: new Date() })
-        .where(eq(Post.id, id))
+        .set({
+          ...input,
+          updatedAt: new Date(),
+          version: sql`${Post.version} + 1`,
+        })
+        .where(and(eq(Post.id, id), eq(Post.version, expectedVersion)))
         .returning();
-      return updated;
+      if (updated) return { status: "updated", value: updated };
+      const existing = await database.query.Post.findFirst({
+        columns: { id: true },
+        where: eq(Post.id, id),
+      });
+      return existing ? { status: "conflict" } : { status: "not-found" };
     },
 
     async delete(id) {

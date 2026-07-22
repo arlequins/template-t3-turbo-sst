@@ -10,7 +10,7 @@ export type CreatePostInput = z.infer<typeof createPostInputSchema>;
 
 export const updatePostInputSchema = z.object({
   id: z.uuid(),
-  data: createPostInputSchema,
+  data: createPostInputSchema.extend({ version: z.number().int().positive() }),
 });
 
 export const listPostsInputSchema = z.object({

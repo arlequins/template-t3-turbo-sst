@@ -4,6 +4,7 @@ export type ContentRecord = {
   id: string;
   title: string;
   updatedAt: Date | null;
+  version: number;
 };
 
 export type ContentListInput = {

@@ -1,5 +1,5 @@
 import type { ContentListInput } from "../../domain/content";
-import { ResourceNotFoundError } from "../errors";
+import { ResourceConflictError, ResourceNotFoundError } from "../errors";
 import type { ApplicationLogger } from "../ports/application-logger";
 import type { ContentRepository } from "../ports/content-repository";
 
@@ -38,11 +38,21 @@ export function createContentService(deps: {
       return deps.repository.create(input);
     },
 
-    async updateContent(id: string, input: { content: string; title: string }) {
+    async updateContent(
+      id: string,
+      input: { content: string; title: string; version: number },
+    ) {
       deps.logger.info("content.update", { contentId: id });
-      const content = await deps.repository.update(id, input);
-      if (!content) throw new ResourceNotFoundError("Content item not found");
-      return content;
+      const { version, ...changes } = input;
+      const result = await deps.repository.update(id, changes, version);
+      if (result.status === "not-found")
+        throw new ResourceNotFoundError("Content item not found");
+      if (result.status === "conflict")
+        throw new ResourceConflictError(
+          "Content item was updated by another request",
+          { contentId: id, expectedVersion: version },
+        );
+      return result.value;
     },
 
     async deleteContent(id: string) {

@@ -31,8 +31,8 @@ export function createDrizzlePostRepository(
       await cache?.clear();
       return result;
     },
-    async update(id, input) {
-      const result = await repository.update(id, input);
+    async update(id, input, expectedVersion) {
+      const result = await repository.update(id, input, expectedVersion);
       await cache?.clear();
       return result;
     },
