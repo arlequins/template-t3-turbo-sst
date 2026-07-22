@@ -12,6 +12,7 @@ import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { createInMemoryRateLimitAdapter } from "./adaptors/in-memory-rate-limit";
+import { mapApplicationErrorToHttp } from "./application-error";
 
 export type ApiBindings = {
   Variables: {
@@ -254,6 +255,17 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
   );
 
   app.onError((error, context) => {
+    const applicationError = mapApplicationErrorToHttp(error);
+    if (applicationError) {
+      context.get("logger").warn("http.application-error", {
+        code: applicationError.body.error.code,
+        error,
+      });
+      return context.json(
+        { ...applicationError.body, requestId: context.get("requestId") },
+        applicationError.status,
+      );
+    }
     context.get("logger").error("http.request.failed", { error });
     void errorReporter.report(error, {
       method: context.req.method,

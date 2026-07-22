@@ -1,6 +1,14 @@
+export type {
+  ApplicationErrorCode as ApplicationErrorCodeType,
+  ApplicationErrorContract,
+} from "./application/errors";
 export {
+  ApplicationError,
+  ApplicationErrorCode,
   ApplicationInputError,
+  ResourceConflictError,
   ResourceNotFoundError,
+  toApplicationErrorContract,
 } from "./application/errors";
 export type { ApplicationLogger } from "./application/ports/application-logger";
 export type { ContentRepository } from "./application/ports/content-repository";
