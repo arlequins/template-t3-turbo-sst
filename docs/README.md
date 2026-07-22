@@ -23,6 +23,8 @@ local application; the pages below explain design decisions and ongoing work.
   sign-in or AWS credentials.
 - [Test operations](testing-operations.md): test layers, external test
   environments, and flaky-test policy.
+- [Dependency and release automation](automation.md): Renovate policy,
+  automated release PRs, tags, and changelog updates.
 
 ## Deployment and Operations
 

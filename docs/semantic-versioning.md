@@ -36,16 +36,16 @@ For commit format details, see [Git conventions](conventions/git.md#commit-messa
 
 - Version source: root `package.json` and the matching git tag, such as `vX.Y.Z`.
 - Release unit: the whole repository. Internal packages such as `@acme/ui` and `@acme/trpc` are private workspace packages and do not receive independent npm releases unless the repository adopts a separate publication workflow.
-- Changelog: update manually on the release branch when needed, unless automated changelog generation is introduced.
+- Changelog: Release Please updates `CHANGELOG.md` from Conventional Commits.
 
 Release flow:
 
-1. Review commits since the previous tag, for example `git log vX.Y.Z..develop --oneline`.
-2. Decide the next version from the rules above.
-3. Run `git flow release start X.Y.Z`.
-4. Update the root `package.json` version and changelog on `release/X.Y.Z`.
-5. Run `git flow release finish X.Y.Z`.
-6. Push branches and tags with `git push origin main develop --follow-tags`.
+1. Merge Conventional Commits into `main`.
+2. Release Please creates or updates the repository release PR.
+3. Review the computed version and generated changelog under normal CI and
+   branch protection.
+4. Merge the release PR to update `package.json` and `CHANGELOG.md`.
+5. Release Please creates the matching `vX.Y.Z` tag and GitHub Release.
 
 ## Summary
 
@@ -56,7 +56,7 @@ Release flow:
 | Version source    | Root `package.json` and git tag.                                                           |
 | Release unit      | Whole repository by default.                                                               |
 | Publication       | Internal workspace packages remain private unless explicitly configured otherwise.         |
-| Changelog         | Manual unless automation is introduced.                                                    |
-| Release mechanism | git-flow release branches and tags.                                                        |
+| Changelog         | Generated in the Release Please PR.                                                        |
+| Release mechanism | Release Please PR, `vX.Y.Z` tag, and GitHub Release.                                       |
 
 Use `feat`, `fix`, and `BREAKING CHANGE` deliberately so releases communicate the intended impact clearly.
