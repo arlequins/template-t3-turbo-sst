@@ -47,6 +47,8 @@ export const serverEnv = createEnv({
     OIDC_ALLOWED_ALGORITHMS: z.string().optional(),
     /** JSON array of named issuer, audience, JWKS, and algorithm configurations. */
     OIDC_PROVIDERS_JSON: z.string().optional(),
+    /** Comma-separated OIDC `issuer|subject` identities promoted to administrator. */
+    AUTH_BOOTSTRAP_ADMIN_IDENTITIES: z.string().optional(),
     /** Comma-separated browser origins accepted by the Hono API. */
     API_CORS_ORIGINS: z.string().optional(),
     /** Local Hono server port. */
@@ -87,6 +89,8 @@ export const serverEnv = createEnv({
       .enum(["true", "false"])
       .transform((value) => value === "true")
       .optional(),
+    S3_UPLOAD_BUCKET: z.string().min(3).optional(),
+    S3_UPLOAD_PREFIX: z.string().min(1).optional(),
   },
   runtimeEnv: {
     SST_STAGE: process.env.SST_STAGE,
@@ -109,6 +113,8 @@ export const serverEnv = createEnv({
     OIDC_JWKS_URI: process.env.OIDC_JWKS_URI,
     OIDC_ALLOWED_ALGORITHMS: process.env.OIDC_ALLOWED_ALGORITHMS,
     OIDC_PROVIDERS_JSON: process.env.OIDC_PROVIDERS_JSON,
+    AUTH_BOOTSTRAP_ADMIN_IDENTITIES:
+      process.env.AUTH_BOOTSTRAP_ADMIN_IDENTITIES,
     API_CORS_ORIGINS: process.env.API_CORS_ORIGINS,
     API_PORT: process.env.API_PORT,
     API_DEPLOYMENT_PRESET: process.env.API_DEPLOYMENT_PRESET,
@@ -126,6 +132,8 @@ export const serverEnv = createEnv({
     S3_CACHE_TTL_SECONDS: process.env.S3_CACHE_TTL_SECONDS,
     S3_CACHE_ENDPOINT: process.env.S3_CACHE_ENDPOINT,
     S3_CACHE_FORCE_PATH_STYLE: process.env.S3_CACHE_FORCE_PATH_STYLE,
+    S3_UPLOAD_BUCKET: process.env.S3_UPLOAD_BUCKET,
+    S3_UPLOAD_PREFIX: process.env.S3_UPLOAD_PREFIX,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,

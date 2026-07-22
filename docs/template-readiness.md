@@ -23,6 +23,10 @@ its related code, tests, environment variables, and documentation.
 - [x] Prune mode for physically removing unselected modules and dependencies.
 - [x] Application, package, and DIP-aligned tRPC domain generators.
 - [x] Removable and regenerable example CRUD functionality.
+- [x] Generic CRUD UI with search, sorting, pagination, shared states, and
+  permission-aware actions.
+- [x] Provider-neutral file upload port with an optional S3 adapter.
+- [x] Exact OIDC identity based initial-administrator bootstrap.
 
 ## Operations and Security
 

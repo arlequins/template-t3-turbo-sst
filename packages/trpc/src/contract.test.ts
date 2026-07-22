@@ -15,7 +15,13 @@ function procedureNames(router: unknown) {
 
 describe("public tRPC contract", () => {
   it("keeps top-level domain routers stable", () => {
-    expect(procedureNames(AppRouter)).toEqual(["auth", "post"]);
+    expect(procedureNames(AppRouter)).toEqual(["auth", "file", "post"]);
+  });
+
+  it("keeps generic file procedures stable", () => {
+    expect(procedureNames(AppRouter._def.record.file)).toEqual([
+      "createUpload",
+    ]);
   });
 
   it("keeps example procedures stable", () => {
@@ -25,6 +31,7 @@ describe("public tRPC contract", () => {
       "byId",
       "create",
       "delete",
+      "update",
     ]);
   });
 });

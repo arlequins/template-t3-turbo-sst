@@ -10,12 +10,20 @@
 import type { Permission } from "@acme/auth";
 import { authApi, hasPermission, provisionSessionUser } from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
+import { serverEnv } from "@acme/env";
 import type { Logger, Telemetry } from "@acme/logger";
-import { createPostService } from "@acme/service";
+import {
+  ApplicationInputError,
+  createFileUploadService,
+  createPostService,
+  ResourceNotFoundError,
+} from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
-import { databaseUserProvisioning } from "./adaptors/auth-user";
+import { createDatabaseUserProvisioning } from "./adaptors/auth-user";
+import { createDrizzlePostRepository } from "./adaptors/post-repository";
+import { createS3FileUploadAdapter } from "./adaptors/s3-file-upload";
 import { getPostCache } from "./cache";
 import { formatTrpcErrorShape } from "./errors";
 
@@ -44,7 +52,18 @@ export const createTRPCContext = async (opts: {
     ? await opts.telemetry.trace(
         "db.user.provision",
         { "db.system": "postgresql" },
-        () => provisionSessionUser(databaseUserProvisioning, tokenSession),
+        () =>
+          provisionSessionUser(
+            createDatabaseUserProvisioning(db, {
+              bootstrapAdministrators: new Set(
+                (serverEnv.AUTH_BOOTSTRAP_ADMIN_IDENTITIES ?? "")
+                  .split(",")
+                  .map((identity) => identity.trim())
+                  .filter(Boolean),
+              ),
+            }),
+            tokenSession,
+          ),
       )
     : null;
   if (session) {
@@ -60,11 +79,18 @@ export const createTRPCContext = async (opts: {
     telemetry: opts.telemetry,
     session,
     services: {
-      post: createPostService(
-        db,
-        opts.logger.child({ component: "post-service" }),
-        { cache: getPostCache() },
-      ),
+      fileUpload: serverEnv.S3_UPLOAD_BUCKET
+        ? createFileUploadService({
+            storage: createS3FileUploadAdapter({
+              bucket: serverEnv.S3_UPLOAD_BUCKET,
+              prefix: serverEnv.S3_UPLOAD_PREFIX,
+            }),
+          })
+        : undefined,
+      post: createPostService({
+        logger: opts.logger.child({ component: "post-service" }),
+        repository: createDrizzlePostRepository(db, { cache: getPostCache() }),
+      }),
     },
   };
 };
@@ -121,6 +147,20 @@ const timingMiddleware = t.middleware(async ({ ctx, next, path }) => {
   return result;
 });
 
+const applicationErrorMiddleware = t.middleware(async ({ next }) => {
+  try {
+    return await next();
+  } catch (error) {
+    if (error instanceof ApplicationInputError) {
+      throw new TRPCError({ code: "BAD_REQUEST", cause: error });
+    }
+    if (error instanceof ResourceNotFoundError) {
+      throw new TRPCError({ code: "NOT_FOUND", cause: error });
+    }
+    throw error;
+  }
+});
+
 /**
  * Public (unauthed) procedure
  *
@@ -128,7 +168,9 @@ const timingMiddleware = t.middleware(async ({ ctx, next, path }) => {
  * tRPC API. It does not guarantee that a user querying is authorized, but you
  * can still access user session data if they are logged in
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(applicationErrorMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -140,6 +182,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  */
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
+  .use(applicationErrorMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });

@@ -1,0 +1,43 @@
+# Generic Application Baseline
+
+The example content feature demonstrates a complete application slice without
+turning the template into a blog product. Rename or remove the slice when a
+real domain is introduced.
+
+## Dependency Direction
+
+```text
+web -> tRPC router -> application service -> repository/file port
+                                            ^
+                                            |
+                                Drizzle and S3 adapters
+```
+
+- `@acme/service` owns use cases, domain records, and ports. It has no database,
+  cache, HTTP, cloud SDK, or logger implementation dependencies.
+- `@acme/trpc` owns transport routers, adapter decoration, and composition.
+- `@acme/db-backbone` owns Drizzle schemas, migrations, the database client,
+  and Drizzle repository adapters.
+- `apps/web` consumes browser-safe tRPC contracts and applies the same
+  permission vocabulary used by API middleware.
+
+## Included Example
+
+- Content create, read, update, and delete operations.
+- Server-side search, sorting, and offset pagination.
+- Loading, empty, error, retry, and mutation feedback states.
+- Permission-aware create, edit, delete, and upload actions.
+- Optional S3 upload targets through a provider-neutral file storage port.
+- Initial administrator assignment using exact OIDC `issuer|subject` values.
+
+The upload service validates policy before calling its port. The S3 adapter only
+creates a short-lived PUT target; applications remain responsible for linking
+the returned object key to their own aggregate and for applying retention or
+malware-scanning policies appropriate to that domain.
+
+## Administrator Bootstrap
+
+Set `AUTH_BOOTSTRAP_ADMIN_IDENTITIES` to a comma-separated list of exact
+`issuer|subject` identities. The provisioning adapter assigns the administrator
+role idempotently on login. Remove the variable after the intended accounts have
+been provisioned if ongoing automatic promotion is not desired.

@@ -1,77 +1,93 @@
-import { desc, eq } from "@acme/db-backbone";
-
-import type { Database } from "@acme/db-backbone/client";
-import { Post } from "@acme/db-backbone/schema";
-import type { Logger } from "@acme/logger";
-import type { Cache } from "@acme/s3-cache";
-import type { CreatePostInput } from "@acme/validators";
-import type { InferSelectModel } from "drizzle-orm";
-
-type PostRow = InferSelectModel<typeof Post>;
-
-const DEFAULT_LIST_LIMIT = 10;
-const MAX_LIST_LIMIT = 50;
-const POST_CACHE_TTL_SECONDS = 60;
-
-export type PostServiceOptions = {
-  cache?: Cache;
-  cacheTtlSeconds?: number;
+export type PostRecord = {
+  content: string;
+  createdAt: Date;
+  id: string;
+  title: string;
+  updatedAt: Date | null;
 };
 
-/**
- * Post domain: Drizzle access and light business rules (e.g. list limit) in one place.
- */
-export function createPostService(
-  database: Database,
-  logger: Logger,
-  options: PostServiceOptions = {},
-) {
-  const cache = options.cache;
-  const cacheTtlSeconds = options.cacheTtlSeconds ?? POST_CACHE_TTL_SECONDS;
+export type PostListInput = {
+  direction?: "asc" | "desc";
+  page?: number;
+  pageSize?: number;
+  query?: string;
+  sort?: "createdAt" | "title";
+};
 
+export type PostPage = {
+  items: PostRecord[];
+  page: number;
+  pageSize: number;
+  total: number;
+};
+
+export type PostRepository = {
+  create(input: { content: string; title: string }): Promise<PostRecord>;
+  delete(id: string): Promise<boolean>;
+  findById(id: string): Promise<PostRecord | undefined>;
+  list(input: Required<PostListInput>): Promise<PostPage>;
+  update(
+    id: string,
+    input: { content: string; title: string },
+  ): Promise<PostRecord | undefined>;
+};
+
+export type ApplicationLogger = {
+  debug(message: string, attributes?: Record<string, unknown>): void;
+  info(message: string, attributes?: Record<string, unknown>): void;
+};
+
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
+export function createPostService(deps: {
+  logger: ApplicationLogger;
+  repository: PostRepository;
+}) {
   return {
-    listPosts(limit = DEFAULT_LIST_LIMIT): Promise<PostRow[]> {
-      const capped = Math.min(Math.max(1, limit), MAX_LIST_LIMIT);
-      logger.debug("post.list", { limit: capped });
-      const load = () =>
-        database.query.Post.findMany({
-          orderBy: desc(Post.id),
-          limit: capped,
-        });
-      return cache
-        ? cache.getOrSet(`list:${capped}`, load, {
-            ttlSeconds: cacheTtlSeconds,
-          })
-        : load();
+    listPosts(input: PostListInput = {}): Promise<PostPage> {
+      const normalized: Required<PostListInput> = {
+        direction: input.direction ?? "desc",
+        page: Math.max(1, input.page ?? 1),
+        pageSize: Math.min(
+          MAX_PAGE_SIZE,
+          Math.max(1, input.pageSize ?? DEFAULT_PAGE_SIZE),
+        ),
+        query: input.query?.trim() ?? "",
+        sort: input.sort ?? "createdAt",
+      };
+      deps.logger.debug("post.list", normalized);
+      return deps.repository.list(normalized);
     },
 
-    getPostById(id: string): Promise<PostRow | undefined> {
-      logger.debug("post.get", { postId: id });
-      const load = () =>
-        database.query.Post.findFirst({
-          where: eq(Post.id, id),
-        });
-      return cache
-        ? cache.getOrSet(`by-id:${id}`, load, {
-            ttlSeconds: cacheTtlSeconds,
-          })
-        : load();
+    async getPostById(id: string): Promise<PostRecord> {
+      deps.logger.debug("post.get", { postId: id });
+      const post = await deps.repository.findById(id);
+      if (!post) throw new ResourceNotFoundError("Content item not found");
+      return post;
     },
 
-    async createPost(input: CreatePostInput) {
-      logger.info("post.create");
-      const result = await database.insert(Post).values(input);
-      await cache?.clear();
-      return result;
+    createPost(input: { content: string; title: string }) {
+      deps.logger.info("post.create");
+      return deps.repository.create(input);
+    },
+
+    async updatePost(id: string, input: { content: string; title: string }) {
+      deps.logger.info("post.update", { postId: id });
+      const post = await deps.repository.update(id, input);
+      if (!post) throw new ResourceNotFoundError("Content item not found");
+      return post;
     },
 
     async deletePost(id: string) {
-      logger.info("post.delete", { postId: id });
-      const result = await database.delete(Post).where(eq(Post.id, id));
-      await cache?.clear();
-      return result;
+      deps.logger.info("post.delete", { postId: id });
+      const deleted = await deps.repository.delete(id);
+      if (!deleted) throw new ResourceNotFoundError("Content item not found");
+      return { deleted: true } as const;
     },
   };
 }
 
 export type PostService = ReturnType<typeof createPostService>;
+
+import { ResourceNotFoundError } from "./errors";

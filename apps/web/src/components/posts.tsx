@@ -140,7 +140,7 @@ export function PostList() {
     );
   }
 
-  if (!posts.length) {
+  if (!posts.items.length) {
     return (
       <div className="bg-muted text-foreground flex min-h-40 w-full items-center justify-center rounded-lg border p-6">
         <p className="text-xl font-bold">No posts yet</p>
@@ -150,7 +150,7 @@ export function PostList() {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      {posts.map((p) => {
+      {posts.items.map((p) => {
         return <PostCard key={p.id} post={p} />;
       })}
     </div>
@@ -158,7 +158,7 @@ export function PostList() {
 }
 
 export function PostCard(props: {
-  post: RouterOutputs["post"]["all"][number];
+  post: RouterOutputs["post"]["all"]["items"][number];
 }) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
