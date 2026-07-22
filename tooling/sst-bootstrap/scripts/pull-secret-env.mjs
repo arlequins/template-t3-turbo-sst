@@ -4,6 +4,7 @@
  */
 import { writeFileSync } from "node:fs";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import { errorName } from "./lib/safe-output.mjs";
 import {
   applyProfile,
   fetchSecret,
@@ -78,26 +79,24 @@ async function main() {
   try {
     fromRemote = await fetchSecret(client, secretId);
   } catch (e) {
-    console.error("GetSecretValue failed:", e.message ?? e);
+    console.error("GetSecretValue failed:", errorName(e));
     process.exit(1);
   }
 
   if (Object.keys(fromRemote).length === 0) {
-    console.warn(`No keys parsed from secret: ${secretId}`);
+    console.warn("No keys were parsed from Secrets Manager.");
   }
 
   const body = serializeEnv(fromRemote);
   if (args.dryRun) {
-    console.log(body);
+    console.log("Dry run: secret fetched; no file was written.");
     return;
   }
   writeFileSync(outFile, body, "utf8");
-  console.log(
-    `Wrote ${Object.keys(fromRemote).length} key(s) from ${secretId} into ${outFile} (replaced file).`,
-  );
+  console.log("Wrote secret values to the configured environment file.");
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error("Secret pull failed:", errorName(e));
   process.exit(1);
 });

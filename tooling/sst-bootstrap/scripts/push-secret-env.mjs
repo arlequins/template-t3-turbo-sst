@@ -4,6 +4,7 @@
  */
 import { existsSync } from "node:fs";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
+import { errorName } from "./lib/safe-output.mjs";
 import {
   applyProfile,
   fileToSecretString,
@@ -84,8 +85,7 @@ async function main() {
     resolveEnvTargetCli(args),
   );
   if (args.dryRun) {
-    console.log(`SecretId: ${secretId}`);
-    console.log(secretString);
+    console.log("Dry run: secret payload validated; no secret was updated.");
     return;
   }
 
@@ -100,13 +100,13 @@ async function main() {
   try {
     await putSecret(client, secretId, secretString);
   } catch (e) {
-    console.error("CreateSecret/UpdateSecret failed:", e.message ?? e);
+    console.error("CreateSecret/UpdateSecret failed:", errorName(e));
     process.exit(1);
   }
-  console.log(`Updated Secrets Manager secret: ${secretId}`);
+  console.log("Updated the configured Secrets Manager secret.");
 }
 
 main().catch((e) => {
-  console.error(e);
+  console.error("Secret push failed:", errorName(e));
   process.exit(1);
 });
