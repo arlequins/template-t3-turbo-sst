@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { gunzipSync, gzipSync } from "node:zlib";
 
 import {
   DeleteObjectCommand,
@@ -10,13 +11,17 @@ import {
 } from "@aws-sdk/client-s3";
 import { parse, stringify } from "superjson";
 
-export const CacheNamespace = {
-  API: "api",
-  DATABASE: "db",
-} as const;
+export const CacheNamespace = { API: "api", DATABASE: "db" } as const;
 
 export type CacheSetOptions = {
+  staleWhileRevalidateSeconds?: number;
   ttlSeconds?: number;
+};
+
+export type CacheMetric = {
+  durationMs: number;
+  operation: "clear" | "delete" | "get" | "refresh" | "set";
+  outcome: "error" | "hit" | "miss" | "stale" | "success";
 };
 
 export type Cache = {
@@ -35,27 +40,50 @@ export type Cache = {
 export type S3CacheOptions = {
   bucket: string;
   client?: S3Client;
+  compressionThresholdBytes?: number;
+  defaultStaleWhileRevalidateSeconds?: number;
   defaultTtlSeconds?: number;
   errorMode?: "bypass" | "throw";
+  maxObjectBytes?: number;
   now?: () => number;
   onError?: (error: unknown, operation: string) => void;
+  onMetric?: (metric: CacheMetric) => void;
   prefix?: string;
+  random?: () => number;
+  ttlJitterRatio?: number;
 };
 
-type CacheEnvelope = {
+type CacheEnvelopeV1 = { expiresAt: number; value: unknown; version: 1 };
+type CacheEnvelopeV2 = {
+  encoding: "gzip-base64" | "identity";
   expiresAt: number;
-  value: unknown;
-  version: 1;
+  payload: string;
+  staleUntil: number;
+  version: 2;
 };
 
 type CacheState = Required<
-  Pick<S3CacheOptions, "bucket" | "defaultTtlSeconds" | "errorMode" | "now">
+  Pick<
+    S3CacheOptions,
+    | "bucket"
+    | "compressionThresholdBytes"
+    | "defaultStaleWhileRevalidateSeconds"
+    | "defaultTtlSeconds"
+    | "errorMode"
+    | "maxObjectBytes"
+    | "now"
+    | "random"
+    | "ttlJitterRatio"
+  >
 > & {
   client: S3Client;
   inFlight: Map<string, Promise<unknown>>;
   onError?: S3CacheOptions["onError"];
+  onMetric?: S3CacheOptions["onMetric"];
   rootPrefix: string;
 };
+
+type ReadResult<T> = { status: "hit" | "stale"; value: T } | { status: "miss" };
 
 function normalizeSegment(value: string, label: string): string {
   const trimmed = value.trim();
@@ -64,11 +92,10 @@ function normalizeSegment(value: string, label: string): string {
   while (start < end && trimmed[start] === "/") start += 1;
   while (end > start && trimmed[end - 1] === "/") end -= 1;
   const normalized = trimmed.slice(start, end);
-  if (!normalized || !/^[a-zA-Z0-9._/-]+$/.test(normalized)) {
+  if (!normalized || !/^[a-zA-Z0-9._/-]+$/.test(normalized))
     throw new Error(
       `${label} must contain only letters, numbers, ., _, -, or /`,
     );
-  }
   return normalized;
 }
 
@@ -78,20 +105,49 @@ function normalizeBucket(value: string): string {
   return bucket;
 }
 
-function parseEnvelope(source: string): CacheEnvelope {
-  const value: unknown = parse(source);
-  if (
-    !value ||
-    typeof value !== "object" ||
-    !("version" in value) ||
-    value.version !== 1 ||
-    !("expiresAt" in value) ||
-    typeof value.expiresAt !== "number" ||
-    !("value" in value)
-  ) {
+function decodeEnvelope(source: string): {
+  expiresAt: number;
+  staleUntil: number;
+  value: unknown;
+} {
+  const envelope: unknown = parse(source);
+  if (!envelope || typeof envelope !== "object" || !("version" in envelope))
     throw new Error("Invalid S3 cache envelope");
+  if (
+    envelope.version === 1 &&
+    "expiresAt" in envelope &&
+    typeof envelope.expiresAt === "number" &&
+    "value" in envelope
+  ) {
+    const legacy = envelope as CacheEnvelopeV1;
+    return {
+      expiresAt: legacy.expiresAt,
+      staleUntil: legacy.expiresAt,
+      value: legacy.value,
+    };
   }
-  return value as CacheEnvelope;
+  if (
+    envelope.version !== 2 ||
+    !("expiresAt" in envelope) ||
+    typeof envelope.expiresAt !== "number" ||
+    !("staleUntil" in envelope) ||
+    typeof envelope.staleUntil !== "number" ||
+    !("payload" in envelope) ||
+    typeof envelope.payload !== "string" ||
+    !("encoding" in envelope) ||
+    (envelope.encoding !== "identity" && envelope.encoding !== "gzip-base64")
+  )
+    throw new Error("Invalid S3 cache envelope");
+  const current = envelope as CacheEnvelopeV2;
+  const serialized =
+    current.encoding === "gzip-base64"
+      ? gunzipSync(Buffer.from(current.payload, "base64")).toString("utf8")
+      : current.payload;
+  return {
+    expiresAt: current.expiresAt,
+    staleUntil: current.staleUntil,
+    value: parse(serialized),
+  };
 }
 
 function isNotFound(error: unknown): boolean {
@@ -111,60 +167,125 @@ function objectHash(key: string): string {
   return createHash("sha256").update(key).digest("hex");
 }
 
+function positive(value: number, label: string, allowZero = false) {
+  if (!Number.isFinite(value) || (allowZero ? value < 0 : value <= 0))
+    throw new Error(
+      `${label} must be ${allowZero ? "a non-negative" : "a positive"} number`,
+    );
+}
+
 function buildCache(state: CacheState, namespaceParts: string[]): Cache {
   const namespacePrefix = [state.rootPrefix, ...namespaceParts].join("/");
   const objectKey = (key: string) =>
     `${namespacePrefix}/${objectHash(key)}.json`;
+  const metric = (
+    operation: CacheMetric["operation"],
+    outcome: CacheMetric["outcome"],
+    startedAt: number,
+  ) =>
+    state.onMetric?.({
+      durationMs: Math.max(0, state.now() - startedAt),
+      operation,
+      outcome,
+    });
 
   async function recover<T>(
-    operation: string,
+    operation: CacheMetric["operation"],
     fallback: T,
     action: () => Promise<T>,
   ): Promise<T> {
+    const startedAt = state.now();
     try {
-      return await action();
+      const value = await action();
+      if (operation !== "get") metric(operation, "success", startedAt);
+      return value;
     } catch (error) {
       if (isNotFound(error)) return fallback;
       state.onError?.(error, operation);
+      metric(operation, "error", startedAt);
       if (state.errorMode === "throw") throw error;
       return fallback;
     }
   }
 
-  const cache: Cache = {
-    async get<T>(key: string): Promise<T | undefined> {
-      const keyPath = objectKey(key);
-      return recover("get", undefined, async () => {
+  async function read<T>(key: string): Promise<ReadResult<T>> {
+    const startedAt = state.now();
+    const result = await recover<ReadResult<T>>(
+      "get",
+      { status: "miss" },
+      async () => {
         const response = await state.client.send(
-          new GetObjectCommand({ Bucket: state.bucket, Key: keyPath }),
+          new GetObjectCommand({ Bucket: state.bucket, Key: objectKey(key) }),
         );
-        if (!response.Body) return undefined;
-        const envelope = parseEnvelope(await response.Body.transformToString());
-        if (envelope.expiresAt <= state.now()) {
+        if (!response.Body) return { status: "miss" };
+        const envelope = decodeEnvelope(
+          await response.Body.transformToString(),
+        );
+        if (envelope.staleUntil <= state.now()) {
           await cache.delete(key);
-          return undefined;
+          return { status: "miss" };
         }
-        return envelope.value as T;
-      });
-    },
+        return {
+          status: envelope.expiresAt <= state.now() ? "stale" : "hit",
+          value: envelope.value as T,
+        };
+      },
+    );
+    metric("get", result.status, startedAt);
+    return result;
+  }
 
-    async set<T>(
-      key: string,
-      value: T,
-      options: CacheSetOptions = {},
-    ): Promise<void> {
-      if (value === undefined) {
+  async function loadOnce<T>(
+    key: string,
+    loader: () => Promise<T>,
+    options: CacheSetOptions,
+  ): Promise<T> {
+    const keyPath = objectKey(key);
+    const existing = state.inFlight.get(keyPath) as Promise<T> | undefined;
+    if (existing) return existing;
+    const pending = loader().then(async (value) => {
+      if (value !== undefined) await cache.set(key, value, options);
+      return value;
+    });
+    state.inFlight.set(keyPath, pending);
+    try {
+      return await pending;
+    } finally {
+      state.inFlight.delete(keyPath);
+    }
+  }
+
+  const cache: Cache = {
+    async get<T>(key: string) {
+      const result = await read<T>(key);
+      return result.status === "hit" ? result.value : undefined;
+    },
+    async set<T>(key: string, value: T, options: CacheSetOptions = {}) {
+      if (value === undefined)
         throw new Error("Cache value must not be undefined");
-      }
       const ttlSeconds = options.ttlSeconds ?? state.defaultTtlSeconds;
-      if (!Number.isFinite(ttlSeconds) || ttlSeconds <= 0) {
-        throw new Error("Cache TTL must be a positive number of seconds");
-      }
-      const body = stringify({
-        expiresAt: state.now() + ttlSeconds * 1_000,
-        value,
-        version: 1,
-      } satisfies CacheEnvelope);
+      const staleSeconds =
+        options.staleWhileRevalidateSeconds ??
+        state.defaultStaleWhileRevalidateSeconds;
+      positive(ttlSeconds, "Cache TTL");
+      positive(staleSeconds, "Cache stale window", true);
+      const jitter = 1 + (state.random() * 2 - 1) * state.ttlJitterRatio;
+      const effectiveTtlMs = Math.max(1, ttlSeconds * jitter * 1_000);
+      const serialized = stringify(value);
+      const compressed =
+        Buffer.byteLength(serialized) >= state.compressionThresholdBytes;
+      const envelope: CacheEnvelopeV2 = {
+        encoding: compressed ? "gzip-base64" : "identity",
+        expiresAt: state.now() + effectiveTtlMs,
+        payload: compressed
+          ? gzipSync(serialized).toString("base64")
+          : serialized,
+        staleUntil: state.now() + effectiveTtlMs + staleSeconds * 1_000,
+        version: 2,
+      };
+      const body = stringify(envelope);
+      if (Buffer.byteLength(body) > state.maxObjectBytes)
+        throw new Error(`Cache object exceeds ${state.maxObjectBytes} bytes`);
       await recover("set", undefined, async () => {
         await state.client.send(
           new PutObjectCommand({
@@ -177,8 +298,7 @@ function buildCache(state: CacheState, namespaceParts: string[]): Cache {
         );
       });
     },
-
-    async delete(key: string): Promise<void> {
+    async delete(key) {
       await recover("delete", undefined, async () => {
         await state.client.send(
           new DeleteObjectCommand({
@@ -188,8 +308,7 @@ function buildCache(state: CacheState, namespaceParts: string[]): Cache {
         );
       });
     },
-
-    async clear(): Promise<number> {
+    async clear() {
       return recover("clear", 0, async () => {
         let deleted = 0;
         let continuationToken: string | undefined;
@@ -220,57 +339,63 @@ function buildCache(state: CacheState, namespaceParts: string[]): Cache {
         return deleted;
       });
     },
-
     async getOrSet<T>(
       key: string,
       loader: () => Promise<T>,
       options: CacheSetOptions = {},
-    ): Promise<T> {
-      const cached = await cache.get<T>(key);
-      if (cached !== undefined) return cached;
-
-      const keyPath = objectKey(key);
-      const existing = state.inFlight.get(keyPath) as Promise<T> | undefined;
-      if (existing) return existing;
-
-      const pending = loader().then(async (value) => {
-        if (value !== undefined) await cache.set(key, value, options);
-        return value;
-      });
-      state.inFlight.set(keyPath, pending);
-      try {
-        return await pending;
-      } finally {
-        state.inFlight.delete(keyPath);
+    ) {
+      const result = await read<T>(key);
+      if (result.status === "hit") return result.value;
+      if (result.status === "stale") {
+        const startedAt = state.now();
+        void loadOnce(key, loader, options)
+          .then(() => metric("refresh", "success", startedAt))
+          .catch((error) => {
+            state.onError?.(error, "refresh");
+            metric("refresh", "error", startedAt);
+          });
+        return result.value;
       }
+      return loadOnce(key, loader, options);
     },
-
-    namespace(name: string): Cache {
+    namespace(name) {
       return buildCache(state, [
         ...namespaceParts,
         normalizeSegment(name, "Cache namespace"),
       ]);
     },
   };
-
   return cache;
 }
 
 export function createS3Cache(options: S3CacheOptions): Cache {
-  const defaultTtlSeconds = options.defaultTtlSeconds ?? 300;
-  if (!Number.isFinite(defaultTtlSeconds) || defaultTtlSeconds <= 0) {
-    throw new Error("Default cache TTL must be a positive number of seconds");
-  }
   const state: CacheState = {
     bucket: normalizeBucket(options.bucket),
     client: options.client ?? new S3Client({}),
-    defaultTtlSeconds,
+    compressionThresholdBytes: options.compressionThresholdBytes ?? 1_024,
+    defaultStaleWhileRevalidateSeconds:
+      options.defaultStaleWhileRevalidateSeconds ?? 0,
+    defaultTtlSeconds: options.defaultTtlSeconds ?? 300,
     errorMode: options.errorMode ?? "bypass",
     inFlight: new Map(),
+    maxObjectBytes: options.maxObjectBytes ?? 1_000_000,
     now: options.now ?? Date.now,
     onError: options.onError,
+    onMetric: options.onMetric,
+    random: options.random ?? Math.random,
     rootPrefix: normalizeSegment(options.prefix ?? "cache", "Cache prefix"),
+    ttlJitterRatio: options.ttlJitterRatio ?? 0.1,
   };
+  positive(state.defaultTtlSeconds, "Default cache TTL");
+  positive(
+    state.defaultStaleWhileRevalidateSeconds,
+    "Default stale window",
+    true,
+  );
+  positive(state.compressionThresholdBytes, "Compression threshold");
+  positive(state.maxObjectBytes, "Maximum object size");
+  if (state.ttlJitterRatio < 0 || state.ttlJitterRatio > 1)
+    throw new Error("TTL jitter ratio must be between 0 and 1");
   return buildCache(state, []);
 }
 

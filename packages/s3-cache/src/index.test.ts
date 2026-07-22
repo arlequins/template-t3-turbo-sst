@@ -58,6 +58,7 @@ describe("createS3Cache", () => {
       client: double.client,
       now: () => now,
       prefix: "test",
+      ttlJitterRatio: 0,
     });
 
     await cache.set("user@example.com", { id: 1 }, { ttlSeconds: 10 });
@@ -153,5 +154,81 @@ describe("createS3Cache", () => {
     await cache.set("key", "value");
 
     expect([...double.objects.keys()][0]).toMatch(/^tenant\/cache\//);
+  });
+
+  it("serves stale data while refreshing once in the background", async () => {
+    const double = createClientDouble();
+    let now = 1_000;
+    const cache = createS3Cache({
+      bucket: "cache-bucket",
+      client: double.client,
+      now: () => now,
+      ttlJitterRatio: 0,
+    });
+    await cache.set("post:1", "stale", {
+      staleWhileRevalidateSeconds: 10,
+      ttlSeconds: 1,
+    });
+    now = 2_001;
+    let resolveLoader: ((value: string) => void) | undefined;
+    const loader = vi.fn(
+      () =>
+        new Promise<string>((resolve) => {
+          resolveLoader = resolve;
+        }),
+    );
+    expect(await cache.get("post:1")).toBeUndefined();
+    expect(await cache.getOrSet("post:1", loader)).toBe("stale");
+    expect(await cache.getOrSet("post:1", loader)).toBe("stale");
+    expect(loader).toHaveBeenCalledOnce();
+    resolveLoader?.("fresh");
+    await vi.waitFor(async () =>
+      expect(await cache.get("post:1")).toBe("fresh"),
+    );
+  });
+
+  it("compresses large values and enforces the stored object limit", async () => {
+    const double = createClientDouble();
+    const cache = createS3Cache({
+      bucket: "cache-bucket",
+      client: double.client,
+      compressionThresholdBytes: 10,
+      maxObjectBytes: 500,
+    });
+    const value = "compressible".repeat(100);
+    await cache.set("large", value);
+    expect([...double.objects.values()][0]).toContain("gzip-base64");
+    expect(await cache.get("large")).toBe(value);
+    const limited = createS3Cache({
+      bucket: "cache-bucket",
+      client: double.client,
+      compressionThresholdBytes: 10_000,
+      maxObjectBytes: 100,
+    });
+    await expect(limited.set("too-large", value)).rejects.toThrow(
+      "Cache object exceeds 100 bytes",
+    );
+  });
+
+  it("reports cache outcomes and operation latency", async () => {
+    const double = createClientDouble();
+    const onMetric = vi.fn();
+    const cache = createS3Cache({
+      bucket: "cache-bucket",
+      client: double.client,
+      onMetric,
+    });
+    await cache.get("missing");
+    await cache.set("present", "value");
+    await cache.get("present");
+    expect(onMetric).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: "get", outcome: "miss" }),
+    );
+    expect(onMetric).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: "get", outcome: "hit" }),
+    );
+    expect(onMetric).toHaveBeenCalledWith(
+      expect.objectContaining({ operation: "set", outcome: "success" }),
+    );
   });
 });

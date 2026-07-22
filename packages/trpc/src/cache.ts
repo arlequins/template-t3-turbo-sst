@@ -1,5 +1,5 @@
 import { serverEnv } from "@acme/env";
-import { createLogger } from "@acme/logger";
+import { createLogger, createTelemetry } from "@acme/logger";
 import type { Cache } from "@acme/s3-cache";
 import { CacheNamespace, createS3Cache } from "@acme/s3-cache";
 import { S3Client } from "@aws-sdk/client-s3";
@@ -9,6 +9,7 @@ const cacheLogger = createLogger({
   bindings: { component: "s3-cache" },
   service: "api",
 });
+const cacheTelemetry = createTelemetry({ service: "api-cache" });
 
 export function getPostCache(): Cache | undefined {
   if (!serverEnv.S3_CACHE_BUCKET) return undefined;
@@ -25,6 +26,16 @@ export function getPostCache(): Cache | undefined {
     defaultTtlSeconds: serverEnv.S3_CACHE_TTL_SECONDS,
     onError: (error, operation) =>
       cacheLogger.warn("cache.s3.failed", { error, operation }),
+    onMetric: ({ durationMs, operation, outcome }) => {
+      const dimensions = { operation, outcome };
+      cacheTelemetry.metric("CacheOperationCount", 1, "Count", dimensions);
+      cacheTelemetry.metric(
+        "CacheOperationLatency",
+        durationMs,
+        "Milliseconds",
+        dimensions,
+      );
+    },
     prefix: serverEnv.S3_CACHE_PREFIX ?? serverEnv.SST_STAGE ?? "local",
   })
     .namespace(CacheNamespace.DATABASE)

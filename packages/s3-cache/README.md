@@ -1,8 +1,10 @@
 # `@acme/s3-cache`
 
 S3-backed JSON cache for API responses and database query results. It provides
-TTL expiration, hashed object keys, namespace clearing, process-local
-single-flight loading, and configurable fail-open behavior.
+TTL jitter, stale-while-revalidate, gzip compression, object size limits,
+hashed keys, namespace clearing, process-local single-flight loading, metric
+callbacks, and configurable fail-open behavior. Version 1 objects remain
+readable while new writes use the version 2 envelope.
 
 ```ts
 const root = createS3Cache({ bucket: "app-cache", prefix: "production" });
