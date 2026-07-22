@@ -130,7 +130,6 @@ export function pathsToPrune(options) {
       "apps/web/src/components/blog",
       "apps/web/src/components/content",
       "apps/web/src/components/authorization",
-      "apps/web/src/components/posts.tsx",
       "apps/web/src/lib/blog-data.ts",
       "scripts/example-crud.mjs",
     );

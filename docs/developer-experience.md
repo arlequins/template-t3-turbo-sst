@@ -1,5 +1,13 @@
 # Developer Experience
 
+## Dead Code
+
+Run `pnpm lint:dead-code` after removing template features or changing package
+exports. Knip checks unused files and dependencies, unlisted imports, unresolved
+imports, and script binaries. Dynamic batch, seed, infrastructure, generator,
+and load-test entrypoints are declared in `knip.json`; keep exceptions narrow
+when adding another runtime-loaded module.
+
 ## Project Initialization
 
 `pnpm template:init` separates machine-facing identity from user-facing
