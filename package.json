@@ -40,6 +40,8 @@
     "postinstall": "pnpm lint:ws",
     "prepare": "husky",
     "security:licenses": "node scripts/check-licenses.mjs",
+    "storybook": "pnpm --filter @acme/ui storybook",
+    "storybook:build": "pnpm --filter @acme/ui build-storybook",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add",
     "sst:ws": "node ./scripts/sst-workspace.mjs",

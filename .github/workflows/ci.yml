@@ -145,6 +145,17 @@ jobs:
       - name: Check migrations
         run: pnpm db:check
 
+  storybook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Build Storybook
+        run: pnpm storybook:build
+
   e2e:
     runs-on: ubuntu-latest
     steps:

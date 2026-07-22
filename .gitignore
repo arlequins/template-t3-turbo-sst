@@ -33,6 +33,7 @@ apps/expo/android
 
 # production
 build
+storybook-static
 
 # misc
 .DS_Store
