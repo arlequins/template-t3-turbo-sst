@@ -10,6 +10,7 @@ export const TRPC_GENERIC_CLIENT_MESSAGE =
 
 /** Serialized on `data` for clients (TanStack Query / tRPC client). */
 export type TrpcClientErrorFlags = {
+  applicationError?: ReturnType<typeof toApplicationErrorContract>;
   databaseUnavailable: boolean;
   unauthorized: boolean;
 };
@@ -110,6 +111,11 @@ export function formatTrpcErrorShape<
     );
 
   const unauthorized = isUnauthorizedTrpcError(error);
+  const applicationError = toApplicationErrorContract(
+    error && typeof error === "object" && "cause" in error
+      ? (error as { cause: unknown }).cause
+      : error,
+  );
 
   let message = shape.message;
   if (databaseUnavailable) {
@@ -124,8 +130,11 @@ export function formatTrpcErrorShape<
     data: {
       ...shape.data,
       zodError,
+      applicationError,
       databaseUnavailable,
       unauthorized,
     },
   };
 }
+
+import { toApplicationErrorContract } from "@acme/service";

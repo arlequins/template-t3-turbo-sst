@@ -23,6 +23,10 @@ apps/batch -> composition -> application use case    <- provider SDKs
 Dependencies point inward. Domain and application code never imports Drizzle,
 Hono, tRPC, AWS SDKs, environment loaders, or concrete logging packages.
 
+Application failures use stable framework-neutral codes from `@acme/service`.
+Delivery adapters map those contracts to tRPC codes or HTTP status responses;
+unknown infrastructure errors remain private and are reported as internal errors.
+
 ## Workspace Responsibilities
 
 | Workspace | Responsibility |

@@ -9,10 +9,10 @@
 
 import type { Permission } from "@acme/auth";
 import { hasPermission } from "@acme/auth";
-import { ApplicationInputError, ResourceNotFoundError } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
+import { mapApplicationErrorToTrpc } from "./application-error";
 import type { TRPCContext } from "./context";
 import { formatTrpcErrorShape } from "./errors";
 
@@ -86,12 +86,13 @@ const applicationErrorMiddleware = t.middleware(async ({ next }) => {
   try {
     return await next();
   } catch (error) {
-    if (error instanceof ApplicationInputError) {
-      throw new TRPCError({ code: "BAD_REQUEST", cause: error });
-    }
-    if (error instanceof ResourceNotFoundError) {
-      throw new TRPCError({ code: "NOT_FOUND", cause: error });
-    }
+    const mapped = mapApplicationErrorToTrpc(error);
+    if (mapped)
+      throw new TRPCError({
+        code: mapped.code,
+        cause: error,
+        message: mapped.contract.message,
+      });
     throw error;
   }
 });
