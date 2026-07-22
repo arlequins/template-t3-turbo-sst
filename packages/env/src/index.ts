@@ -75,4 +75,13 @@ export const LambdaEnvironment = {
   ...(serverEnv.OTEL_SERVICE_VERSION
     ? { OTEL_SERVICE_VERSION: serverEnv.OTEL_SERVICE_VERSION }
     : {}),
+  ...(serverEnv.S3_CACHE_BUCKET
+    ? { S3_CACHE_BUCKET: serverEnv.S3_CACHE_BUCKET }
+    : {}),
+  ...(serverEnv.S3_CACHE_PREFIX
+    ? { S3_CACHE_PREFIX: serverEnv.S3_CACHE_PREFIX }
+    : {}),
+  ...(serverEnv.S3_CACHE_TTL_SECONDS
+    ? { S3_CACHE_TTL_SECONDS: String(serverEnv.S3_CACHE_TTL_SECONDS) }
+    : {}),
 };

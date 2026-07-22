@@ -56,6 +56,8 @@ its related code, tests, environment variables, and documentation.
 - [x] Required sandbox endpoint variables with manual workflow overrides and
   visible failure when cloud qualification is not configured.
 - [x] Environment schema synchronization and changed-workspace checks.
+- [x] Optional OpenTelemetry export, component testing, Storybook, and an
+  S3-backed application cache are available as reusable building blocks.
 
 ## Adaptation Review
 

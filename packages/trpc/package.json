@@ -26,9 +26,12 @@
   "dependencies": {
     "@acme/auth": "workspace:*",
     "@acme/db-backbone": "workspace:*",
+    "@acme/env": "workspace:*",
     "@acme/logger": "workspace:*",
+    "@acme/s3-cache": "workspace:*",
     "@acme/service": "workspace:*",
     "@acme/validators": "workspace:*",
+    "@aws-sdk/client-s3": "catalog:",
     "@trpc/server": "catalog:",
     "drizzle-orm": "catalog:",
     "superjson": "catalog:",

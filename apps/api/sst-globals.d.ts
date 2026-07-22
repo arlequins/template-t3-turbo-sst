@@ -46,11 +46,13 @@ declare const sst: {
         handler: {
           handler: string;
           environment?: Record<string, string>;
+          link?: unknown[];
           vpc?: { subnets: string[]; securityGroups: string[] };
         },
       ) => unknown;
       url: string;
     };
+    Bucket: new (name: string) => { name: string };
     Function: new (
       name: string,
       args: {

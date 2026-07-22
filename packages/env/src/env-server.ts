@@ -74,6 +74,19 @@ export const serverEnv = createEnv({
     OTEL_SERVICE_NAME: z.string().min(1).optional(),
     /** Deployed application version included in exported resource attributes. */
     OTEL_SERVICE_VERSION: z.string().min(1).optional(),
+    /** S3 bucket used as an application cache. Omit to disable caching. */
+    S3_CACHE_BUCKET: z.string().min(3).optional(),
+    /** Object-key prefix used to isolate stages and applications. */
+    S3_CACHE_PREFIX: z.string().min(1).optional(),
+    /** Default cache lifetime. */
+    S3_CACHE_TTL_SECONDS: z.coerce.number().int().positive().optional(),
+    /** Optional S3-compatible endpoint for local development. */
+    S3_CACHE_ENDPOINT: z.url().optional(),
+    /** Required by many local S3-compatible endpoints. */
+    S3_CACHE_FORCE_PATH_STYLE: z
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
+      .optional(),
   },
   runtimeEnv: {
     SST_STAGE: process.env.SST_STAGE,
@@ -108,6 +121,11 @@ export const serverEnv = createEnv({
     OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
     OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
     OTEL_SERVICE_VERSION: process.env.OTEL_SERVICE_VERSION,
+    S3_CACHE_BUCKET: process.env.S3_CACHE_BUCKET,
+    S3_CACHE_PREFIX: process.env.S3_CACHE_PREFIX,
+    S3_CACHE_TTL_SECONDS: process.env.S3_CACHE_TTL_SECONDS,
+    S3_CACHE_ENDPOINT: process.env.S3_CACHE_ENDPOINT,
+    S3_CACHE_FORCE_PATH_STYLE: process.env.S3_CACHE_FORCE_PATH_STYLE,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,
