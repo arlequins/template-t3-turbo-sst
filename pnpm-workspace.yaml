@@ -34,6 +34,7 @@ catalog:
   drizzle-zod: ^0.8.3
   hono: ^4.12.31
   jsdom: ^29.1.1
+  knip: ^6.27.0
   jose: ^6.2.3
   lucide-react: ^1.25.0
   oidc-client-ts: ^3.5.0

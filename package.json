@@ -38,6 +38,7 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint . --write",
     "lint:ws": "pnpm dlx sherif@latest",
+    "lint:dead-code": "dotenv -e .env.example -- knip",
     "postinstall": "pnpm lint:ws",
     "prepare": "husky",
     "security:licenses": "node scripts/check-licenses.mjs",
@@ -72,6 +73,7 @@
     "@turbo/gen": "^2.10.5",
     "dotenv-cli": "^11.0.0",
     "husky": "^9.1.7",
+    "knip": "catalog:",
     "turbo": "^2.10.5",
     "typescript": "catalog:"
   }

@@ -98,6 +98,9 @@ jobs:
       - name: Biome lint
         run: pnpm lint && pnpm lint:ws
 
+      - name: Dead code and dependencies
+        run: pnpm lint:dead-code
+
   format:
     runs-on: ubuntu-latest
     steps:

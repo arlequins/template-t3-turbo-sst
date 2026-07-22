@@ -18,7 +18,6 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
-    "@acme/auth": "workspace:*",
     "@acme/db-backbone": "workspace:*",
     "@acme/env": "workspace:*",
     "@acme/logger": "workspace:*",
