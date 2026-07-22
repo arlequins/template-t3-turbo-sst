@@ -1,5 +1,19 @@
 # Generic Application Baseline
 
+## Asynchronous Boundaries
+
+Application code publishes events, enqueues jobs, and creates one-time schedules
+through provider-neutral ports from `@acme/service`. `apps/api` includes
+inspectable in-memory adapters for local development and tests, plus adapters
+for EventBridge, SQS, and EventBridge Scheduler. Keep AWS resource names, ARNs,
+and credentials in the composition root; do not pass cloud SDK types into use
+cases.
+
+Every asynchronous message carries an id, name, ISO timestamp, payload, and
+schema version. Use correlation and causation ids when continuing a request or
+message chain. Consumers should combine the message id with the idempotency
+service before applying side effects.
+
 ## Retry Safety
 
 Use `createIdempotencyService` around commands that may be retried by clients,
