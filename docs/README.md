@@ -27,6 +27,8 @@ local application; the pages below explain design decisions and ongoing work.
   automated release PRs, tags, and changelog updates.
 - [Observability](observability.md): structured logs, metrics, traces, and OTLP
   collector configuration.
+- [UI development](ui-development.md): component tests, Storybook, and
+  accessibility checks.
 
 ## Deployment and Operations
 

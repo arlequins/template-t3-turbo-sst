@@ -14,7 +14,8 @@
       "!apps/**/.nitro",
       "!apps/**/.output",
       "!apps/**/.tanstack",
-      "!apps/web/.next"
+      "!apps/web/.next",
+      "!**/storybook-static"
     ]
   },
   "formatter": {
