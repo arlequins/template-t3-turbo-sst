@@ -8,23 +8,12 @@
  */
 
 import type { Permission } from "@acme/auth";
-import { authApi, hasPermission, provisionSessionUser } from "@acme/auth";
-import { db } from "@acme/db-backbone/client";
-import { serverEnv } from "@acme/env";
-import type { Logger, Telemetry } from "@acme/logger";
-import {
-  ApplicationInputError,
-  createFileUploadService,
-  createPostService,
-  ResourceNotFoundError,
-} from "@acme/service";
+import { hasPermission } from "@acme/auth";
+import { ApplicationInputError, ResourceNotFoundError } from "@acme/service";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError, z } from "zod/v4";
-import { createDatabaseUserProvisioning } from "./adaptors/auth-user";
-import { createDrizzlePostRepository } from "./adaptors/post-repository";
-import { createS3FileUploadAdapter } from "./adaptors/s3-file-upload";
-import { getPostCache } from "./cache";
+import type { TRPCContext } from "./context";
 import { formatTrpcErrorShape } from "./errors";
 
 /**
@@ -40,67 +29,13 @@ import { formatTrpcErrorShape } from "./errors";
  * @see https://trpc.io/docs/server/context
  */
 
-export const createTRPCContext = async (opts: {
-  headers: Headers;
-  logger: Logger;
-  telemetry: Telemetry;
-}) => {
-  const tokenSession = await authApi.getSession({
-    headers: opts.headers,
-  });
-  const session = tokenSession
-    ? await opts.telemetry.trace(
-        "db.user.provision",
-        { "db.system": "postgresql" },
-        () =>
-          provisionSessionUser(
-            createDatabaseUserProvisioning(db, {
-              bootstrapAdministrators: new Set(
-                (serverEnv.AUTH_BOOTSTRAP_ADMIN_IDENTITIES ?? "")
-                  .split(",")
-                  .map((identity) => identity.trim())
-                  .filter(Boolean),
-              ),
-            }),
-            tokenSession,
-          ),
-      )
-    : null;
-  if (session) {
-    opts.logger.info("auth.login.succeeded", {
-      issuer: session.user.issuer,
-      subject: session.user.subject,
-      userId: session.user.id,
-    });
-  }
-  return {
-    authApi,
-    logger: opts.logger,
-    telemetry: opts.telemetry,
-    session,
-    services: {
-      fileUpload: serverEnv.S3_UPLOAD_BUCKET
-        ? createFileUploadService({
-            storage: createS3FileUploadAdapter({
-              bucket: serverEnv.S3_UPLOAD_BUCKET,
-              prefix: serverEnv.S3_UPLOAD_PREFIX,
-            }),
-          })
-        : undefined,
-      post: createPostService({
-        logger: opts.logger.child({ component: "post-service" }),
-        repository: createDrizzlePostRepository(db, { cache: getPostCache() }),
-      }),
-    },
-  };
-};
 /**
  * 2. INITIALIZATION
  *
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<TRPCContext>().create({
   transformer: superjson,
   errorFormatter: ({ shape, error }) =>
     formatTrpcErrorShape({

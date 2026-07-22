@@ -1,4 +1,4 @@
-import type { PostListInput, PostRepository } from "@acme/service";
+import type { ContentListInput, ContentRepository } from "@acme/service";
 import { asc, count, desc, eq, ilike, or } from "drizzle-orm";
 
 import type { Database } from "./client";
@@ -6,9 +6,9 @@ import { Post } from "./schema";
 
 export function createDrizzlePostRepository(
   database: Database,
-): PostRepository {
+): ContentRepository {
   return {
-    async list(input: Required<PostListInput>) {
+    async list(input: Required<ContentListInput>) {
       const filter = input.query
         ? or(
             ilike(Post.title, `%${input.query}%`),

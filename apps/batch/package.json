@@ -12,6 +12,7 @@
     "sst:remove": "pnpm with-env sst remove",
     "format": "biome format .",
     "lint": "biome lint .",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
@@ -27,6 +28,7 @@
     "@types/aws-lambda": "^8.10.162",
     "@types/node": "catalog:",
     "sst": "4.17.1",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

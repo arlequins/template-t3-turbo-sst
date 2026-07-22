@@ -1,40 +1,66 @@
-# Application Architecture
+# Clean Architecture
 
-This template separates browser delivery, HTTP transport, application APIs, and persistence so each layer can be replaced independently.
+This template keeps policy independent from delivery frameworks and providers.
+The example content slice is intentionally small, but it demonstrates the same
+dependency direction expected from production features.
 
 ```text
-Browser
-  -> apps/web (Next.js static export, client-side data fetching)
-  -> apps/api (Hono HTTP runtime)
-       -> packages/trpc (typed procedures and request context)
-            -> packages/service (application and domain operations)
-                 -> packages/db-backbone (Drizzle schema and PostgreSQL client)
+apps/web -> tRPC router -> application use case -> port <- adapter
+apps/api ------^                                      <- Drizzle / S3 / OIDC
+apps/batch -> composition -> application use case    <- provider SDKs
 ```
 
-## Responsibilities
+## Layers
+
+| Layer | Location | Responsibility |
+| --- | --- | --- |
+| Domain | `packages/*/src/domain` | Business vocabulary and rules with no framework dependencies |
+| Application | `packages/*/src/application` | Use cases and outbound ports |
+| Adapters | `packages/trpc/src/adaptors`, `packages/db-backbone`, `apps/*/src/adaptors` | Translate databases, object storage, identity, and delivery mechanisms into ports |
+| Composition | `packages/trpc/src/composition`, `apps/*/composition` | Select concrete adapters and construct use cases |
+| Delivery | tRPC routers, Hono routes, Lambda handlers, React views | Validate and translate requests, then call application behavior |
+
+Dependencies point inward. Domain and application code never imports Drizzle,
+Hono, tRPC, AWS SDKs, environment loaders, or concrete logging packages.
+
+## Workspace Responsibilities
 
 | Workspace | Responsibility |
 | --- | --- |
-| `apps/web` | Static Next.js App Router output. Browser interactions and tRPC queries run in Client Components. It does not expose Route Handlers or depend on server-only tRPC modules. |
-| `apps/api` | Hono application, CORS, health endpoint, tRPC HTTP adapter, local Node server, and AWS Lambda entry point. |
-| `packages/trpc` | tRPC context, middleware, routers, input/output contracts, and browser-safe router types. |
-| `packages/service` | Framework-independent application operations. Services receive their dependencies instead of importing a global database client. |
-| `packages/db-backbone` | Drizzle schema, PostgreSQL client, migrations, and seeds. |
-| `packages/logger` | Structured JSON logging, child context bindings, and sensitive-field redaction. |
-| `packages/auth` | OIDC discovery, JWKS-backed JWT access-token validation, and application sessions. |
+| `apps/web` | Static Next.js App Router output, browser interactions, and client-side tRPC queries |
+| `apps/api` | Hono delivery adapter, HTTP policy, health endpoints, local server, and Lambda entry point |
+| `apps/batch` | Step Functions and Lambda delivery adapters plus batch composition roots |
+| `packages/trpc` | Typed transport contracts, middleware, infrastructure adapters, and request composition |
+| `packages/service` | Framework-independent domain models, application ports, and use cases |
+| `packages/db-backbone` | Drizzle adapters, PostgreSQL schema, migrations, and seeds |
+| `packages/auth` | Authorization policy, session use cases, and OIDC infrastructure adapters |
+| `packages/logger` | Structured logging and telemetry adapters |
 
 ## Request Flow
 
 1. A Client Component calls the browser-safe `@acme/trpc/client` entry point.
-2. The tRPC client sends an HTTP request to `${NEXT_PUBLIC_API_URL}/api/trpc`.
-3. Hono applies request IDs, request guards, security headers, and CORS before
-   forwarding the request to tRPC.
-4. Hono binds the request ID to a child logger; tRPC passes that logger to request-scoped services.
-5. tRPC creates request-scoped services backed by the Drizzle database client.
-6. Protected procedures use the OIDC `sub` claim as the stable application user ID.
-7. The router validates input and delegates the operation to a service.
+2. The client sends a request to `${NEXT_PUBLIC_API_URL}/api/trpc`.
+3. Hono applies request IDs, request guards, security headers, and CORS.
+4. The tRPC composition root validates the OIDC session and constructs use cases.
+5. A router validates input, applies authorization, and calls one use case.
+6. The use case reaches external systems only through injected ports.
 
-The web app must never import the server entry point `@acme/trpc` from a Client Component. Use `@acme/trpc/client`, which exports only constants, error helpers, and types that are safe to bundle for the browser.
+Client Components must never import the server entry point `@acme/trpc`. Use
+`@acme/trpc/client`, which contains browser-safe constants, error helpers, and
+types.
+
+## Feature Workflow
+
+1. Define domain vocabulary without transport or persistence types.
+2. Define an application port for every required external effect.
+3. Implement and unit test a use case against port doubles.
+4. Implement adapters at the infrastructure boundary.
+5. Select adapters in a composition root.
+6. Add a thin transport handler that validates input and calls the use case.
+
+Run `pnpm architecture:check` after moving files or adding dependencies. The
+check is also part of the root test command and rejects common inward dependency
+violations.
 
 ## Local Development
 
@@ -46,32 +72,31 @@ pnpm dev:local
 ```
 
 This starts PostgreSQL, applies migrations and seeds, and runs the local OIDC
-provider, API, and web app. Use `pnpm dev` only when required dependencies and
-environment variables are already available.
-
-The defaults are:
+provider, API, and web app. The defaults are:
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:5000`
 - Liveness: `http://localhost:5000/health/live`
-- Readiness (includes PostgreSQL): `http://localhost:5000/health/ready`
+- Readiness: `http://localhost:5000/health/ready`
 - tRPC: `http://localhost:5000/api/trpc`
 
-`API_PORT` changes the local API port. `API_CORS_ORIGINS` accepts a comma-separated allowlist and defaults to `NEXT_PUBLIC_SITE_URL`.
+`API_PORT` changes the local API port. `API_CORS_ORIGINS` accepts a
+comma-separated allowlist and defaults to `NEXT_PUBLIC_SITE_URL`.
 
 ## Deployment
 
 - `apps/web/sst.config.ts` deploys the static Next.js export to S3 and CloudFront.
-- `apps/api/sst.config.ts` deploys the same Hono app through a selectable Lambda Function URL or API Gateway HTTP API preset. See [`apps/api/README.md`](../apps/api/README.md#aws-deployment-presets) for operational tradeoffs.
-- Optional `SUBNET_IDS` and `SECURITY_GROUP_IDS` attach API and batch Lambdas to a VPC for private database access.
+- `apps/api/sst.config.ts` selects a Lambda Function URL or API Gateway HTTP API preset.
+- Optional VPC variables attach API and batch Lambdas to private resources.
 
-After deploying the API, set `NEXT_PUBLIC_API_URL` to its public URL before building and deploying the web app.
+After deploying the API, set `NEXT_PUBLIC_API_URL` to its public URL before
+building and deploying the web app.
 
 ## Extension Rules
 
-- Add ordinary HTTP endpoints directly to `apps/api/src/app.ts` or mount a dedicated Hono route module.
-- Add typed application APIs as tRPC routers in `packages/trpc/src/router`.
-- Keep database calls out of Hono handlers and tRPC routers; place them in dependency-injected services or adapters.
+- Add typed application APIs as thin routers in `packages/trpc/src/router`.
+- Add ordinary HTTP endpoints as dedicated Hono route modules.
+- Put provider implementations in adapter directories and select them in composition roots.
 - Add Drizzle tables under `packages/db-backbone/src/schemas` and export them from `schema.ts`.
-- Keep environment reads centralized in `@acme/env` and update `.env.example` plus `turbo.json` when adding variables.
-- Generate and commit a Drizzle migration for every schema change, then add a new numbered seed file when reference or example data must change.
+- Centralize environment parsing in `@acme/env` and update examples plus `turbo.json`.
+- Commit a migration for every schema change and numbered seeds for data changes.

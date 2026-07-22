@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createFileUploadService } from "./file-upload";
+import { createFileUploadService } from "./application/use-cases/request-file-upload";
 
 describe("createFileUploadService", () => {
   it("validates policy before delegating to storage", async () => {

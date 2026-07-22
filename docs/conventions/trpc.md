@@ -7,9 +7,9 @@ Read this when adding or changing procedures in `packages/trpc`.
 ```text
 apps/api/src/app.ts
   -> packages/trpc/src/router
-       -> request-scoped services from ctx.services
-            -> packages/service
-                 -> packages/db-backbone
+       -> request-scoped use cases from ctx.services
+            -> packages/service/src/application
+                 -> port <- adapter
 ```
 
 The Hono app owns HTTP concerns. tRPC owns typed API contracts and request middleware. Services own application behavior and receive concrete I/O dependencies during composition. Drizzle owns persistence.
@@ -24,7 +24,7 @@ The Hono app owns HTTP concerns. tRPC owns typed API contracts and request middl
 
 ### tRPC Context
 
-- Build request-scoped dependencies in `packages/trpc/src/trpc.ts`.
+- Build request-scoped dependencies in `packages/trpc/src/composition`.
 - Resolve authentication once per request.
 - Pass the request-scoped logger from Hono into tRPC and bind a component name for each service.
 - Expose application operations through `ctx.services`.
@@ -41,10 +41,7 @@ export const createTRPCContext = async (opts: {
     logger: opts.logger,
     session,
     services: {
-      post: createPostService(
-        db,
-        opts.logger.child({ component: "post-service" }),
-      ),
+      content: createContentService({ logger, repository }),
     },
   };
 };
@@ -59,11 +56,11 @@ export const createTRPCContext = async (opts: {
 
 ```ts
 export const postRouter = {
-  all: publicProcedure.query(({ ctx }) => ctx.services.post.listPosts()),
+  all: publicProcedure.query(({ ctx }) => ctx.services.content.listContent()),
 
   byId: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
-    .query(({ ctx, input }) => ctx.services.post.getPostById(input.id)),
+    .query(({ ctx, input }) => ctx.services.content.getContentById(input.id)),
 } satisfies TRPCRouterRecord;
 ```
 

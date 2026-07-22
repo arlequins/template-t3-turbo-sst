@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { ApplicationLogger, PostRepository } from "./post";
-import { createPostService } from "./post";
+import type { ApplicationLogger } from "./application/ports/application-logger";
+import type { ContentRepository } from "./application/ports/content-repository";
+import { createContentService } from "./application/use-cases/content";
 
 function createDependencies() {
-  const repository: PostRepository = {
+  const repository: ContentRepository = {
     create: vi.fn(),
     delete: vi.fn(),
     findById: vi.fn(),
@@ -17,10 +18,10 @@ function createDependencies() {
   return { logger, repository };
 }
 
-describe("createPostService", () => {
+describe("createContentService", () => {
   it("normalizes list input before calling the repository port", async () => {
     const deps = createDependencies();
-    await createPostService(deps).listPosts({
+    await createContentService(deps).listContent({
       page: 0,
       pageSize: 100,
       query: "  term  ",
@@ -39,28 +40,31 @@ describe("createPostService", () => {
     vi.mocked(deps.repository.update).mockResolvedValue({
       content: "Body",
       createdAt: new Date(0),
-      id: "post-1",
+      id: "content-1",
       title: "Title",
       updatedAt: new Date(1),
     });
     vi.mocked(deps.repository.delete).mockResolvedValue(true);
-    const service = createPostService(deps);
-    await service.updatePost("post-1", { content: "Body", title: "Title" });
-    await service.deletePost("post-1");
-    expect(deps.repository.update).toHaveBeenCalledWith("post-1", {
+    const service = createContentService(deps);
+    await service.updateContent("content-1", {
       content: "Body",
       title: "Title",
     });
-    expect(deps.repository.delete).toHaveBeenCalledWith("post-1");
+    await service.deleteContent("content-1");
+    expect(deps.repository.update).toHaveBeenCalledWith("content-1", {
+      content: "Body",
+      title: "Title",
+    });
+    expect(deps.repository.delete).toHaveBeenCalledWith("content-1");
   });
 
   it("reports missing resources through an application error", async () => {
     const deps = createDependencies();
-    const service = createPostService(deps);
-    await expect(service.getPostById("missing")).rejects.toThrow(
+    const service = createContentService(deps);
+    await expect(service.getContentById("missing")).rejects.toThrow(
       "Content item not found",
     );
-    await expect(service.deletePost("missing")).rejects.toThrow(
+    await expect(service.deleteContent("missing")).rejects.toThrow(
       "Content item not found",
     );
   });
