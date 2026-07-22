@@ -23,6 +23,9 @@
     "@acme/logger": "workspace:*",
     "@acme/service": "workspace:*",
     "@acme/trpc": "workspace:*",
+    "@aws-sdk/client-eventbridge": "catalog:",
+    "@aws-sdk/client-scheduler": "catalog:",
+    "@aws-sdk/client-sqs": "catalog:",
     "@trpc/server": "catalog:",
     "drizzle-orm": "catalog:",
     "hono": "catalog:"
