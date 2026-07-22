@@ -100,7 +100,17 @@ export function pathsToPrune(options) {
     );
   }
   if (!features.has("example-ui")) {
-    paths.push("apps/web/src/components/posts.tsx", "scripts/example-crud.mjs");
+    paths.push(
+      "apps/web/public/blog",
+      "apps/web/src/app/admin",
+      "apps/web/src/app/editor",
+      "apps/web/src/app/posts",
+      "apps/web/src/app/users",
+      "apps/web/src/components/blog",
+      "apps/web/src/components/posts.tsx",
+      "apps/web/src/lib/blog-data.ts",
+      "scripts/example-crud.mjs",
+    );
   }
 
   return paths.sort();
@@ -154,6 +164,7 @@ function prunePackageJson(relativePath, source, options) {
     removeDependencies(packageJson, [
       `${options.scope}/validators`,
       "@tanstack/react-form",
+      "lucide-react",
     ]);
   }
   if (!features.has("example-ui") && relativePath === "package.json") {
@@ -293,10 +304,8 @@ export function transformContent(relativePath, source, options) {
     if (relativePath === "apps/web/src/app/layout.tsx") {
       output = output
         .replace('import { OidcAuthProvider } from "~/auth/provider";\n', "")
-        .replace(
-          "          <OidcAuthProvider>\n            <TRPCReactProvider>{props.children}</TRPCReactProvider>\n          </OidcAuthProvider>",
-          "          <TRPCReactProvider>{props.children}</TRPCReactProvider>",
-        );
+        .replace("          <OidcAuthProvider>\n", "")
+        .replace("          </OidcAuthProvider>\n", "");
     }
     if (relativePath === "apps/web/src/app/page.tsx") {
       output = output
@@ -361,6 +370,15 @@ export function transformContent(relativePath, source, options) {
       : "";
     const authStatus = features.has("auth") ? "      <AuthStatus />\n" : "";
     output = `"use client";\n\n${authImport}import { env } from "~/env";\n\nexport default function HomePage() {\n  return (\n    <main className="container py-16">\n${authStatus}      <h1 className="text-4xl font-bold">${options.name}</h1>\n      <p className="text-muted-foreground mt-4">\n        API: {env.NEXT_PUBLIC_API_URL}\n      </p>\n    </main>\n  );\n}\n`;
+  }
+
+  if (
+    !features.has("example-ui") &&
+    relativePath === "apps/web/src/app/layout.tsx"
+  ) {
+    output = output
+      .replace('import { AppShell } from "~/components/blog/app-shell";\n', "")
+      .replace("<AppShell>{props.children}</AppShell>", "{props.children}");
   }
 
   if (relativePath === "template.features.json") {
