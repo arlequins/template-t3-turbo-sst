@@ -3,11 +3,18 @@ import { defineConfig, devices } from "@playwright/test";
 const envCommand = "pnpm exec dotenv -e .env.e2e --";
 
 export default defineConfig({
+  expect: {
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.12,
+    },
+  },
   testDir: "./tests/e2e",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
+  snapshotPathTemplate:
+    "{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}",
   use: {
     baseURL: "http://localhost:3100",
     trace: "on-first-retry",

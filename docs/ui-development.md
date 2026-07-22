@@ -22,6 +22,13 @@ The Storybook accessibility addon reports violations while developing and the
 static Storybook build is required by CI. A successful build confirms that every
 story can be bundled independently from the Next.js application.
 
+## Visual Regression
+
+Playwright stores responsive baselines for representative dashboard, list,
+user, and administration views. Update them deliberately with
+`pnpm test:e2e --update-snapshots=all` after reviewing both desktop Chromium and
+mobile Chrome output. The same suite runs WCAG A/AA checks on each view.
+
 ## Blog application example
 
 The full preset includes a responsive editorial application under `apps/web`.
