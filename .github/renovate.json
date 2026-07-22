@@ -7,6 +7,10 @@
     "security:minimumReleaseAgeNpm"
   ],
   "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 5am on Monday"],
+  "prConcurrentLimit": 5,
   "rangeStrategy": "bump",
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
@@ -86,8 +90,28 @@
       ],
       "matchUpdateTypes": ["major"],
       "groupName": "authentication stack major"
+    },
+    {
+      "description": "Keep AWS SDK clients on one compatible version line",
+      "matchPackageNames": ["@aws-sdk/**"],
+      "groupName": "AWS SDK"
+    },
+    {
+      "description": "Keep OpenTelemetry packages compatible",
+      "matchPackageNames": ["@opentelemetry/**"],
+      "groupName": "OpenTelemetry"
+    },
+    {
+      "description": "Keep Storybook and its testing integrations compatible",
+      "matchPackageNames": ["storybook", "@storybook/**"],
+      "groupName": "Storybook"
     }
   ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"],
+    "automerge": false
+  },
   "npm": {
     "managerFilePatterns": [
       "/(^|/)package\\.json$/",

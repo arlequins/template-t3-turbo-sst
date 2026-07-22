@@ -101,17 +101,16 @@ The root `commitlint.config.mjs` should configure:
 - `header-max-length: [2, "always", 100]`: allow headers up to 100 characters.
 - `body-leading-blank` and `footer-leading-blank`: keep the default behavior.
 
-## Release Procedure: git-flow
+## Release Procedure
 
 See [semantic versioning](../semantic-versioning.md) for version calculation.
 
-1. If environment variables or secrets changed, update the secret store before tagging.
-2. Run `git flow release start X.Y.Z`.
-   - This creates `release/X.Y.Z` from `develop`.
-   - Update the root `package.json` version and changelog on this branch.
-3. Run `git flow release finish X.Y.Z`.
-   - This creates a merge commit into `main`, adds the `vX.Y.Z` tag, and back-merges into `develop`.
-4. Run `git push origin main develop --follow-tags`.
+1. Merge Conventional Commits into `main`.
+2. Review the Release Please PR containing the version and changelog update.
+3. Merge the release PR after required checks and approvals pass.
+4. Confirm that Release Please created the `vX.Y.Z` tag and GitHub Release.
+
+See [dependency and release automation](../automation.md) for repository setup.
 
 ## Hotfix Procedure
 
