@@ -13,7 +13,16 @@ pnpm --filter @acme/api sst:deploy
 | `GET /health/live` | Process liveness and request ID. |
 | `GET /health/ready` | Readiness, including PostgreSQL connectivity. |
 | `GET /health` | Compatibility alias for liveness. |
+| `GET /docs` | Interactive Scalar API reference and request client. |
+| `GET /openapi.json` | OpenAPI 3.1 contract used by the API explorer. |
+| `POST /api/echo` | Executable JSON request example for local and deployed verification. |
 | `/api/trpc/*` | tRPC queries and mutations. |
+
+Open `http://localhost:5000/docs`, select an operation, and use the request
+client to send it to the current API host. The explorer persists authorization
+locally so protected HTTP operations can reuse a bearer token when they are
+added. tRPC procedures keep their TypeScript router contract and are not
+represented as REST operations in the OpenAPI document.
 
 `src/app.ts` is runtime-independent. `src/dev.ts` serves it with Node for local development, and `src/lambda.ts` adapts the same app to AWS Lambda.
 

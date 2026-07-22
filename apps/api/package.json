@@ -26,6 +26,8 @@
     "@aws-sdk/client-eventbridge": "catalog:",
     "@aws-sdk/client-scheduler": "catalog:",
     "@aws-sdk/client-sqs": "catalog:",
+    "@hono/zod-openapi": "catalog:",
+    "@scalar/hono-api-reference": "catalog:",
     "@trpc/server": "catalog:",
     "drizzle-orm": "catalog:",
     "hono": "catalog:"

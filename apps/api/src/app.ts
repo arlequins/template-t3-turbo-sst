@@ -4,15 +4,16 @@ import type { ErrorReporter, Logger, Telemetry } from "@acme/logger";
 import { createLogger, createTelemetry, noopErrorReporter } from "@acme/logger";
 import type { RateLimitPort } from "@acme/service";
 import { AppRouter, createTRPCContext, TRPC_HTTP_PATH } from "@acme/trpc";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { sql } from "drizzle-orm";
-import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 import { createInMemoryRateLimitAdapter } from "./adaptors/in-memory-rate-limit";
 import { mapApplicationErrorToHttp } from "./application-error";
+import { registerOpenApiRoutes } from "./openapi";
 
 export type ApiBindings = {
   Variables: {
@@ -69,7 +70,19 @@ function handleTrpcRequest(
 }
 
 export function createApiApp(options: CreateApiAppOptions = {}) {
-  const app = new Hono<ApiBindings>();
+  const app = new OpenAPIHono<ApiBindings>({
+    defaultHook(result, context) {
+      if (!result.success) {
+        return context.json(
+          {
+            error: "Invalid Request",
+            requestId: context.get("requestId"),
+          },
+          400,
+        );
+      }
+    },
+  });
   const corsOrigins = options.corsOrigins ?? configuredCorsOrigins();
   const rootLogger = options.logger ?? createLogger({ service: "api" });
   const readinessCheck = options.readinessCheck ?? checkDatabaseReadiness;
@@ -204,40 +217,9 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
     });
   }
 
-  const liveResponse = (requestId: string) => ({
-    status: "ok" as const,
-    checks: { process: "ok" as const },
-    requestId,
-  });
-
-  app.get("/health", (context) =>
-    context.json(liveResponse(context.get("requestId"))),
-  );
-
-  app.get("/health/live", (context) =>
-    context.json(liveResponse(context.get("requestId"))),
-  );
-
-  app.get("/health/ready", async (context) => {
-    try {
-      await readinessCheck();
-      for (const check of Object.values(externalChecks)) await check();
-      return context.json({
-        status: "ok" as const,
-        checks: { database: "ok" as const },
-        requestId: context.get("requestId"),
-      });
-    } catch (error) {
-      context.get("logger").warn("health.readiness.failed", { error });
-      return context.json(
-        {
-          status: "unavailable" as const,
-          checks: { database: "unavailable" as const },
-          requestId: context.get("requestId"),
-        },
-        503,
-      );
-    }
+  registerOpenApiRoutes(app, {
+    externalReadinessChecks: externalChecks,
+    readinessCheck,
   });
 
   app.all(TRPC_HTTP_PATH, (context) =>

@@ -82,6 +82,8 @@ provider, API, and web app. The defaults are:
 - API: `http://localhost:5000`
 - Liveness: `http://localhost:5000/health/live`
 - Readiness: `http://localhost:5000/health/ready`
+- API explorer: `http://localhost:5000/docs`
+- OpenAPI contract: `http://localhost:5000/openapi.json`
 - tRPC: `http://localhost:5000/api/trpc`
 
 `API_PORT` changes the local API port. `API_CORS_ORIGINS` accepts a
