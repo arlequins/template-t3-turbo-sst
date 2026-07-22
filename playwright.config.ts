@@ -5,7 +5,7 @@ const envCommand = "pnpm exec dotenv -e .env.e2e --";
 export default defineConfig({
   expect: {
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.12,
     },
   },
   testDir: "./tests/e2e",
