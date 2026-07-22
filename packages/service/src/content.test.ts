@@ -38,24 +38,42 @@ describe("createContentService", () => {
   it("delegates mutations without exposing an infrastructure type", async () => {
     const deps = createDependencies();
     vi.mocked(deps.repository.update).mockResolvedValue({
-      content: "Body",
-      createdAt: new Date(0),
-      id: "content-1",
-      title: "Title",
-      updatedAt: new Date(1),
+      status: "updated",
+      value: {
+        content: "Body",
+        createdAt: new Date(0),
+        id: "content-1",
+        title: "Title",
+        updatedAt: new Date(1),
+        version: 2,
+      },
     });
     vi.mocked(deps.repository.delete).mockResolvedValue(true);
     const service = createContentService(deps);
     await service.updateContent("content-1", {
       content: "Body",
       title: "Title",
+      version: 1,
     });
     await service.deleteContent("content-1");
-    expect(deps.repository.update).toHaveBeenCalledWith("content-1", {
-      content: "Body",
-      title: "Title",
-    });
+    expect(deps.repository.update).toHaveBeenCalledWith(
+      "content-1",
+      { content: "Body", title: "Title" },
+      1,
+    );
     expect(deps.repository.delete).toHaveBeenCalledWith("content-1");
+  });
+
+  it("reports optimistic locking conflicts", async () => {
+    const deps = createDependencies();
+    vi.mocked(deps.repository.update).mockResolvedValue({ status: "conflict" });
+    await expect(
+      createContentService(deps).updateContent("content-1", {
+        content: "Body",
+        title: "Title",
+        version: 1,
+      }),
+    ).rejects.toThrow("updated by another request");
   });
 
   it("reports missing resources through an application error", async () => {

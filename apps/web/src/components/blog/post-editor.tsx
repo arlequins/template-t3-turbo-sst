@@ -46,7 +46,11 @@ export function PostEditor() {
   );
   const save = () => {
     const data = { content: body, title };
-    if (id) updatePost.mutate({ data, id });
+    if (id && existing.data)
+      updatePost.mutate({
+        data: { ...data, version: existing.data.version },
+        id,
+      });
     else createPost.mutate(data);
   };
   const isSaving = createPost.isPending || updatePost.isPending;

@@ -107,7 +107,12 @@ insert into drizzle.__drizzle_migrations (hash, created_at) values ('${migration
     "-v",
     "ON_ERROR_STOP=1",
     "-c",
-    "select to_regclass('sample.post'), to_regclass('auth.app_user')",
+    `do $$ begin
+      if to_regclass('sample.post') is null then raise exception 'sample.post is missing'; end if;
+      if to_regclass('auth.app_user') is null then raise exception 'auth.app_user is missing'; end if;
+      if to_regclass('sample.idempotency_record') is null then raise exception 'idempotency table is missing'; end if;
+      if not exists (select 1 from information_schema.columns where table_schema = 'sample' and table_name = 'post' and column_name = 'version') then raise exception 'post.version is missing'; end if;
+    end $$`,
   ]);
 } finally {
   run("docker", [...compose, "down", "--volumes"]);

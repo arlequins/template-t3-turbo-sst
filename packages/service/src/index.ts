@@ -18,12 +18,19 @@ export type {
   UploadTarget,
 } from "./application/ports/file-storage";
 export type {
+  IdempotencyClaim,
+  IdempotencyRequest,
+  IdempotencyStorePort,
+} from "./application/ports/idempotency-store";
+export type {
   RateLimitDecision,
   RateLimitPort,
   RateLimitRequest,
 } from "./application/ports/rate-limiter";
 export type { ContentService } from "./application/use-cases/content";
 export { createContentService } from "./application/use-cases/content";
+export type { IdempotencyService } from "./application/use-cases/idempotency";
+export { createIdempotencyService } from "./application/use-cases/idempotency";
 export type { FileUploadService } from "./application/use-cases/request-file-upload";
 export { createFileUploadService } from "./application/use-cases/request-file-upload";
 export type {

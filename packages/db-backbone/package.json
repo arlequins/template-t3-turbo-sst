@@ -11,6 +11,10 @@
       "types": "./dist/client.d.ts",
       "default": "./src/client.ts"
     },
+    "./idempotency-store": {
+      "types": "./dist/idempotency-store.d.ts",
+      "default": "./src/idempotency-store.ts"
+    },
     "./post-repository": {
       "types": "./dist/post-repository.d.ts",
       "default": "./src/post-repository.ts"
