@@ -17,7 +17,7 @@ for (const pageCase of pages) {
     await expect(page.locator("main")).toBeVisible();
     await expect(page).toHaveScreenshot(`${pageCase.name}.png`, {
       animations: "disabled",
-      fullPage: true,
+      fullPage: false,
     });
   });
 }
