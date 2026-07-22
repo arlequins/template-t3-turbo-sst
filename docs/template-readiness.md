@@ -20,6 +20,7 @@ its related code, tests, environment variables, and documentation.
   metadata, and example domains.
 - [x] Full and minimal presets with selectable auth, batch, SST, and example UI
   features.
+- [x] Pairwise qualification of every two-feature enabled/disabled state.
 - [x] Prune mode for physically removing unselected modules and dependencies.
 - [x] Application, package, and DIP-aligned tRPC domain generators.
 - [x] Removable and regenerable example CRUD functionality.

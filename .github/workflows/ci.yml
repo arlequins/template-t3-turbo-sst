@@ -67,6 +67,14 @@ jobs:
       - name: Qualify generated preset
         run: pnpm test:template-output ${{ matrix.preset }}
 
+  template-feature-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./tooling/github/setup
+      - name: Qualify pairwise feature combinations
+        run: pnpm test:template-matrix
+
   lint:
     runs-on: ubuntu-latest
     steps:

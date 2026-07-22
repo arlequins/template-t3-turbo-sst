@@ -50,6 +50,7 @@
     "test:sst": "node scripts/test-sst.mjs",
     "test:runtime": "node --test scripts/check-runtime.test.mjs",
     "test:template-init": "node --test scripts/template-init.test.mjs scripts/template-doctor.test.mjs",
+    "test:template-matrix": "node --test scripts/template-matrix.test.mjs && node scripts/template-matrix.mjs",
     "test:template-output": "node scripts/test-template-output.mjs",
     "template:init": "node scripts/template-init.mjs",
     "template:doctor": "node scripts/template-doctor.mjs",
