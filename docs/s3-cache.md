@@ -12,6 +12,10 @@ development remains functional when no cache bucket is configured.
 - Concurrent misses for the same key share one loader call within a process.
 - Namespaces can be cleared after writes or used to isolate API and DB data.
 - S3 failures use fail-open behavior by default, preserving the origin path.
+- Production defaults add 10% TTL jitter and compress payloads at 1 KiB.
+- An optional stale window returns the last value while one local loader refreshes it.
+- Maximum object limits are checked before upload.
+- `onMetric` reports hit, miss, stale, refresh, error, and latency data without a vendor dependency.
 
 ## API response cache
 
