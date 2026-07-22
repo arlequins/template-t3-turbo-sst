@@ -25,6 +25,8 @@ local application; the pages below explain design decisions and ongoing work.
   environments, and flaky-test policy.
 - [Dependency and release automation](automation.md): Renovate policy,
   automated release PRs, tags, and changelog updates.
+- [Observability](observability.md): structured logs, metrics, traces, and OTLP
+  collector configuration.
 
 ## Deployment and Operations
 

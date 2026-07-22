@@ -1,4 +1,5 @@
-import { SpanStatusCode, trace } from "@opentelemetry/api";
+import type { Counter, Histogram } from "@opentelemetry/api";
+import { metrics, SpanStatusCode, trace } from "@opentelemetry/api";
 
 export type TraceAttributes = Record<string, boolean | number | string>;
 
@@ -31,6 +32,9 @@ export function createTelemetry(options: {
   metricSink?: (line: string) => void;
 }): Telemetry {
   const tracer = trace.getTracer(options.service);
+  const meter = metrics.getMeter(options.service);
+  const counters = new Map<string, Counter>();
+  const histograms = new Map<string, Histogram>();
   const metricSink = options.metricSink ?? console.log;
   const namespace = options.metricNamespace ?? "Template/Application";
 
@@ -51,6 +55,21 @@ export function createTelemetry(options: {
       });
     },
     metric(name, value, unit, dimensions = {}) {
+      if (unit === "Milliseconds") {
+        let histogram = histograms.get(name);
+        if (!histogram) {
+          histogram = meter.createHistogram(name, { unit: "ms" });
+          histograms.set(name, histogram);
+        }
+        histogram.record(value, dimensions);
+      } else {
+        let counter = counters.get(name);
+        if (!counter) {
+          counter = meter.createCounter(name, { unit: "1" });
+          counters.set(name, counter);
+        }
+        counter.add(value, dimensions);
+      }
       metricSink(
         JSON.stringify({
           _aws: {
