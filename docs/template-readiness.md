@@ -16,8 +16,8 @@ its related code, tests, environment variables, and documentation.
 
 ## Template Composition
 
-- [x] Repository initialization for package scope, application names, metadata,
-  and example domains.
+- [x] Repository initialization for package scope, machine name, display name,
+  metadata, and example domains.
 - [x] Full and minimal presets with selectable auth, batch, SST, and example UI
   features.
 - [x] Prune mode for physically removing unselected modules and dependencies.
@@ -57,7 +57,7 @@ its related code, tests, environment variables, and documentation.
 - [x] Early Node.js and pnpm runtime validation.
 - [x] Initializer tests on Linux, macOS, and Windows.
 - [x] PostgreSQL migration upgrades and tRPC contract regression tests.
-- [x] Desktop and mobile Playwright authentication and accessibility coverage.
+- [x] Chromium and mobile-emulated Playwright authentication and accessibility coverage.
 - [x] AWS sandbox smoke tests and a documented load-test policy.
 - [x] Required sandbox endpoint variables with manual workflow overrides and
   visible failure when cloud qualification is not configured.
@@ -69,7 +69,7 @@ its related code, tests, environment variables, and documentation.
 
 Before publishing a repository created from this template:
 
-1. Run `pnpm template:init` with the target scope, name, and domain.
+1. Run `pnpm template:init` with the target scope, name, display name, and domain.
 2. Choose a preset and prune modules that the application will not use.
 3. Replace local and example identity, domain, seed, and IAM values.
 4. Configure protected environments, branch rules, and cloud roles.

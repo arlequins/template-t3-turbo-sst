@@ -4,17 +4,17 @@ import type { Metadata, Viewport } from "next";
 
 import { OidcAuthProvider } from "~/auth/provider";
 import { AppShell } from "~/components/blog/app-shell";
+import { siteConfig } from "~/config/site";
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/styles.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Northstar Editorial Studio",
-    template: "%s | Northstar",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "A reusable editorial dashboard template built with Next.js and tRPC.",
+  description: siteConfig.description,
 };
 
 export const viewport: Viewport = {

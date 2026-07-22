@@ -57,7 +57,12 @@ async function copyRepository() {
 }
 
 async function assertTemplateIdentityRemoved() {
-  const forbidden = ["template-t3-turbo-sst", "@acme", "example.com"];
+  const forbidden = [
+    "template-t3-turbo-sst",
+    "@acme",
+    "Acme Workspace",
+    "example.com",
+  ];
   const files = execFileSync("git", ["ls-files", "-z"], {
     cwd: target,
     encoding: "utf8",
@@ -96,6 +101,8 @@ try {
     `${preset}-app`,
     "--scope",
     "@company",
+    "--display-name",
+    `${preset === "full" ? "Full" : "Minimal"} Workspace`,
     "--domain",
     `${preset}.template.test`,
     "--description",
@@ -106,6 +113,12 @@ try {
   ]);
   run("git", ["add", "--all"]);
   await assertTemplateIdentityRemoved();
+  const manifest = JSON.parse(
+    await readFile(join(target, "template.features.json"), "utf8"),
+  );
+  const expectedDisplayName = `${preset === "full" ? "Full" : "Minimal"} Workspace`;
+  if (manifest.displayName !== expectedDisplayName)
+    throw new Error("Template display name was not written to the manifest");
 
   if (preset === "minimal") {
     run(pnpm, ["install", "--no-frozen-lockfile"]);

@@ -1,5 +1,21 @@
 # Developer Experience
 
+## Project Initialization
+
+`pnpm template:init` separates machine-facing identity from user-facing
+branding:
+
+- `--name` sets the npm-safe repository and SST application slug.
+- `--display-name` sets web metadata and shell branding. It defaults to a
+  title-cased version of `--name`.
+- `--scope` replaces the `@acme/*` workspace namespace.
+- `--domain` replaces example hostnames.
+- `--preset` and `--features` choose optional modules; `--prune` removes them.
+
+The resulting `template.features.json` is the local composition manifest. Keep
+it committed so generators and future automation can discover the initialized
+identity and enabled features without parsing package files.
+
 ## Reproducible Workspace
 
 Open the repository in a Dev Container or GitHub Codespaces to get Node.js 24, Docker access, forwarded local ports, Biome, and installed workspace dependencies. Docker remains outside the container so PostgreSQL and E2E services use the same Compose files as local development.
@@ -25,6 +41,6 @@ Names must be lowercase kebab-case. The active package scope is read from the in
 
 Commit `.template/example-crud` together with an intentional example removal if later regeneration must remain available to other contributors.
 
-## Quickstart Qualification
+## Generated Project Qualification
 
 CI qualifies generated full and minimal repositories without AWS credentials. The manual `Quickstart deployment qualification` workflow additionally renames a fresh template, validates it, assumes `AWS_QUICKSTART_ROLE_ARN` through GitHub OIDC, performs the first API and web deployment, and always removes the sandbox stage.

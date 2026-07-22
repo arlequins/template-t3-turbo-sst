@@ -26,7 +26,7 @@ test("signs in with PKCE, reaches the protected API, and signs out", async ({
   );
 
   await expect(
-    page.getByRole("heading", { name: "Good morning, Maya" }),
+    page.getByRole("heading", { name: "Welcome to Acme Workspace" }),
   ).toBeVisible();
 
   await page.getByRole("button", { name: "Sign out" }).click();

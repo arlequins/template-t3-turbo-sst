@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const TEMPLATE_NAME = "template-t3-turbo-sst";
 const TEMPLATE_SCOPE = "@acme";
+const TEMPLATE_DISPLAY_NAME = "Acme Workspace";
 const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui"];
 const DEPENDENCY_FIELDS = [
   "dependencies",
@@ -41,6 +42,24 @@ export function resolveFeatures(options) {
   if (unknown.length > 0)
     throw new Error(`Unknown features: ${unknown.join(", ")}`);
   return new Set(requested);
+}
+
+export function resolveDisplayName(options) {
+  if (options["display-name"]?.trim()) return options["display-name"].trim();
+  return (options.name ?? "")
+    .split("-")
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ");
+}
+
+function displayInitials(displayName) {
+  return displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }
 
 export function parseArgs(args) {
@@ -202,6 +221,10 @@ export function validateOptions(options) {
   if (options.domain && !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(options.domain)) {
     throw new Error("--domain must be a hostname such as example.org");
   }
+  const displayName = resolveDisplayName(options);
+  if (displayName.length < 1 || displayName.length > 80) {
+    throw new Error("--display-name must contain between 1 and 80 characters");
+  }
   if (
     options.preset &&
     options.preset !== "full" &&
@@ -220,6 +243,9 @@ export function transformContent(relativePath, source, options) {
     .join(options.scope)
     .split(TEMPLATE_NAME)
     .join(options.name);
+  output = output
+    .split(TEMPLATE_DISPLAY_NAME)
+    .join(resolveDisplayName(options));
   if (options.domain) output = output.split("example.com").join(options.domain);
 
   const appName = new Map([
@@ -419,7 +445,7 @@ export function transformContent(relativePath, source, options) {
       ? 'import { AuthStatus } from "~/auth/status";\n'
       : "";
     const authStatus = features.has("auth") ? "      <AuthStatus />\n" : "";
-    output = `"use client";\n\n${authImport}import { env } from "~/env";\n\nexport default function HomePage() {\n  return (\n    <main className="container py-16">\n${authStatus}      <h1 className="text-4xl font-bold">${options.name}</h1>\n      <p className="text-muted-foreground mt-4">\n        API: {env.NEXT_PUBLIC_API_URL}\n      </p>\n    </main>\n  );\n}\n`;
+    output = `"use client";\n\n${authImport}import { env } from "~/env";\n\nexport default function HomePage() {\n  return (\n    <main className="container py-16">\n${authStatus}      <h1 className="text-4xl font-bold">${resolveDisplayName(options)}</h1>\n      <p className="text-muted-foreground mt-4">\n        API: {env.NEXT_PUBLIC_API_URL}\n      </p>\n    </main>\n  );\n}\n`;
   }
 
   if (
@@ -431,9 +457,23 @@ export function transformContent(relativePath, source, options) {
       .replace("<AppShell>{props.children}</AppShell>", "{props.children}");
   }
 
+  if (relativePath === "apps/web/src/config/site.ts") {
+    output = output.replace(
+      /shortName: "[A-Z0-9]{1,4}"/,
+      `shortName: ${JSON.stringify(displayInitials(resolveDisplayName(options)))}`,
+    );
+  }
+
   if (relativePath === "template.features.json") {
     output = `${JSON.stringify(
-      { preset: options.preset ?? "full", features: [...features] },
+      {
+        name: options.name,
+        displayName: resolveDisplayName(options),
+        scope: options.scope,
+        domain: options.domain ?? null,
+        preset: options.preset ?? "full",
+        features: [...features],
+      },
       undefined,
       2,
     )}\n`;
@@ -523,7 +563,7 @@ if (isCli) {
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error(
-      "pnpm template:init -- --name my-app --scope @company [--preset full|minimal] [--features auth,batch,sst,example-ui] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
+      "pnpm template:init -- --name my-app --scope @company [--display-name 'My App'] [--preset full|minimal] [--features auth,batch,sst,example-ui] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
     );
     process.exitCode = 1;
   }
