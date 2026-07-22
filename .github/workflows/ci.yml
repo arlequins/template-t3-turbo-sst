@@ -37,6 +37,14 @@ jobs:
       - uses: ./tooling/github/setup
       - run: pnpm test:migration-upgrade
 
+  database-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./tooling/github/setup
+      - name: Test repository against isolated PostgreSQL
+        run: pnpm test:integration
+
   template-portability:
     strategy:
       matrix:
