@@ -202,6 +202,9 @@ importers:
       '@acme/logger':
         specifier: workspace:*
         version: link:../../packages/logger
+      '@acme/service':
+        specifier: workspace:*
+        version: link:../../packages/service
       '@acme/trpc':
         specifier: workspace:*
         version: link:../../packages/trpc

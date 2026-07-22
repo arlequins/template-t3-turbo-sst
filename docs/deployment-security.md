@@ -30,3 +30,17 @@ The license policy rejects AGPL and GPL production dependencies by default. Adju
 ## Headers and CSP
 
 The Hono API uses `secureHeaders` and strict CORS. For the statically exported web application, configure a CloudFront response-headers policy with HSTS, `X-Content-Type-Options`, `Referrer-Policy`, frame restrictions, and a tested Content Security Policy. Start CSP in report-only mode because OIDC issuer and API origins vary by generated project, then enforce it after collecting violations. Do not hard-code a template-wide production issuer.
+
+## Application Request Guards
+
+The Hono boundary rejects tRPC request bodies larger than
+`API_BODY_LIMIT_BYTES` and applies a fixed-window limiter through the
+provider-neutral `RateLimitPort`. The bundled in-memory adapter is useful for
+local development and as per-instance defense in depth. It is not a global
+quota across serverless instances.
+
+Production workloads should keep API Gateway throttling enabled or replace the
+port with a shared, atomic store adapter. A WAF remains appropriate for edge
+abuse controls. Rate-limited responses use HTTP 429 with `Retry-After` and
+`RateLimit-*` metadata; oversized requests use HTTP 413. Health checks and CORS
+preflight requests are not counted.

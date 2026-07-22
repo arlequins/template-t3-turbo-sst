@@ -123,5 +123,46 @@ describe("API app", () => {
     expect(response.headers.get("access-control-allow-headers")).toContain(
       "Trpc-Accept",
     );
+    expect(response.headers.get("access-control-expose-headers")).toContain(
+      "RateLimit-Reset",
+    );
+  });
+
+  it("rejects oversized tRPC request bodies", async () => {
+    const limitedApp = createApiApp({
+      bodyLimitBytes: 8,
+      corsOrigins: ["http://localhost:3000"],
+      logger: createLogger({ service: "api", sink: () => {} }),
+      rateLimiter: false,
+    });
+    const response = await limitedApp.request("/api/trpc/post.create", {
+      body: JSON.stringify({ content: "long content" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    });
+    expect(response.status).toBe(413);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "Payload Too Large",
+    });
+  });
+
+  it("returns standard rate-limit metadata", async () => {
+    const limitedApp = createApiApp({
+      corsOrigins: ["http://localhost:3000"],
+      logger: createLogger({ service: "api", sink: () => {} }),
+      rateLimit: { requests: 1, windowMs: 60_000 },
+    });
+    await limitedApp.request("/api/trpc/missing");
+    const response = await limitedApp.request("/api/trpc/missing");
+    expect(response.status).toBe(429);
+    expect(response.headers.get("ratelimit-limit")).toBe("1");
+    expect(response.headers.get("retry-after")).toBeTruthy();
+  });
+
+  it("sets restrictive API response headers", async () => {
+    const response = await app.request("/health/live");
+    expect(response.headers.get("referrer-policy")).toBe("no-referrer");
+    expect(response.headers.get("permissions-policy")).toContain("camera=()");
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
   });
 });

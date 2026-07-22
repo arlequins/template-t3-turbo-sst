@@ -2,13 +2,16 @@ import { db } from "@acme/db-backbone/client";
 import { clientEnv, serverEnv } from "@acme/env";
 import type { ErrorReporter, Logger, Telemetry } from "@acme/logger";
 import { createLogger, createTelemetry, noopErrorReporter } from "@acme/logger";
+import type { RateLimitPort } from "@acme/service";
 import { AppRouter, createTRPCContext, TRPC_HTTP_PATH } from "@acme/trpc";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
+import { createInMemoryRateLimitAdapter } from "./adaptors/in-memory-rate-limit";
 
 export type ApiBindings = {
   Variables: {
@@ -24,6 +27,9 @@ export type CreateApiAppOptions = {
   externalReadinessChecks?: Record<string, () => Promise<void>>;
   errorReporter?: ErrorReporter;
   telemetry?: Telemetry;
+  bodyLimitBytes?: number;
+  rateLimit?: { requests: number; windowMs: number };
+  rateLimiter?: false | RateLimitPort;
 };
 
 let coldStart = true;
@@ -72,6 +78,16 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
     options.telemetry ??
     createTelemetry({ service: "api", metricNamespace: "Template/Api" });
   const stage = process.env.SST_STAGE ?? "local";
+  const bodyLimitBytes =
+    options.bodyLimitBytes ?? serverEnv.API_BODY_LIMIT_BYTES ?? 1_048_576;
+  const rateLimit = options.rateLimit ?? {
+    requests: serverEnv.API_RATE_LIMIT_REQUESTS ?? 120,
+    windowMs: (serverEnv.API_RATE_LIMIT_WINDOW_SECONDS ?? 60) * 1_000,
+  };
+  const rateLimiter =
+    options.rateLimiter === false
+      ? undefined
+      : (options.rateLimiter ?? createInMemoryRateLimitAdapter());
 
   app.use("*", requestId());
   app.use("*", async (context, next) => {
@@ -101,7 +117,18 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
       telemetry.metric("ColdStart", 1, "Count", { stage });
     }
   });
-  app.use("*", secureHeaders());
+  app.use(
+    "*",
+    secureHeaders({
+      crossOriginResourcePolicy: "same-site",
+      permissionsPolicy: {
+        camera: [],
+        geolocation: [],
+        microphone: [],
+      },
+      referrerPolicy: "no-referrer",
+    }),
+  );
   app.use(
     "*",
     cors({
@@ -113,10 +140,68 @@ export function createApiApp(options: CreateApiAppOptions = {}) {
         "X-Request-Id",
       ],
       allowMethods: ["GET", "POST", "OPTIONS"],
-      exposeHeaders: ["X-Request-Id"],
+      exposeHeaders: [
+        "RateLimit-Limit",
+        "RateLimit-Remaining",
+        "RateLimit-Reset",
+        "Retry-After",
+        "X-Request-Id",
+      ],
       maxAge: 86_400,
     }),
   );
+
+  const trpcPaths = [TRPC_HTTP_PATH, `${TRPC_HTTP_PATH}/*`];
+  for (const path of trpcPaths) {
+    app.use(
+      path,
+      bodyLimit({
+        maxSize: bodyLimitBytes,
+        onError: (context) =>
+          context.json(
+            {
+              error: "Payload Too Large",
+              requestId: context.get("requestId"),
+            },
+            413,
+          ),
+      }),
+    );
+    app.use(path, async (context, next) => {
+      if (!rateLimiter || context.req.method === "OPTIONS") return next();
+      const forwardedFor = context.req.header("x-forwarded-for") ?? "local";
+      const clientKey = forwardedFor.split(",")[0]?.trim() || "unknown";
+      const decision = await rateLimiter.consume({
+        key: clientKey,
+        limit: rateLimit.requests,
+        now: new Date(),
+        windowMs: rateLimit.windowMs,
+      });
+      context.header("RateLimit-Limit", String(decision.limit));
+      context.header("RateLimit-Remaining", String(decision.remaining));
+      context.header(
+        "RateLimit-Reset",
+        String(Math.ceil(decision.resetAt.getTime() / 1_000)),
+      );
+      if (!decision.allowed) {
+        const retryAfter = Math.max(
+          1,
+          Math.ceil((decision.resetAt.getTime() - Date.now()) / 1_000),
+        );
+        context.header("Retry-After", String(retryAfter));
+        context.get("logger").warn("http.rate_limit.exceeded");
+        telemetry.metric("RateLimitExceeded", 1, "Count", { stage });
+        return context.json(
+          {
+            error: "Too Many Requests",
+            requestId: context.get("requestId"),
+          },
+          429,
+        );
+      }
+      return next();
+    });
+  }
 
   const liveResponse = (requestId: string) => ({
     status: "ok" as const,
