@@ -12,6 +12,8 @@ local application; the pages below explain design decisions and ongoing work.
    feedback commands, and template qualification.
 3. [Template readiness](template-readiness.md) lists the capabilities to retain
    or deliberately remove when adapting the template.
+4. [Generic application baseline](generic-application.md) explains the reusable
+   CRUD, authorization, upload, and Clean Architecture example.
 
 ## Development
 

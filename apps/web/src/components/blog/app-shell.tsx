@@ -21,7 +21,7 @@ import { AuthStatus } from "~/auth/status";
 
 const navigation = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/posts/", icon: FileText, label: "Posts" },
+  { href: "/posts/", icon: FileText, label: "Content" },
   { href: "/editor/", icon: PenLine, label: "Editor" },
   { href: "/users/", icon: Users, label: "Users" },
   { href: "/admin/", icon: ShieldCheck, label: "Admin" },

@@ -1,54 +1,67 @@
-import type { Database } from "@acme/db-backbone/client";
-import type { LogRecord } from "@acme/logger";
-import { createLogger } from "@acme/logger";
-import type { Cache } from "@acme/s3-cache";
 import { describe, expect, it, vi } from "vitest";
+
+import type { ApplicationLogger, PostRepository } from "./post";
 import { createPostService } from "./post";
 
+function createDependencies() {
+  const repository: PostRepository = {
+    create: vi.fn(),
+    delete: vi.fn(),
+    findById: vi.fn(),
+    list: vi
+      .fn()
+      .mockResolvedValue({ items: [], page: 1, pageSize: 10, total: 0 }),
+    update: vi.fn(),
+  };
+  const logger: ApplicationLogger = { debug: vi.fn(), info: vi.fn() };
+  return { logger, repository };
+}
+
 describe("createPostService", () => {
-  it("preserves request context in service logs", async () => {
-    const records: LogRecord[] = [];
-    const findMany = vi.fn().mockResolvedValue([]);
-    const database = {
-      query: { Post: { findMany } },
-    } as unknown as Database;
-    const logger = createLogger({
-      service: "api",
-      bindings: { component: "post-service", requestId: "request-123" },
-      sink: (record) => records.push(record),
+  it("normalizes list input before calling the repository port", async () => {
+    const deps = createDependencies();
+    await createPostService(deps).listPosts({
+      page: 0,
+      pageSize: 100,
+      query: "  term  ",
     });
-
-    await createPostService(database, logger).listPosts(100);
-
-    expect(findMany).toHaveBeenCalledOnce();
-    expect(records).toEqual([
-      expect.objectContaining({
-        component: "post-service",
-        limit: 50,
-        message: "post.list",
-        requestId: "request-123",
-      }),
-    ]);
+    expect(deps.repository.list).toHaveBeenCalledWith({
+      direction: "desc",
+      page: 1,
+      pageSize: 50,
+      query: "term",
+      sort: "createdAt",
+    });
   });
 
-  it("caches database reads through an injected cache", async () => {
-    const findFirst = vi.fn().mockResolvedValue({ id: "post-1" });
-    const database = {
-      query: { Post: { findFirst } },
-    } as unknown as Database;
-    const getOrSet = vi.fn(
-      async (_key: string, loader: () => Promise<unknown>) => loader(),
-    );
-    const cache = { getOrSet } as unknown as Cache;
-    const logger = createLogger({ service: "test", sink: () => undefined });
+  it("delegates mutations without exposing an infrastructure type", async () => {
+    const deps = createDependencies();
+    vi.mocked(deps.repository.update).mockResolvedValue({
+      content: "Body",
+      createdAt: new Date(0),
+      id: "post-1",
+      title: "Title",
+      updatedAt: new Date(1),
+    });
+    vi.mocked(deps.repository.delete).mockResolvedValue(true);
+    const service = createPostService(deps);
+    await service.updatePost("post-1", { content: "Body", title: "Title" });
+    await service.deletePost("post-1");
+    expect(deps.repository.update).toHaveBeenCalledWith("post-1", {
+      content: "Body",
+      title: "Title",
+    });
+    expect(deps.repository.delete).toHaveBeenCalledWith("post-1");
+  });
 
-    await createPostService(database, logger, { cache }).getPostById("post-1");
-
-    expect(getOrSet).toHaveBeenCalledWith(
-      "by-id:post-1",
-      expect.any(Function),
-      { ttlSeconds: 60 },
+  it("reports missing resources through an application error", async () => {
+    const deps = createDependencies();
+    const service = createPostService(deps);
+    await expect(service.getPostById("missing")).rejects.toThrow(
+      "Content item not found",
     );
-    expect(findFirst).toHaveBeenCalledOnce();
+    await expect(service.deletePost("missing")).rejects.toThrow(
+      "Content item not found",
+    );
   });
 });

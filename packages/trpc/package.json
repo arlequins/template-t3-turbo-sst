@@ -32,6 +32,7 @@
     "@acme/service": "workspace:*",
     "@acme/validators": "workspace:*",
     "@aws-sdk/client-s3": "catalog:",
+    "@aws-sdk/s3-request-presigner": "catalog:",
     "@trpc/server": "catalog:",
     "drizzle-orm": "catalog:",
     "superjson": "catalog:",

@@ -1,12 +1,18 @@
 import { Permission } from "@acme/auth";
-import { createPostInputSchema } from "@acme/validators";
+import {
+  createPostInputSchema,
+  listPostsInputSchema,
+  updatePostInputSchema,
+} from "@acme/validators";
 import type { TRPCRouterRecord } from "@trpc/server";
 import { z } from "zod/v4";
 
 import { permissionProcedure, publicProcedure } from "../trpc";
 
 export const postRouter = {
-  all: publicProcedure.query(({ ctx }) => ctx.services.post.listPosts()),
+  all: publicProcedure
+    .input(listPostsInputSchema.optional())
+    .query(({ ctx, input }) => ctx.services.post.listPosts(input)),
 
   byId: publicProcedure
     .input(z.object({ id: z.string() }))
@@ -15,6 +21,12 @@ export const postRouter = {
   create: permissionProcedure(Permission.POST_WRITE)
     .input(createPostInputSchema)
     .mutation(({ ctx, input }) => ctx.services.post.createPost(input)),
+
+  update: permissionProcedure(Permission.POST_WRITE)
+    .input(updatePostInputSchema)
+    .mutation(({ ctx, input }) =>
+      ctx.services.post.updatePost(input.id, input.data),
+    ),
 
   delete: permissionProcedure(Permission.POST_WRITE)
     .input(z.string())

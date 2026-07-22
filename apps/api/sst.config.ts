@@ -40,9 +40,22 @@ export default $config({
       wafEnabled: serverEnv.API_WAF_ENABLED,
     });
     const cacheBucket = new sst.aws.Bucket("Cache");
+    const uploadOrigins = (
+      serverEnv.API_CORS_ORIGINS ?? "http://localhost:3000"
+    )
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+    const uploadBucket = new sst.aws.Bucket("Uploads", {
+      cors: {
+        allowHeaders: ["content-type"],
+        allowMethods: ["PUT"],
+        allowOrigins: uploadOrigins,
+      },
+    });
     const handler = {
       handler: "src/lambda.handler",
-      link: [cacheBucket],
+      link: [cacheBucket, uploadBucket],
       ...(vpc
         ? {
             vpc: {
@@ -55,6 +68,8 @@ export default $config({
         ...LambdaEnvironment,
         S3_CACHE_BUCKET: cacheBucket.name,
         S3_CACHE_PREFIX: `${$app.name}/${$app.stage}`,
+        S3_UPLOAD_BUCKET: uploadBucket.name,
+        S3_UPLOAD_PREFIX: `${$app.name}/${$app.stage}`,
         SST_STAGE: $app.stage,
       },
     };

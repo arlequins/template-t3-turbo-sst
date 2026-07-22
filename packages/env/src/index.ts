@@ -53,6 +53,12 @@ export const LambdaEnvironment = {
   ...(serverEnv.OIDC_PROVIDERS_JSON
     ? { OIDC_PROVIDERS_JSON: serverEnv.OIDC_PROVIDERS_JSON }
     : {}),
+  ...(serverEnv.AUTH_BOOTSTRAP_ADMIN_IDENTITIES
+    ? {
+        AUTH_BOOTSTRAP_ADMIN_IDENTITIES:
+          serverEnv.AUTH_BOOTSTRAP_ADMIN_IDENTITIES,
+      }
+    : {}),
   OIDC_ALLOWED_ALGORITHMS: serverEnv.OIDC_ALLOWED_ALGORITHMS ?? "RS256",
   API_CORS_ORIGINS:
     serverEnv.API_CORS_ORIGINS ?? clientEnv.NEXT_PUBLIC_SITE_URL,
@@ -83,5 +89,11 @@ export const LambdaEnvironment = {
     : {}),
   ...(serverEnv.S3_CACHE_TTL_SECONDS
     ? { S3_CACHE_TTL_SECONDS: String(serverEnv.S3_CACHE_TTL_SECONDS) }
+    : {}),
+  ...(serverEnv.S3_UPLOAD_BUCKET
+    ? { S3_UPLOAD_BUCKET: serverEnv.S3_UPLOAD_BUCKET }
+    : {}),
+  ...(serverEnv.S3_UPLOAD_PREFIX
+    ? { S3_UPLOAD_PREFIX: serverEnv.S3_UPLOAD_PREFIX }
     : {}),
 };

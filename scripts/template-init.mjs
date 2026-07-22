@@ -71,7 +71,8 @@ export function pathsToPrune(options) {
   if (!features.has("auth")) {
     paths.push(
       "apps/web/src/app/auth",
-      "apps/web/src/auth",
+      "apps/web/src/auth/provider.tsx",
+      "apps/web/src/auth/status.tsx",
       "apps/web/src/lib/client-auth.ts",
       "packages/auth",
       "packages/db-backbone/drizzle/0001_auth-users.sql",
@@ -82,6 +83,7 @@ export function pathsToPrune(options) {
       "playwright.config.ts",
       "tests/e2e/accessibility.test.ts",
       "tests/e2e/auth.test.ts",
+      "tests/e2e/content-crud.test.ts",
       "tooling/oidc-mock",
     );
   }
@@ -107,6 +109,8 @@ export function pathsToPrune(options) {
       "apps/web/src/app/posts",
       "apps/web/src/app/users",
       "apps/web/src/components/blog",
+      "apps/web/src/components/content",
+      "apps/web/src/components/authorization",
       "apps/web/src/components/posts.tsx",
       "apps/web/src/lib/blog-data.ts",
       "scripts/example-crud.mjs",
@@ -143,7 +147,10 @@ function prunePackageJson(relativePath, source, options) {
       removeDependencies(packageJson, [`${options.scope}/auth`]);
     }
     if (relativePath === "apps/web/package.json") {
-      removeDependencies(packageJson, ["oidc-client-ts"]);
+      removeDependencies(packageJson, [
+        `${options.scope}/auth`,
+        "oidc-client-ts",
+      ]);
     }
     if (relativePath === "packages/trpc/package.json") {
       removeDependencies(packageJson, [`${options.scope}/auth`, "drizzle-orm"]);
@@ -252,7 +259,7 @@ export function transformContent(relativePath, source, options) {
           "",
         )
         .replace(
-          'import { databaseUserProvisioning } from "./adaptors/auth-user";\n',
+          /import \{ createDatabaseUserProvisioning \} from "\.\/adaptors\/auth-user";\n/,
           "",
         )
         .replace(
@@ -261,7 +268,6 @@ export function transformContent(relativePath, source, options) {
         )
         .replace("    authApi,\n", "")
         .replace("    session,\n", "")
-        .replace("initTRPC, TRPCError", "initTRPC")
         .replace(
           /export const protectedProcedure = t\.procedure[\s\S]*$/,
           "export const protectedProcedure = publicProcedure;\n",
@@ -274,7 +280,7 @@ export function transformContent(relativePath, source, options) {
     }
     if (relativePath === "packages/trpc/src/contract.test.ts") {
       output = output
-        .replace('["auth", "post"]', '["post"]')
+        .replace('["auth", "file", "post"]', '["file", "post"]')
         .replace(
           '    expect(procedureNames(AppRouter._def.record.auth)).toEqual(["me"]);\n',
           "",
@@ -297,6 +303,18 @@ export function transformContent(relativePath, source, options) {
         )
         .replaceAll("protectedProcedure", "publicProcedure");
     }
+    if (relativePath === "packages/trpc/src/router/file.ts") {
+      output = output
+        .replace(/import \{ Permission \} from "[^"]+\/auth";\n/, "")
+        .replace(
+          'import { permissionProcedure } from "../trpc";',
+          'import { publicProcedure } from "../trpc";',
+        )
+        .replace(
+          "permissionProcedure(Permission.POST_WRITE)",
+          "publicProcedure",
+        );
+    }
     if (relativePath === "packages/trpc/src/router/auth.ts") {
       output =
         'import type { TRPCRouterRecord } from "@trpc/server";\n\nimport { publicProcedure } from "../trpc";\n\nexport const authRouter = {\n  me: publicProcedure.query(() => null),\n} satisfies TRPCRouterRecord;\n';
@@ -312,8 +330,19 @@ export function transformContent(relativePath, source, options) {
         .replace('import { AuthStatus } from "~/auth/status";\n', "")
         .replace("        <AuthStatus />\n", "");
     }
+    if (relativePath === "apps/web/src/components/blog/app-shell.tsx") {
+      output = output
+        .replace('import { AuthStatus } from "~/auth/status";\n', "")
+        .replace("            <AuthStatus compact />\n", "");
+    }
     if (relativePath === "apps/web/src/auth/status.tsx") {
       output = "export function AuthStatus() {\n  return null;\n}\n";
+    }
+    if (
+      relativePath ===
+      "apps/web/src/components/authorization/permission-gate.tsx"
+    ) {
+      output = `export const Permission = { POST_WRITE: "post:write" } as const;\n\nexport function PermissionGate(props: { children: React.ReactNode; fallback?: React.ReactNode; permission?: unknown }) {\n  return props.children;\n}\n`;
     }
     if (relativePath === "apps/web/src/trpc/react.tsx") {
       output = output

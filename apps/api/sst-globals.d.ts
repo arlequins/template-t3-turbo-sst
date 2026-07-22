@@ -52,7 +52,16 @@ declare const sst: {
       ) => unknown;
       url: string;
     };
-    Bucket: new (name: string) => { name: string };
+    Bucket: new (
+      name: string,
+      args?: {
+        cors?: {
+          allowHeaders?: string[];
+          allowMethods?: ("DELETE" | "GET" | "HEAD" | "POST" | "PUT")[];
+          allowOrigins?: string[];
+        };
+      },
+    ) => { name: string };
     Function: new (
       name: string,
       args: {

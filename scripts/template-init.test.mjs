@@ -65,6 +65,22 @@ describe("template:init", () => {
     );
     assert.doesNotMatch(router, /protectedProcedure/);
 
+    const fileRouter = transformContent(
+      "packages/trpc/src/router/file.ts",
+      'import { Permission } from "@acme/auth";\nimport { permissionProcedure } from "../trpc";\nconst upload = permissionProcedure(Permission.POST_WRITE);\n',
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(fileRouter, /@company\/auth|permissionProcedure/);
+    assert.match(fileRouter, /publicProcedure/);
+
+    const trpcContext = transformContent(
+      "packages/trpc/src/trpc.ts",
+      'import { initTRPC, TRPCError } from "@trpc/server";\nimport { createDatabaseUserProvisioning } from "./adaptors/auth-user";\n',
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(trpcContext, /auth-user/);
+    assert.match(trpcContext, /initTRPC, TRPCError/);
+
     const rootPackage = transformContent(
       "package.json",
       JSON.stringify({

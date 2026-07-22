@@ -1,4 +1,5 @@
 import { db } from "@acme/db-backbone/client";
+import { createDrizzlePostRepository } from "@acme/db-backbone/post-repository";
 import { createLogger } from "@acme/logger";
 import { createPostService } from "@acme/service";
 
@@ -8,10 +9,10 @@ const logger = createLogger({
   service: "batch",
   bindings: { component: "process-main" },
 });
-const postService = createPostService(
-  db,
-  logger.child({ component: "post-service" }),
-);
+const postService = createPostService({
+  logger: logger.child({ component: "post-service" }),
+  repository: createDrizzlePostRepository(db),
+});
 
 export async function processMain(payload: ProcessMainEvent): Promise<void> {
   const runLogger = logger.child({ batchId: payload.batchId });
@@ -25,6 +26,6 @@ export async function processMain(payload: ProcessMainEvent): Promise<void> {
   const result = await postService.listPosts();
   runLogger.info("batch.process.completed", {
     inputType: "db",
-    resultCount: result.length,
+    resultCount: result.total,
   });
 }
