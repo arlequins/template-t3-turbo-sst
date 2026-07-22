@@ -77,6 +77,8 @@ The API endpoints are:
 
 - Liveness: `http://localhost:5000/health/live`
 - PostgreSQL-backed readiness: `http://localhost:5000/health/ready`
+- Interactive API explorer: `http://localhost:5000/docs`
+- OpenAPI document: `http://localhost:5000/openapi.json`
 - tRPC: `http://localhost:5000/api/trpc`
 
 See [Application Architecture](./docs/architecture.md) for request flow and
