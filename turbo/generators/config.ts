@@ -67,15 +67,33 @@ function addDomainToContract(domain: string) {
     /expect\(procedureNames\(AppRouter\)\)\.toEqual\((\[[^\]]+\])\)/,
   );
   if (!match?.[1]) throw new Error("Unable to update the tRPC contract test");
-  const routers = JSON.parse(match[1]) as string[];
+  const routers = [...match[1].matchAll(/"([^"]+)"/g)].flatMap((entry) =>
+    entry[1] ? [entry[1]] : [],
+  );
   const next = [...new Set([...routers, camelCase(domain)])].sort();
   writeFileSync(path, source.replace(match[1], JSON.stringify(next)), "utf8");
+}
+
+function exportFeatureFromService(name: string) {
+  const path = "packages/service/src/index.ts";
+  const pascalName = pascalCase(name);
+  const additions = [
+    `export type { ${pascalName}Input, ${pascalName}Result } from "./domain/${name}";`,
+    `export type { ${pascalName}Port } from "./application/ports/${name}-port";`,
+    `export type { ${pascalName}Service } from "./application/use-cases/${name}";`,
+    `export { create${pascalName}Service } from "./application/use-cases/${name}";`,
+  ];
+  const source = readFileSync(path, "utf8");
+  writeFileSync(path, `${source.trimEnd()}\n${additions.join("\n")}\n`, "utf8");
 }
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
   plop.setHelper("scope", packageScope);
   plop.setHelper("camelCase", camelCase);
   plop.setHelper("pascalCase", pascalCase);
+  plop.setHelper("procedure", (kind: string) =>
+    kind === "query" ? "query" : "mutation",
+  );
 
   const namePrompt = {
     type: "input" as const,
@@ -132,6 +150,63 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         addDomainToContract(name);
         execFileSync("pnpm", ["check:fix"], { stdio: "inherit" });
         return "Domain module scaffolded and registered";
+      },
+    ],
+  });
+
+  plop.setGenerator("feature", {
+    description: "Generate a clean-architecture command or query slice",
+    prompts: [
+      namePrompt,
+      {
+        type: "list",
+        name: "kind",
+        message: "Operation kind",
+        choices: ["command", "query"],
+        default: "command",
+      },
+    ],
+    actions: [
+      ...[
+        ["domain/{{ name }}.ts", "domain.ts.hbs"],
+        ["application/ports/{{ name }}-port.ts", "port.ts.hbs"],
+        ["application/use-cases/{{ name }}.ts", "usecase.ts.hbs"],
+        ["{{ name }}.test.ts", "test.ts.hbs"],
+      ].map(([path, template]) => ({
+        type: "add",
+        path: `packages/service/src/${path}`,
+        templateFile: `templates/feature/${template}`,
+      })),
+      ...[
+        ["adaptors/{{ name }}.ts", "adaptor.ts.hbs"],
+        ["composition/{{ name }}.ts", "composition.ts.hbs"],
+        ["router/{{ name }}.ts", "router.ts.hbs"],
+      ].map(([path, template]) => ({
+        type: "add",
+        path: `packages/trpc/src/${path}`,
+        templateFile: `templates/feature/${template}`,
+      })),
+      {
+        type: "modify",
+        path: "packages/trpc/src/root.ts",
+        pattern: /import \{ createTRPCRouter \} from "\.\/trpc";/,
+        template:
+          'import { {{ camelCase name }}Router } from "./router/{{ name }}";\nimport { createTRPCRouter } from "./trpc";',
+      },
+      {
+        type: "modify",
+        path: "packages/trpc/src/root.ts",
+        pattern: /export const AppRouter = createTRPCRouter\(\{\n/,
+        template:
+          "export const AppRouter = createTRPCRouter({\n  {{ camelCase name }}: {{ camelCase name }}Router,\n",
+      },
+      (answers) => {
+        const name = sanitizeName(String(answers.name));
+        exportFeatureFromService(name);
+        addDomainToContract(name);
+        execFileSync("pnpm", ["check:fix"], { stdio: "inherit" });
+        execFileSync("pnpm", ["architecture:check"], { stdio: "inherit" });
+        return "Feature slice scaffolded, registered, and checked";
       },
     ],
   });

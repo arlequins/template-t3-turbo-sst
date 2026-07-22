@@ -96,6 +96,7 @@ for provider configuration.
 | `pnpm test:e2e` | Run isolated PostgreSQL and browser end-to-end tests. |
 | `pnpm db:setup` | Apply committed migrations and pending seeds. |
 | `pnpm turbo gen` | Generate an application, package, or tRPC domain. |
+| `pnpm gen:feature` | Generate a clean-architecture command or query slice. |
 
 Database schema changes use:
 

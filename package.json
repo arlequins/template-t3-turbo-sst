@@ -64,7 +64,8 @@
     "env:push": "pnpm -F @acme/sst-bootstrap run env:push --",
     "env:check": "node scripts/check-env-sync.mjs",
     "example:remove": "node scripts/example-crud.mjs remove",
-    "example:regenerate": "node scripts/example-crud.mjs regenerate"
+    "example:regenerate": "node scripts/example-crud.mjs regenerate",
+    "gen:feature": "turbo gen feature"
   },
   "devDependencies": {
     "@axe-core/playwright": "catalog:",
