@@ -8,6 +8,7 @@ import {
   initializeTemplate,
   parseArgs,
   pathsToPrune,
+  resolveDisplayName,
   resolveFeatures,
   transformContent,
   validateOptions,
@@ -25,6 +26,11 @@ describe("template:init", () => {
     ]);
     assert.equal(options.dryRun, true);
     assert.doesNotThrow(() => validateOptions(options));
+    assert.equal(resolveDisplayName(options), "Customer Portal");
+    assert.equal(
+      resolveDisplayName({ ...options, "display-name": "Customer Hub" }),
+      "Customer Hub",
+    );
     assert.throws(() =>
       validateOptions({ name: "Bad Name", scope: "company" }),
     );
@@ -103,6 +109,36 @@ describe("template:init", () => {
       { name: "app", scope: "@company", preset: "minimal" },
     );
     assert.doesNotMatch(context, /@company\/auth|AuthSession|TRPCAuth/);
+
+    const siteConfig = transformContent(
+      "apps/web/src/config/site.ts",
+      'export const siteConfig = { name: "Acme Workspace", shortName: "AW" };\n',
+      {
+        name: "customer-portal",
+        scope: "@company",
+        "display-name": "Customer Portal",
+      },
+    );
+    assert.match(siteConfig, /name: "Customer Portal"/);
+    assert.match(siteConfig, /shortName: "CP"/);
+
+    const featureManifest = JSON.parse(
+      transformContent("template.features.json", "{}", {
+        name: "customer-portal",
+        scope: "@company",
+        domain: "customer.example.org",
+        "display-name": "Customer Portal",
+        preset: "full",
+      }),
+    );
+    assert.deepEqual(featureManifest, {
+      name: "customer-portal",
+      displayName: "Customer Portal",
+      scope: "@company",
+      domain: "customer.example.org",
+      preset: "full",
+      features: ["auth", "batch", "sst", "example-ui"],
+    });
 
     const rootPackage = transformContent(
       "package.json",

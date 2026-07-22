@@ -18,6 +18,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { AuthStatus } from "~/auth/status";
+import { siteConfig } from "~/config/site";
 
 const navigation = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
@@ -41,8 +42,8 @@ function Sidebar(props: { onNavigate?: () => void }) {
           <BookOpenText aria-hidden="true" className="size-4" />
         </span>
         <div>
-          <p className="text-sm font-semibold">Northstar</p>
-          <p className="text-muted-foreground text-xs">Editorial studio</p>
+          <p className="text-sm font-semibold">{siteConfig.name}</p>
+          <p className="text-muted-foreground text-xs">Application workspace</p>
         </div>
       </Link>
 
@@ -80,14 +81,14 @@ function Sidebar(props: { onNavigate?: () => void }) {
           className="hover:bg-muted flex items-center gap-3 rounded-md px-3 py-2"
         >
           <span className="bg-foreground text-background flex size-8 items-center justify-center rounded-full text-xs font-semibold">
-            MC
+            {siteConfig.user.initials}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">
-              Maya Chen
+              {siteConfig.user.name}
             </span>
             <span className="text-muted-foreground block truncate text-xs">
-              Administrator
+              {siteConfig.user.role}
             </span>
           </span>
           <Settings
@@ -123,7 +124,7 @@ export function AppShell(props: { children: React.ReactNode }) {
             <span className="bg-foreground text-background flex size-8 items-center justify-center rounded-md">
               <BookOpenText aria-hidden="true" className="size-4" />
             </span>
-            <span className="text-sm font-semibold">Northstar</span>
+            <span className="text-sm font-semibold">{siteConfig.name}</span>
           </Link>
 
           <button

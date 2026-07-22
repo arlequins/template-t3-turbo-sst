@@ -23,7 +23,7 @@ export type BlogPost = {
 
 export const blogPosts: BlogPost[] = [
   {
-    author: "Maya Chen",
+    author: "Alex Morgan",
     category: "Work",
     comments: 18,
     content: [
@@ -79,7 +79,7 @@ export const blogPosts: BlogPost[] = [
     views: 0,
   },
   {
-    author: "Maya Chen",
+    author: "Alex Morgan",
     category: "Ideas",
     comments: 0,
     content: [
@@ -100,16 +100,16 @@ export const blogPosts: BlogPost[] = [
 
 export const blogUsers = [
   {
-    email: "maya@northstar.test",
-    initials: "MC",
+    email: "alex@example.test",
+    initials: "AM",
     joined: "Jan 12, 2026",
-    name: "Maya Chen",
+    name: "Alex Morgan",
     posts: 24,
     role: "Administrator",
     status: "Active",
   },
   {
-    email: "jon@northstar.test",
+    email: "jon@example.test",
     initials: "JB",
     joined: "Feb 03, 2026",
     name: "Jon Bell",
@@ -118,7 +118,7 @@ export const blogUsers = [
     status: "Active",
   },
   {
-    email: "alina@northstar.test",
+    email: "alina@example.test",
     initials: "AR",
     joined: "Mar 28, 2026",
     name: "Alina Ross",
@@ -127,7 +127,7 @@ export const blogUsers = [
     status: "Active",
   },
   {
-    email: "sam@northstar.test",
+    email: "sam@example.test",
     initials: "SK",
     joined: "Jun 07, 2026",
     name: "Sam Kim",
@@ -136,7 +136,7 @@ export const blogUsers = [
     status: "Invited",
   },
   {
-    email: "leah@northstar.test",
+    email: "leah@example.test",
     initials: "LP",
     joined: "Nov 19, 2025",
     name: "Leah Patel",

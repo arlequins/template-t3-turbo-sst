@@ -15,6 +15,7 @@ import Link from "next/link";
 import { PageHeader } from "~/components/blog/page-header";
 import { StatBlock } from "~/components/blog/stat-block";
 import { StatusBadge } from "~/components/blog/status-badge";
+import { siteConfig } from "~/config/site";
 import { blogPosts, formatCompactNumber } from "~/lib/blog-data";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -26,7 +27,7 @@ export default function DashboardPage() {
     <div className="space-y-6 lg:space-y-7">
       <PageHeader
         eyebrow="Wednesday, July 22"
-        title="Good morning, Maya"
+        title={`Welcome to ${siteConfig.name}`}
         description="Here is what is happening across your publication today."
         actions={
           <Button asChild>

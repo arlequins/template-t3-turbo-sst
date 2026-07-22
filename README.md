@@ -33,14 +33,18 @@ actionable error when the runtime does not match.
 Preview repository-wide replacements before applying them:
 
 ```bash
-pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --dry-run
-pnpm template:init -- --name customer-portal --scope @company --domain customer.example.org --description "Customer portal"
+pnpm template:init -- --name customer-portal --display-name "Customer Portal" --scope @company --domain customer.example.org --dry-run
+pnpm template:init -- --name customer-portal --display-name "Customer Portal" --scope @company --domain customer.example.org --description "Customer portal"
 pnpm install
 ```
 
 The initializer updates package names, SST application names, repository
 metadata, and example domains. It refuses to modify a dirty worktree unless
 `--force` is provided.
+
+`--display-name` controls user-facing branding and defaults to a title-cased
+version of `--name`. The generated `template.features.json` records the project
+identity, selected preset, and enabled optional features for later tooling.
 
 The default preset retains the complete template. For a smaller starting point:
 

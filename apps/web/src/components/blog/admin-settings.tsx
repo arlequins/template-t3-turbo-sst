@@ -5,6 +5,7 @@ import { Input } from "@acme/ui/input";
 import { toast } from "@acme/ui/toast";
 import { Save } from "lucide-react";
 import { useState } from "react";
+import { siteConfig } from "~/config/site";
 
 const tabs = ["General", "Publishing", "Security"] as const;
 
@@ -61,7 +62,7 @@ export function AdminSettings() {
               Publication name
               <Input
                 className="mt-2"
-                defaultValue="Northstar"
+                defaultValue={siteConfig.name}
                 id="publication-name"
               />
             </label>
@@ -69,7 +70,7 @@ export function AdminSettings() {
               Site URL
               <Input
                 className="mt-2"
-                defaultValue="https://northstar.example"
+                defaultValue="https://app.example.com"
                 id="site-url"
               />
             </label>
