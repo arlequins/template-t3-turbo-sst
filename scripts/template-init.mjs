@@ -254,24 +254,45 @@ export function transformContent(relativePath, source, options) {
     if (relativePath === "packages/trpc/src/trpc.ts") {
       output = output
         .replace(/import type \{ Permission \} from "[^"]+\/auth";\n/, "")
-        .replace(
-          /import \{ authApi, hasPermission, provisionSessionUser \} from "[^"]+\/auth";\n/,
-          "",
-        )
+        .replace(/import \{ hasPermission \} from "[^"]+\/auth";\n/, "")
         .replace(
           /import \{ createDatabaseUserProvisioning \} from "\.\/adaptors\/auth-user";\n/,
           "",
         )
         .replace(
-          / {2}const tokenSession = await authApi\.getSession\(\{[\s\S]*? {2}\}\n {2}return \{/,
-          "  return {",
-        )
-        .replace("    authApi,\n", "")
-        .replace("    session,\n", "")
-        .replace(
           /export const protectedProcedure = t\.procedure[\s\S]*$/,
           "export const protectedProcedure = publicProcedure;\n",
         );
+    }
+    if (relativePath === "packages/trpc/src/context.ts") {
+      output = output
+        .replace(
+          /import type \{ AuthSession, TRPCAuth \} from "[^"]+\/auth";\n/,
+          "",
+        )
+        .replace("  authApi: TRPCAuth;\n", "")
+        .replace("  session: AuthSession | null;\n", "");
+    }
+    if (relativePath === "packages/trpc/src/composition/create-context.ts") {
+      output = output
+        .replace(
+          /import \{ authApi, provisionSessionUser \} from "[^"]+\/auth";\n/,
+          "",
+        )
+        .replace(
+          /import \{ createDatabaseUserProvisioning \} from "\.\.\/adaptors\/auth-user";\n/,
+          "",
+        )
+        .replace(
+          /function bootstrapAdministratorIdentities\(\) \{[\s\S]*?\n\}\n\n/,
+          "",
+        )
+        .replace(
+          / {2}const tokenSession = await authApi\.getSession[\s\S]*?\n {2}if \(session\)[\s\S]*?\n {4}\}\);\n\n/,
+          "",
+        )
+        .replace("    authApi,\n", "")
+        .replace("    session,\n", "");
     }
     if (relativePath === "packages/trpc/src/root.ts") {
       output = output

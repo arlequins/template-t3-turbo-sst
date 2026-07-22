@@ -1,22 +1,25 @@
-export { ApplicationInputError, ResourceNotFoundError } from "./errors";
+export {
+  ApplicationInputError,
+  ResourceNotFoundError,
+} from "./application/errors";
+export type { ApplicationLogger } from "./application/ports/application-logger";
+export type { ContentRepository } from "./application/ports/content-repository";
 export type {
-  FileUploadPort,
-  FileUploadService,
+  FileStoragePort,
   UploadRequest,
   UploadTarget,
-} from "./file-upload";
-export { createFileUploadService } from "./file-upload";
-export type {
-  ApplicationLogger,
-  PostListInput,
-  PostPage,
-  PostRecord,
-  PostRepository,
-  PostService,
-} from "./post";
-export { createPostService } from "./post";
+} from "./application/ports/file-storage";
 export type {
   RateLimitDecision,
   RateLimitPort,
   RateLimitRequest,
-} from "./rate-limit";
+} from "./application/ports/rate-limiter";
+export type { ContentService } from "./application/use-cases/content";
+export { createContentService } from "./application/use-cases/content";
+export type { FileUploadService } from "./application/use-cases/request-file-upload";
+export { createFileUploadService } from "./application/use-cases/request-file-upload";
+export type {
+  ContentListInput,
+  ContentPage,
+  ContentRecord,
+} from "./domain/content";

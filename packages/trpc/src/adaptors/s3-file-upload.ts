@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { FileUploadPort } from "@acme/service";
+import type { FileStoragePort } from "@acme/service";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -12,7 +12,7 @@ export function createS3FileUploadAdapter(options: {
   bucket: string;
   client?: S3Client;
   prefix?: string;
-}): FileUploadPort {
+}): FileStoragePort {
   const client = options.client ?? new S3Client({});
   const prefix = options.prefix?.replace(/^\/+|\/+$/g, "") ?? "uploads";
   return {

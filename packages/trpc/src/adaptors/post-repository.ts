@@ -1,12 +1,12 @@
 import type { Database } from "@acme/db-backbone/client";
 import { createDrizzlePostRepository as createRepository } from "@acme/db-backbone/post-repository";
 import type { Cache } from "@acme/s3-cache";
-import type { PostRepository } from "@acme/service";
+import type { ContentRepository } from "@acme/service";
 
 export function createDrizzlePostRepository(
   database: Database,
   options: { cache?: Cache; cacheTtlSeconds?: number } = {},
-): PostRepository {
+): ContentRepository {
   const repository = createRepository(database);
   const cache = options.cache;
   const ttlSeconds = options.cacheTtlSeconds ?? 60;

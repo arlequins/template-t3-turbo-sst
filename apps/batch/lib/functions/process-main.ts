@@ -5,8 +5,8 @@
 import type { Handler } from "aws-lambda";
 
 import type { HandlerInvokeEvent } from "..";
+import { processMain } from "../composition/process-main";
 import { logStepPayload } from "../usecases/common/logging";
-import { processMain } from "../usecases/process-main";
 
 export type ProcessMainEvent = HandlerInvokeEvent<{ type: "raw" | "db-query" }>;
 

@@ -1,31 +1,18 @@
+import { ApplicationInputError } from "../errors";
+import type { FileStoragePort, UploadRequest } from "../ports/file-storage";
+
 const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
-
-import { ApplicationInputError } from "./errors";
-
-export type UploadRequest = {
-  contentType: string;
-  fileName: string;
-  size: number;
-};
-export type UploadTarget = {
-  expiresAt: Date;
-  key: string;
-  method: "PUT";
-  url: string;
-};
-export type FileUploadPort = {
-  createUploadTarget(input: UploadRequest): Promise<UploadTarget>;
-};
 
 export function createFileUploadService(deps: {
   allowedContentTypes?: ReadonlySet<string>;
   maxBytes?: number;
-  storage: FileUploadPort;
+  storage: FileStoragePort;
 }) {
   const allowed =
     deps.allowedContentTypes ??
     new Set(["application/pdf", "image/jpeg", "image/png", "text/plain"]);
   const maxBytes = deps.maxBytes ?? DEFAULT_MAX_BYTES;
+
   return {
     requestUpload(input: UploadRequest) {
       if (!allowed.has(input.contentType))

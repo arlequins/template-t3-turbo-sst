@@ -81,6 +81,29 @@ describe("template:init", () => {
     assert.doesNotMatch(trpcContext, /auth-user/);
     assert.match(trpcContext, /initTRPC, TRPCError/);
 
+    const composition = transformContent(
+      "packages/trpc/src/composition/create-context.ts",
+      await readFile(
+        new URL(
+          "../packages/trpc/src/composition/create-context.ts",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(composition, /@company\/auth|authApi|tokenSession/);
+
+    const context = transformContent(
+      "packages/trpc/src/context.ts",
+      await readFile(
+        new URL("../packages/trpc/src/context.ts", import.meta.url),
+        "utf8",
+      ),
+      { name: "app", scope: "@company", preset: "minimal" },
+    );
+    assert.doesNotMatch(context, /@company\/auth|AuthSession|TRPCAuth/);
+
     const rootPackage = transformContent(
       "package.json",
       JSON.stringify({
