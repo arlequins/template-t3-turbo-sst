@@ -2,6 +2,30 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-07-22
+
+### Added
+
+- Interactive OpenAPI documentation with an API request explorer and browser E2E coverage.
+- Clean Architecture feature generator for domain, port, use-case, adaptor, composition, router, and test scaffolding.
+- Provider-neutral asynchronous messaging ports with in-memory and AWS adaptors.
+- Retry-safe mutation support backed by idempotency keys and optimistic content versioning.
+- Resilient S3 cache policies for stale reads, retry backoff, request coalescing, and observability hooks.
+- Isolated database integration tests powered by Testcontainers.
+- Responsive Playwright visual regression coverage for desktop and mobile layouts.
+- Template doctor and feature-matrix checks for generated project qualification.
+
+### Changed
+
+- Standardized application errors across the service, tRPC, and Hono API layers.
+- Enforced dead-code and dependency analysis in local tooling and CI.
+- Expanded CI to validate database migrations, generated presets, architecture boundaries, Storybook, and browser workflows.
+
+### Fixed
+
+- Made template environment-file updates atomic.
+- Stabilized cross-platform visual snapshots with fixed viewport baselines and platform rendering tolerance.
+
 ## [1.0.1] - 2026-04-10
 
 ### Added
