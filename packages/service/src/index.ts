@@ -15,3 +15,8 @@ export type {
   PostService,
 } from "./post";
 export { createPostService } from "./post";
+export type {
+  RateLimitDecision,
+  RateLimitPort,
+  RateLimitRequest,
+} from "./rate-limit";

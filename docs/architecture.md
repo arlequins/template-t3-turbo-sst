@@ -27,7 +27,8 @@ Browser
 
 1. A Client Component calls the browser-safe `@acme/trpc/client` entry point.
 2. The tRPC client sends an HTTP request to `${NEXT_PUBLIC_API_URL}/api/trpc`.
-3. Hono applies request IDs, security headers, and CORS before forwarding the request to tRPC.
+3. Hono applies request IDs, request guards, security headers, and CORS before
+   forwarding the request to tRPC.
 4. Hono binds the request ID to a child logger; tRPC passes that logger to request-scoped services.
 5. tRPC creates request-scoped services backed by the Drizzle database client.
 6. Protected procedures use the OIDC `sub` claim as the stable application user ID.

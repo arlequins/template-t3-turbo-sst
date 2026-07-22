@@ -39,6 +39,8 @@ its related code, tests, environment variables, and documentation.
   restore verification, and rollback guidance.
 - [x] Replaceable tracing and error reporting with CloudWatch metrics, alarms,
   and an incident runbook.
+- [x] Provider-neutral application rate limiting, request body limits, and
+  explicit API security headers with standard 413/429 responses.
 
 ## Authentication and Authorization
 

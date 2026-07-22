@@ -66,6 +66,16 @@ export const serverEnv = createEnv({
     API_THROTTLE_RATE_LIMIT: z.coerce.number().positive().optional(),
     /** API Gateway maximum request burst. */
     API_THROTTLE_BURST_LIMIT: z.coerce.number().int().positive().optional(),
+    /** Maximum JSON request body accepted by the application API. */
+    API_BODY_LIMIT_BYTES: z.coerce.number().int().positive().optional(),
+    /** Per-instance request allowance for the default application limiter. */
+    API_RATE_LIMIT_REQUESTS: z.coerce.number().int().positive().optional(),
+    /** Fixed-window duration for the default application limiter. */
+    API_RATE_LIMIT_WINDOW_SECONDS: z.coerce
+      .number()
+      .int()
+      .positive()
+      .optional(),
     /** Optional SNS topic receiving CloudWatch alarm notifications. */
     ALERT_TOPIC_ARN: z.string().startsWith("arn:aws:sns:").optional(),
     /** OTLP/HTTP collector base URL. Omit to keep export disabled. */
@@ -122,6 +132,9 @@ export const serverEnv = createEnv({
     API_WAF_ENABLED: process.env.API_WAF_ENABLED,
     API_THROTTLE_RATE_LIMIT: process.env.API_THROTTLE_RATE_LIMIT,
     API_THROTTLE_BURST_LIMIT: process.env.API_THROTTLE_BURST_LIMIT,
+    API_BODY_LIMIT_BYTES: process.env.API_BODY_LIMIT_BYTES,
+    API_RATE_LIMIT_REQUESTS: process.env.API_RATE_LIMIT_REQUESTS,
+    API_RATE_LIMIT_WINDOW_SECONDS: process.env.API_RATE_LIMIT_WINDOW_SECONDS,
     ALERT_TOPIC_ARN: process.env.ALERT_TOPIC_ARN,
     OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
