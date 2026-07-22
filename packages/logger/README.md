@@ -8,4 +8,22 @@ Small structured JSON logger shared by server applications and packages.
 - Pass identifiers and counts as fields. Do not log request bodies or authentication data.
 - Keys containing authorization, cookies, passwords, secrets, tokens, or API keys are redacted recursively.
 
-Applications can inject a custom `sink` for tests or for a future telemetry transport.
+Applications can inject a custom `sink` for tests or alternate log transports.
+
+## OpenTelemetry
+
+`startObservability()` installs the Node SDK, Node auto-instrumentations, and
+OTLP/HTTP exporters for traces and metrics. Call it before importing instrumented
+runtime modules. An omitted endpoint is an intentional no-op, so local startup
+does not require a collector.
+
+```ts
+await startObservability({
+  endpoint: serverEnv.OTEL_EXPORTER_OTLP_ENDPOINT,
+  serviceName: "api",
+});
+```
+
+Call `shutdownObservability()` before a controlled process exit to flush pending
+telemetry. Lambda initializes the SDK once during module loading and reuses it
+across warm invocations.

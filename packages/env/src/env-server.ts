@@ -66,6 +66,14 @@ export const serverEnv = createEnv({
     API_THROTTLE_BURST_LIMIT: z.coerce.number().int().positive().optional(),
     /** Optional SNS topic receiving CloudWatch alarm notifications. */
     ALERT_TOPIC_ARN: z.string().startsWith("arn:aws:sns:").optional(),
+    /** OTLP/HTTP collector base URL. Omit to keep export disabled. */
+    OTEL_EXPORTER_OTLP_ENDPOINT: z.url().optional(),
+    /** Comma-separated OTLP headers in key=value form. */
+    OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
+    /** Logical service identity included in exported resource attributes. */
+    OTEL_SERVICE_NAME: z.string().min(1).optional(),
+    /** Deployed application version included in exported resource attributes. */
+    OTEL_SERVICE_VERSION: z.string().min(1).optional(),
   },
   runtimeEnv: {
     SST_STAGE: process.env.SST_STAGE,
@@ -96,6 +104,10 @@ export const serverEnv = createEnv({
     API_THROTTLE_RATE_LIMIT: process.env.API_THROTTLE_RATE_LIMIT,
     API_THROTTLE_BURST_LIMIT: process.env.API_THROTTLE_BURST_LIMIT,
     ALERT_TOPIC_ARN: process.env.ALERT_TOPIC_ARN,
+    OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
+    OTEL_SERVICE_NAME: process.env.OTEL_SERVICE_NAME,
+    OTEL_SERVICE_VERSION: process.env.OTEL_SERVICE_VERSION,
   },
   emptyStringAsUndefined: true,
   skipValidation: skipEnvValidation,
