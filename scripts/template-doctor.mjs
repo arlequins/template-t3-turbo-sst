@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { access, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { connect } from "node:net";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -164,9 +164,11 @@ export async function runDoctor(options = {}) {
     JSON.parse(await readFile(resolve(cwd, "template.features.json"), "utf8"))
       .features ?? [];
   const envPath = resolve(cwd, options.envFile ?? ".env.localhost");
+  let envSource;
   try {
-    await access(envPath);
-  } catch {
+    envSource = await readFile(envPath, "utf8");
+  } catch (error) {
+    if (error?.code !== "ENOENT") throw error;
     return [
       ...results,
       {
@@ -177,7 +179,7 @@ export async function runDoctor(options = {}) {
       },
     ];
   }
-  const env = { ...parseEnv(await readFile(envPath, "utf8")), ...process.env };
+  const env = { ...parseEnv(envSource), ...process.env };
   results.push(
     {
       detail: options.envFile ?? ".env.localhost",
