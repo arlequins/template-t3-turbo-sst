@@ -37,8 +37,15 @@ Run `pnpm turbo gen` and select one of these generators:
 | `app` | A runnable TypeScript workspace under `apps/` |
 | `package` | A compiled TypeScript library under `packages/` |
 | `domain` | A DIP-aligned tRPC domain with types, port, service, adapter, composition, use case, router registration, and contract update |
+| `feature` | A clean-architecture command or query across `@acme/service` and `@acme/trpc`, including its first unit test |
 
 Names must be lowercase kebab-case. The active package scope is read from the initialized workspace instead of being hard-coded.
+
+Use `pnpm gen:feature`, enter a feature name, and select `command` or `query`.
+The generator registers the router, updates the public contract, formats the
+result, and runs the architecture boundary check. Replace the generated message
+input and pass-through adapter with domain-specific types and infrastructure;
+the generated dependency direction should remain intact.
 
 ## Fast Feedback
 

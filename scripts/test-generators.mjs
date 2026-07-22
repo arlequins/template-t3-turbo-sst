@@ -45,12 +45,13 @@ try {
   await copyRepository();
   await copyFile(resolve(target, ".env.example"), resolve(target, ".env"));
   run(pnpm, ["install", "--frozen-lockfile"]);
-  for (const [generator, name] of [
+  for (const [generator, ...args] of [
     ["app", "generated-app"],
     ["package", "generated-package"],
     ["domain", "order-history"],
+    ["feature", "inventory-query", "query"],
   ]) {
-    run(pnpm, ["turbo", "gen", generator, "--args", name]);
+    run(pnpm, ["turbo", "gen", generator, "--args", ...args]);
   }
   run(pnpm, ["check"]);
   run(pnpm, ["typecheck"]);
@@ -62,8 +63,18 @@ try {
   if (!rootRouter.includes("orderHistory: orderHistoryRouter")) {
     throw new Error("Generated domain was not registered in the tRPC root");
   }
+  if (!rootRouter.includes("inventoryQuery: inventoryQueryRouter")) {
+    throw new Error("Generated feature was not registered in the tRPC root");
+  }
+  const featureRouter = await readFile(
+    resolve(target, "packages/trpc/src/router/inventory-query.ts"),
+    "utf8",
+  );
+  if (!featureRouter.includes(".query(")) {
+    throw new Error("Generated query feature used the wrong procedure kind");
+  }
   console.log(
-    "Application, package, and domain generators passed qualification.",
+    "Application, package, domain, and feature generators passed qualification.",
   );
 } finally {
   await rm(target, { recursive: true, force: true });
