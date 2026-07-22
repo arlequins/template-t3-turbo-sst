@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTRPC } from "~/trpc/react";
 import { useAuth } from "./provider";
 
-export function AuthStatus() {
+export function AuthStatus(props: { compact?: boolean }) {
   const { isLoading, login, logout, user } = useAuth();
   const trpc = useTRPC();
   const session = useQuery(
@@ -28,18 +28,26 @@ export function AuthStatus() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-muted-foreground text-sm">
+      <span
+        className={props.compact ? "hidden" : "text-muted-foreground text-sm"}
+      >
         {displayName ?? user.profile.sub}
       </span>
       {session.data && (
         <span
-          className="text-muted-foreground text-sm"
+          className={
+            props.compact ? "sr-only" : "text-muted-foreground text-sm"
+          }
           data-testid="api-session"
         >
           API session: {session.data.name ?? session.data.id}
         </span>
       )}
-      <Button variant="outline" onClick={() => void logout()}>
+      <Button
+        size={props.compact ? "sm" : "default"}
+        variant="outline"
+        onClick={() => void logout()}
+      >
         Sign out
       </Button>
     </div>
