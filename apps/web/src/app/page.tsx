@@ -23,7 +23,7 @@ const weeklyViews = [42, 57, 48, 71, 63, 84, 78];
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-7">
+    <div className="space-y-6 lg:space-y-7">
       <PageHeader
         eyebrow="Wednesday, July 22"
         title="Good morning, Maya"
@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
       <section
         aria-label="Publication overview"
-        className="bg-background grid overflow-hidden rounded-lg border sm:grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
       >
         <StatBlock
           change="+12.4% from last month"
@@ -73,18 +73,18 @@ export default function DashboardPage() {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,0.7fr)]">
-        <section className="bg-background rounded-lg border">
-          <div className="flex items-center justify-between border-b px-5 py-4">
+        <section className="bg-background rounded-lg border shadow-xs">
+          <div className="flex items-start justify-between gap-3 border-b px-4 py-4 sm:items-center sm:px-5">
             <div>
               <h2 className="text-sm font-semibold">Audience this week</h2>
               <p className="text-muted-foreground mt-0.5 text-xs">
                 Daily views across all published posts
               </p>
             </div>
-            <span className="text-sm font-semibold">2,914 views</span>
+            <span className="shrink-0 text-sm font-semibold">2,914</span>
           </div>
-          <div className="px-5 py-6">
-            <div className="flex h-44 items-end gap-3 sm:gap-5">
+          <div className="px-4 py-5 sm:px-5 sm:py-6">
+            <div className="flex h-36 items-end gap-2 sm:h-44 sm:gap-5">
               {weeklyViews.map((height, index) => (
                 <div
                   className="flex h-full flex-1 flex-col justify-end gap-2"
@@ -105,7 +105,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="bg-background rounded-lg border">
+        <section className="bg-background rounded-lg border shadow-xs">
           <div className="border-b px-5 py-4">
             <h2 className="text-sm font-semibold">Publishing queue</h2>
             <p className="text-muted-foreground mt-0.5 text-xs">
@@ -145,8 +145,8 @@ export default function DashboardPage() {
         </section>
       </div>
 
-      <section className="bg-background overflow-hidden rounded-lg border">
-        <div className="flex items-center justify-between border-b px-5 py-4">
+      <section className="bg-background overflow-hidden rounded-lg border shadow-xs">
+        <div className="flex items-center justify-between border-b px-4 py-4 sm:px-5">
           <div>
             <h2 className="text-sm font-semibold">Recent posts</h2>
             <p className="text-muted-foreground mt-0.5 text-xs">
@@ -157,7 +157,36 @@ export default function DashboardPage() {
             <Link href="/posts/">View all</Link>
           </Button>
         </div>
-        <div className="overflow-x-auto">
+        <div className="divide-y sm:hidden">
+          {blogPosts.slice(0, 4).map((post) => (
+            <Link
+              className="flex items-center gap-3 p-4"
+              href={`/posts/${post.slug}/`}
+              key={post.slug}
+            >
+              <span className="relative block size-14 shrink-0 overflow-hidden rounded-md">
+                <Image
+                  alt=""
+                  className="object-cover"
+                  fill
+                  sizes="56px"
+                  src={post.image}
+                />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="line-clamp-2 text-sm font-semibold leading-5">
+                  {post.title}
+                </span>
+                <span className="text-muted-foreground mt-1 flex items-center gap-2 text-xs">
+                  <StatusBadge label={post.status} />
+                  <span>{formatCompactNumber(post.views)} views</span>
+                </span>
+              </span>
+              <ArrowUpRight className="text-muted-foreground size-4 shrink-0" />
+            </Link>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="bg-muted/60 text-muted-foreground text-xs uppercase">
               <tr>

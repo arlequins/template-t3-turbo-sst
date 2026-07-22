@@ -30,7 +30,7 @@ export default async function PostDetailPage(props: {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button asChild variant="ghost">
           <Link href="/posts/">
             <ArrowLeft aria-hidden="true" />
@@ -41,7 +41,7 @@ export default async function PostDetailPage(props: {
       </div>
 
       <article className="bg-background overflow-hidden rounded-lg border">
-        <div className="relative aspect-[16/7] min-h-64 w-full">
+        <div className="relative aspect-[4/3] w-full sm:aspect-[16/7]">
           <Image
             alt="Editorial feature"
             className="object-cover"
@@ -51,12 +51,12 @@ export default async function PostDetailPage(props: {
             src={post.image}
           />
         </div>
-        <div className="mx-auto max-w-4xl px-5 py-8 sm:px-8 lg:py-12">
+        <div className="mx-auto max-w-4xl px-5 py-7 sm:px-8 sm:py-9 lg:py-12">
           <div className="mb-5 flex flex-wrap items-center gap-3 text-sm">
             <StatusBadge label={post.status} />
             <span className="text-muted-foreground">{post.category}</span>
           </div>
-          <h1 className="max-w-3xl text-3xl font-semibold sm:text-4xl">
+          <h1 className="max-w-3xl text-[1.75rem] font-semibold leading-tight sm:text-4xl">
             {post.title}
           </h1>
           <p className="text-muted-foreground mt-4 max-w-3xl text-lg leading-8">
@@ -78,10 +78,10 @@ export default async function PostDetailPage(props: {
             </div>
             <aside
               aria-label="Post performance"
-              className="h-fit border-l pl-5"
+              className="h-fit border-t pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-5"
             >
               <h2 className="text-sm font-semibold">Performance</h2>
-              <dl className="mt-4 space-y-4">
+              <dl className="mt-4 grid grid-cols-2 gap-4 lg:block lg:space-y-4">
                 <div>
                   <dt className="text-muted-foreground flex items-center gap-2 text-xs">
                     <Eye className="size-4" />

@@ -38,8 +38,8 @@ export function PostListView(props: { posts: BlogPost[] }) {
   }, [props.posts, query, status]);
 
   return (
-    <section className="bg-background overflow-hidden rounded-lg border">
-      <div className="flex flex-col gap-3 border-b p-4 md:flex-row md:items-center">
+    <section className="bg-background overflow-hidden rounded-lg border shadow-xs">
+      <div className="flex flex-col gap-3 border-b p-3.5 sm:p-4 md:flex-row md:items-center">
         <label className="relative min-w-0 flex-1 md:max-w-sm">
           <Search
             aria-hidden="true"
@@ -55,7 +55,7 @@ export function PostListView(props: { posts: BlogPost[] }) {
           />
         </label>
         <div
-          className="flex items-center gap-1 overflow-x-auto"
+          className="-mx-1 flex items-center gap-1 overflow-x-auto px-1 pb-0.5"
           role="group"
           aria-label="Filter by status"
         >
@@ -75,7 +75,48 @@ export function PostListView(props: { posts: BlogPost[] }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="divide-y md:hidden">
+        {visiblePosts.map((post) => (
+          <article className="p-4" key={post.slug}>
+            <Link
+              className="grid grid-cols-[88px_minmax(0,1fr)] gap-3"
+              href={`/posts/${post.slug}/`}
+            >
+              <span className="relative aspect-[4/3] overflow-hidden rounded-md bg-muted">
+                <Image
+                  alt=""
+                  className="object-cover"
+                  fill
+                  sizes="88px"
+                  src={post.image}
+                />
+              </span>
+              <span className="min-w-0 self-center">
+                <span className="mb-1.5 flex items-center gap-2">
+                  <StatusBadge label={post.status} />
+                  <span className="text-muted-foreground text-xs">
+                    {post.category}
+                  </span>
+                </span>
+                <span className="line-clamp-2 text-sm font-semibold leading-5">
+                  {post.title}
+                </span>
+              </span>
+            </Link>
+            <div className="text-muted-foreground mt-3 flex items-center justify-between border-t pt-3 text-xs">
+              <span>
+                {post.author} / {post.readTime}
+              </span>
+              <span className="flex items-center gap-1">
+                <Eye className="size-3.5" />
+                {formatCompactNumber(post.views)}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[840px] text-left text-sm">
           <thead className="bg-muted/60 text-muted-foreground text-xs uppercase">
             <tr>
@@ -110,7 +151,7 @@ export function PostListView(props: { posts: BlogPost[] }) {
                         {post.title}
                       </span>
                       <span className="text-muted-foreground mt-1 block text-xs">
-                        {post.category} · {post.readTime} · {post.author}
+                        {post.category} / {post.readTime} / {post.author}
                       </span>
                     </span>
                   </Link>
@@ -157,7 +198,7 @@ export function PostListView(props: { posts: BlogPost[] }) {
           </p>
         </div>
       )}
-      <div className="text-muted-foreground flex items-center justify-between border-t px-5 py-3 text-xs">
+      <div className="text-muted-foreground flex items-center justify-between border-t px-4 py-3 text-xs sm:px-5">
         <span>
           {visiblePosts.length} of {props.posts.length} posts
         </span>

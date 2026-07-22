@@ -10,7 +10,7 @@ export function PageHeader(props: {
   return (
     <header
       className={cn(
-        "flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between sm:pb-6",
         props.className,
       )}
     >
@@ -20,7 +20,7 @@ export function PageHeader(props: {
             {props.eyebrow}
           </p>
         )}
-        <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">
+        <h1 className="text-foreground text-[1.65rem] font-semibold leading-tight sm:text-3xl">
           {props.title}
         </h1>
         <p className="text-muted-foreground mt-1 max-w-2xl text-sm leading-6">
@@ -28,7 +28,9 @@ export function PageHeader(props: {
         </p>
       </div>
       {props.actions && (
-        <div className="flex shrink-0 items-center gap-2">{props.actions}</div>
+        <div className="flex w-full shrink-0 items-center gap-2 [&>*]:flex-1 sm:w-auto sm:[&>*]:flex-none">
+          {props.actions}
+        </div>
       )}
     </header>
   );

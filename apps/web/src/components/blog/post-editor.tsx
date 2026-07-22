@@ -21,12 +21,12 @@ export function PostEditor() {
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-muted-foreground text-xs">Saved a moment ago</p>
           <h1 className="mt-1 text-xl font-semibold">Post editor</h1>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-3 gap-2 sm:flex">
           <Button
             onClick={() => setPreview((value) => !value)}
             variant="outline"
@@ -48,8 +48,8 @@ export function PostEditor() {
         </div>
       </div>
       {preview ? (
-        <article className="bg-background overflow-hidden rounded-lg border">
-          <div className="relative aspect-[16/7] min-h-56">
+        <article className="bg-background overflow-hidden rounded-lg border shadow-xs">
+          <div className="relative aspect-[4/3] sm:aspect-[16/7]">
             <Image
               alt="Workspace with a notebook and laptop"
               className="object-cover"
@@ -75,7 +75,7 @@ export function PostEditor() {
         </article>
       ) : (
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-          <section className="bg-background space-y-5 rounded-lg border p-5 sm:p-7">
+          <section className="bg-background space-y-5 rounded-lg border p-4 shadow-xs sm:p-7">
             <label className="block text-sm font-medium" htmlFor="post-title">
               Title
               <Input
@@ -102,7 +102,7 @@ export function PostEditor() {
               />
             </label>
           </section>
-          <aside className="bg-background h-fit rounded-lg border p-5">
+          <aside className="bg-background h-fit rounded-lg border p-5 shadow-xs">
             <h2 className="text-sm font-semibold">Post settings</h2>
             <div className="mt-5 space-y-4">
               <label className="block text-sm font-medium">

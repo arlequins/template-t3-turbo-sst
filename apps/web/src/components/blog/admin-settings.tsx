@@ -33,12 +33,15 @@ function Toggle(props: {
 export function AdminSettings() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("General");
   return (
-    <div className="bg-background rounded-lg border">
-      <div className="flex overflow-x-auto border-b px-4" role="tablist">
+    <div className="bg-background rounded-lg border shadow-xs">
+      <div
+        className="grid grid-cols-3 border-b px-2 sm:flex sm:px-4"
+        role="tablist"
+      >
         {tabs.map((item) => (
           <button
             aria-selected={tab === item}
-            className={`h-12 border-b-2 px-4 text-sm font-medium ${tab === item ? "border-primary text-foreground" : "text-muted-foreground border-transparent"}`}
+            className={`h-12 border-b-2 px-2 text-sm font-medium sm:px-4 ${tab === item ? "border-primary text-foreground" : "text-muted-foreground border-transparent"}`}
             key={item}
             onClick={() => setTab(item)}
             role="tab"
@@ -122,7 +125,10 @@ export function AdminSettings() {
           </div>
         )}
         <div className="mt-7 flex justify-end border-t pt-5">
-          <Button onClick={() => toast.success("Settings saved")}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => toast.success("Settings saved")}
+          >
             <Save />
             Save changes
           </Button>

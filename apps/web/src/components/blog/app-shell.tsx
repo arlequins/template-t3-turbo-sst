@@ -8,17 +8,14 @@ import {
   BookOpenText,
   FileText,
   LayoutDashboard,
-  Menu,
   PenLine,
   Search,
   Settings,
   ShieldCheck,
   Users,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 
 import { AuthStatus } from "~/auth/status";
 
@@ -27,7 +24,7 @@ const navigation = [
   { href: "/posts/", icon: FileText, label: "Posts" },
   { href: "/editor/", icon: PenLine, label: "Editor" },
   { href: "/users/", icon: Users, label: "Users" },
-  { href: "/admin/", icon: ShieldCheck, label: "Administration" },
+  { href: "/admin/", icon: ShieldCheck, label: "Admin" },
 ] as const;
 
 function Sidebar(props: { onNavigate?: () => void }) {
@@ -103,9 +100,14 @@ function Sidebar(props: { onNavigate?: () => void }) {
   );
 }
 
+function isActive(pathname: string, href: string) {
+  return href === "/"
+    ? pathname === "/"
+    : pathname.startsWith(href.replace(/\/$/, ""));
+}
+
 export function AppShell(props: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (pathname.startsWith("/auth/")) return props.children;
 
@@ -115,40 +117,14 @@ export function AppShell(props: { children: React.ReactNode }) {
         <Sidebar />
       </aside>
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <button
-            type="button"
-            aria-label="Close navigation"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-          <aside className="bg-background relative h-full w-72 border-r shadow-xl">
-            <Button
-              aria-label="Close navigation"
-              className="absolute top-4 right-3 z-10"
-              onClick={() => setMobileOpen(false)}
-              size="icon"
-              variant="ghost"
-            >
-              <X aria-hidden="true" />
-            </Button>
-            <Sidebar onNavigate={() => setMobileOpen(false)} />
-          </aside>
-        </div>
-      )}
-
       <div className="lg:pl-64">
-        <header className="bg-background/95 sticky top-0 z-20 flex h-16 items-center border-b px-4 backdrop-blur sm:px-6">
-          <Button
-            aria-label="Open navigation"
-            className="mr-2 lg:hidden"
-            onClick={() => setMobileOpen(true)}
-            size="icon"
-            variant="ghost"
-          >
-            <Menu aria-hidden="true" />
-          </Button>
+        <header className="bg-background/90 sticky top-0 z-20 flex h-16 items-center border-b px-4 backdrop-blur-xl sm:px-6">
+          <Link className="flex items-center gap-2 lg:hidden" href="/">
+            <span className="bg-foreground text-background flex size-8 items-center justify-center rounded-md">
+              <BookOpenText aria-hidden="true" className="size-4" />
+            </span>
+            <span className="text-sm font-semibold">Northstar</span>
+          </Link>
 
           <button
             type="button"
@@ -159,8 +135,18 @@ export function AppShell(props: { children: React.ReactNode }) {
             <span className="ml-auto text-xs">Ctrl K</span>
           </button>
 
-          <div className="ml-auto flex items-center gap-1">
-            <ThemeToggle />
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
+            <Button
+              aria-label="Search"
+              className="md:hidden"
+              size="icon"
+              variant="ghost"
+            >
+              <Search />
+            </Button>
+            <span className="hidden sm:block">
+              <ThemeToggle />
+            </span>
             <Button aria-label="Notifications" size="icon" variant="ghost">
               <Bell aria-hidden="true" />
             </Button>
@@ -169,10 +155,41 @@ export function AppShell(props: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="mx-auto w-full max-w-[1440px] px-4 pt-5 pb-28 sm:px-6 sm:pt-7 lg:px-8 lg:py-8">
           {props.children}
         </main>
       </div>
+
+      <nav
+        aria-label="Mobile navigation"
+        className="bg-background/95 fixed inset-x-0 bottom-0 z-40 grid h-20 grid-cols-5 border-t px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+      >
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(pathname, item.href);
+          return (
+            <Link
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "text-muted-foreground relative flex min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-medium",
+                active && "text-foreground",
+              )}
+              href={item.href}
+              key={item.href}
+            >
+              <span
+                className={cn(
+                  "flex size-8 items-center justify-center rounded-md",
+                  active && "bg-primary/10 text-primary",
+                )}
+              >
+                <Icon aria-hidden="true" className="size-[18px]" />
+              </span>
+              <span className="truncate">{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 }

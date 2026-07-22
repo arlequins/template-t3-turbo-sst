@@ -26,8 +26,8 @@ export function UserManagementView() {
 
   return (
     <>
-      <div className="bg-background overflow-hidden rounded-lg border">
-        <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center">
+      <div className="bg-background overflow-hidden rounded-lg border shadow-xs">
+        <div className="flex flex-col gap-3 border-b p-3.5 sm:flex-row sm:items-center sm:p-4">
           <label className="relative flex-1" htmlFor="user-search">
             <span className="sr-only">Search users</span>
             <Search className="text-muted-foreground absolute top-2.5 left-3 size-4" />
@@ -50,12 +50,51 @@ export function UserManagementView() {
             <option>Editor</option>
             <option>Author</option>
           </select>
-          <Button onClick={() => setInviteOpen(true)}>
+          <Button
+            className="w-full sm:w-auto"
+            onClick={() => setInviteOpen(true)}
+          >
             <UserPlus />
             Invite user
           </Button>
         </div>
-        <div className="overflow-x-auto">
+        <div className="divide-y sm:hidden">
+          {users.map((user) => (
+            <article className="p-4" key={user.email}>
+              <div className="flex items-start gap-3">
+                <span className="bg-foreground text-background flex size-10 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                  {user.initials}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-semibold">
+                      {user.name}
+                    </p>
+                    <StatusBadge label={user.status} />
+                  </div>
+                  <p className="text-muted-foreground mt-0.5 truncate text-xs">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-3 border-t pt-3 text-xs">
+                <div>
+                  <p className="text-muted-foreground">Role</p>
+                  <p className="mt-1 font-medium">{user.role}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Posts</p>
+                  <p className="mt-1 font-medium">{user.posts}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Joined</p>
+                  <p className="mt-1 font-medium">{user.joined}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-muted/60 text-muted-foreground text-xs uppercase">
               <tr>

@@ -17,13 +17,17 @@ export function StatBlock(props: {
   };
 
   return (
-    <div className="border-border flex min-w-0 items-start justify-between border-b px-5 py-5 last:border-b-0 sm:border-r sm:nth-last-2:border-b-0 sm:odd:border-r sm:even:border-r-0 lg:border-b-0 lg:even:border-r lg:last:border-r-0">
+    <div className="bg-background flex min-w-0 flex-col-reverse justify-between gap-3 rounded-lg border p-4 shadow-xs sm:flex-row sm:items-start sm:p-5">
       <div>
-        <p className="text-muted-foreground text-xs font-medium uppercase">
+        <p className="text-muted-foreground text-[11px] font-medium uppercase sm:text-xs">
           {props.label}
         </p>
-        <p className="mt-2 text-2xl font-semibold">{props.value}</p>
-        <p className="text-muted-foreground mt-1 text-xs">{props.change}</p>
+        <p className="mt-1.5 text-xl font-semibold sm:mt-2 sm:text-2xl">
+          {props.value}
+        </p>
+        <p className="text-muted-foreground mt-1 hidden text-xs sm:block">
+          {props.change}
+        </p>
       </div>
       <span
         className={`flex size-9 shrink-0 items-center justify-center rounded-md ${tones[props.tone ?? "blue"]}`}

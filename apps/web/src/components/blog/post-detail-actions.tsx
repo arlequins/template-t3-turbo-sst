@@ -14,12 +14,12 @@ export function PostDetailActions(props: { slug: string }) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button onClick={copyLink} variant="outline">
+    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+      <Button className="w-full sm:w-auto" onClick={copyLink} variant="outline">
         <LinkIcon aria-hidden="true" />
         Copy link
       </Button>
-      <Button asChild>
+      <Button asChild className="w-full sm:w-auto">
         <Link href={`/editor/?post=${props.slug}`}>
           <PenLine aria-hidden="true" />
           Edit post
