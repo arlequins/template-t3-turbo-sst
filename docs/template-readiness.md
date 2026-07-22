@@ -67,6 +67,11 @@ its related code, tests, environment variables, and documentation.
 
 ## Adaptation Review
 
+Run `pnpm template:doctor` after initialization and whenever local setup changes.
+It checks runtime tools, required environment values, OIDC/SST contracts, and
+whether local PostgreSQL and OIDC endpoints are reachable. Use `--json` for
+automation and `--strict` when warnings must fail qualification.
+
 Before publishing a repository created from this template:
 
 1. Run `pnpm template:init` with the target scope, name, display name, and domain.
