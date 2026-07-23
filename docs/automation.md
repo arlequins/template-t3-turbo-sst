@@ -17,7 +17,10 @@ blocked, pending, and manually approved updates.
 Release Please reads Conventional Commits on `main` and maintains one release
 PR for the repository. The PR updates `package.json`,
 `.release-please-manifest.json`, and `CHANGELOG.md`. Merging it creates a
-`vX.Y.Z` tag and a GitHub Release.
+`vX.Y.Z` tag and a GitHub Release. Keep `include-component-in-tag` disabled in
+`release-please-config.json`; enabling it changes the expected tag to
+`<package-name>-vX.Y.Z` and disconnects release history from the repository's
+existing tags.
 
 The workflow uses its short-lived `GITHUB_TOKEN` by default, so no release
 secret is required. Grant GitHub Actions permission to create and approve pull
