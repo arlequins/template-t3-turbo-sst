@@ -19,19 +19,30 @@ PR for the repository. The PR updates `package.json`,
 `.release-please-manifest.json`, and `CHANGELOG.md`. Merging it creates a
 `vX.Y.Z` tag and a GitHub Release.
 
-Create a fine-grained token that can read repository contents and write
-contents and pull requests, then store it as `RELEASE_PLEASE_TOKEN`. A GitHub
-App installation token is preferable for organizations that already manage a
-release automation app. Do not use a personal broad-scope classic token.
+The workflow uses its short-lived `GITHUB_TOKEN` by default, so no release
+secret is required. Grant GitHub Actions permission to create and approve pull
+requests in the repository settings. The workflow itself grants only the
+contents, issues, and pull-request permissions needed by Release Please.
+
+Organizations that already manage a release automation app may optionally
+store its installation token or a fine-grained token as
+`RELEASE_PLEASE_TOKEN`. When present, that token takes precedence over
+`GITHUB_TOKEN`. Do not use a personal broad-scope classic token.
 
 ```bash
 gh secret set RELEASE_PLEASE_TOKEN
 gh workflow run release.yml
 ```
 
-The separate token is intentional: pull requests opened with the workflow's
-default `GITHUB_TOKEN` do not trigger another workflow run, which would prevent
-the release PR from receiving the required CI checks.
+Pull requests created with `GITHUB_TOKEN` can require a maintainer to approve
+their workflow runs, depending on the repository's Actions settings. An
+optional GitHub App or fine-grained token avoids that approval step and is
+recommended when release PR validation must start unattended.
+
+npm Trusted Publishing is independent from this GitHub automation. It replaces
+an npm publishing token for `npm publish`; it does not provide permission to
+create GitHub pull requests, tags, or releases. This template is private by
+default and does not publish a package to npm.
 
 Release PRs follow the same review and branch-protection requirements as other
 changes. Do not manually edit the generated version or changelog unless the
