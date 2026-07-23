@@ -6,6 +6,7 @@
     "env:pull": "node ./scripts/pull-secret-env.mjs",
     "env:push": "node ./scripts/push-secret-env.mjs",
     "sst:install": "pnpm with-env sst install",
+    "test": "node --test ./scripts/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "with-env": "dotenv -e ../../.env --"
   },
