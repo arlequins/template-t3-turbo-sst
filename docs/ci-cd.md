@@ -51,7 +51,11 @@ Set these repository variables when the associated workflow is enabled:
 | `LOAD_TEST_API_URL` | k6 baseline |
 | `DEPENDENCY_REVIEW_ENABLED` | Makes dependency-review findings blocking when set to `true` |
 
-Set `RELEASE_PLEASE_TOKEN` as a repository secret. Do not store AWS access keys
+No release secret is required: Release Please uses the workflow's short-lived
+`GITHUB_TOKEN`. `RELEASE_PLEASE_TOKEN` is an optional override for a GitHub App
+installation token or fine-grained token when release PR checks must start
+without manual workflow approval. npm Trusted Publishing credentials apply
+only when a derived project adds npm publication. Do not store AWS access keys
 in GitHub; deployments use short-lived OIDC credentials.
 
 ## Deployment Environment Contract
