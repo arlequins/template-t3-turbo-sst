@@ -7,9 +7,14 @@ Create separate AWS IAM roles for preview and production. Configure GitHub's OID
 Store role ARNs as GitHub variables. Role ARNs identify resources and are not credentials:
 
 - repository: `AWS_PREVIEW_ROLE_ARN`
-- `production` environment: `AWS_PRODUCTION_ROLE_ARN`
+- repository: `AWS_PRODUCTION_ROLE_ARN`
+- repository: `AWS_PREVIEW_SECRET_NAME` and `AWS_PRODUCTION_SECRET_NAME`
 
-Preview jobs remain skipped until `AWS_PREVIEW_ROLE_ARN` is configured.
+The secret-name variables identify the Secrets Manager values loaded into the
+deployment runner after OIDC authentication. They may contain a base name or a
+complete ARN; they are identifiers, not secret payloads. Preview jobs remain
+skipped until both preview variables are configured. See
+[CI/CD Operations](ci-cd.md) for the complete environment contract.
 
 Set `AWS_REGION` as an environment variable. Do not store AWS access keys in GitHub.
 

@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
   id-token: write
@@ -13,8 +17,10 @@ jobs:
     if: >-
       github.event.action != 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      vars.AWS_PREVIEW_ROLE_ARN != ''
+      vars.AWS_PREVIEW_ROLE_ARN != '' &&
+      vars.AWS_PREVIEW_SECRET_NAME != ''
     strategy:
+      fail-fast: false
       matrix:
         application: [api, web]
     uses: ./.github/workflows/deploy-reusable.yml
@@ -23,12 +29,14 @@ jobs:
       environment: pr-${{ github.event.pull_request.number }}
       operation: deploy
       role_arn: ${{ vars.AWS_PREVIEW_ROLE_ARN }}
+      secret_name: ${{ vars.AWS_PREVIEW_SECRET_NAME }}
 
   remove:
     if: >-
       github.event.action == 'closed' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
-      vars.AWS_PREVIEW_ROLE_ARN != ''
+      vars.AWS_PREVIEW_ROLE_ARN != '' &&
+      vars.AWS_PREVIEW_SECRET_NAME != ''
     strategy:
       matrix:
         application: [web, api]
@@ -39,3 +47,4 @@ jobs:
       environment: pr-${{ github.event.pull_request.number }}
       operation: remove
       role_arn: ${{ vars.AWS_PREVIEW_ROLE_ARN }}
+      secret_name: ${{ vars.AWS_PREVIEW_SECRET_NAME }}

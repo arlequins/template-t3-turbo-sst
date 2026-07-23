@@ -9,6 +9,10 @@ on:
         type: choice
         options: [api, web, batch]
 
+concurrency:
+  group: production-${{ inputs.application }}
+  cancel-in-progress: false
+
 permissions:
   contents: read
   id-token: write
@@ -21,3 +25,4 @@ jobs:
       environment: production
       operation: deploy
       role_arn: ${{ vars.AWS_PRODUCTION_ROLE_ARN }}
+      secret_name: ${{ vars.AWS_PRODUCTION_SECRET_NAME }}

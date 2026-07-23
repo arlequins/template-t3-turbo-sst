@@ -36,6 +36,8 @@ local application; the pages below explain design decisions and ongoing work.
 
 ## Deployment and Operations
 
+- [CI/CD operations](ci-cd.md): workflow responsibilities, required repository
+  settings, deployment environment loading, and release flow.
 - [Deployment and supply-chain security](deployment-security.md): GitHub OIDC,
   protected environments, security checks, and response headers.
 - [Incident runbook](incident-runbook.md): triage, mitigation, recovery, and
