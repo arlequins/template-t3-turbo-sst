@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.1](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.0...v1.1.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **ci:** align release tag format ([#50](https://github.com/arlequins/template-t3-turbo-sst/issues/50)) ([31db2f9](https://github.com/arlequins/template-t3-turbo-sst/commit/31db2f9f257c16137be05446eb7fa2b395138923))
+* **ci:** enable releases with GitHub token ([#48](https://github.com/arlequins/template-t3-turbo-sst/issues/48)) ([c6ae828](https://github.com/arlequins/template-t3-turbo-sst/commit/c6ae82812d4a20ec55758d67254f73aa01172857))
+* **tooling:** redact secret synchronization logs ([#46](https://github.com/arlequins/template-t3-turbo-sst/issues/46)) ([bd52104](https://github.com/arlequins/template-t3-turbo-sst/commit/bd5210452d889ae3382326d6d21bcfdd6bdfdf16))
+
 ## [1.1.0] - 2026-07-22
 
 ### Added
