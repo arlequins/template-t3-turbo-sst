@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.1...v1.1.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **ci:** upgrade release action to Node 24 ([#52](https://github.com/arlequins/template-t3-turbo-sst/issues/52)) ([07cba06](https://github.com/arlequins/template-t3-turbo-sst/commit/07cba06ca9b65877d6e378f16227c5550c2496c5))
+
 ## [1.1.1](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.0...v1.1.1) (2026-07-23)
 
 
