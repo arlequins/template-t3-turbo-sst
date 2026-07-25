@@ -31,11 +31,15 @@ local application; the pages below explain design decisions and ongoing work.
   collector configuration.
 - [UI development](ui-development.md): component tests, Storybook, and
   accessibility checks.
+- [Versioned blog theme](blog-theme.md): branding, localized MDX validation,
+  theme releases, and scheduled publishing.
 - [S3 cache](s3-cache.md): API and database caching, TTL, invalidation, and
   local configuration.
 
 ## Deployment and Operations
 
+- [Static portfolio deployment](static-portfolio.md): deploy the blog theme
+  without API, authentication, database, or SST infrastructure.
 - [CI/CD operations](ci-cd.md): workflow responsibilities, required repository
   settings, deployment environment loading, and release flow.
 - [Deployment and supply-chain security](deployment-security.md): GitHub OIDC,

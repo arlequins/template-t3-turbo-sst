@@ -1,0 +1,7 @@
+{
+  "$schema": "./theme.schema.json",
+  "id": "blog-portfolio",
+  "name": "Blog Portfolio",
+  "schemaVersion": 1,
+  "version": "1.0.0"
+}

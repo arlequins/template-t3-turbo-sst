@@ -5,7 +5,7 @@ import { Input } from "@acme/ui/input";
 import { toast } from "@acme/ui/toast";
 import { Save } from "lucide-react";
 import { useState } from "react";
-import { siteConfig } from "~/config/site";
+import { brandConfig } from "~/config/brand.config";
 
 const tabs = ["General", "Publishing", "Security"] as const;
 
@@ -62,7 +62,7 @@ export function AdminSettings() {
               Publication name
               <Input
                 className="mt-2"
-                defaultValue={siteConfig.name}
+                defaultValue={brandConfig.name}
                 id="publication-name"
               />
             </label>

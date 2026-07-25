@@ -4,17 +4,17 @@ import type { Metadata, Viewport } from "next";
 
 import { OidcAuthProvider } from "~/auth/provider";
 import { AppShell } from "~/components/blog/app-shell";
-import { siteConfig } from "~/config/site";
+import { brandConfig, createBrandStyle } from "~/config/brand.config";
 import { TRPCReactProvider } from "~/trpc/react";
 
 import "~/app/styles.css";
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
+    default: brandConfig.name,
+    template: `%s | ${brandConfig.name}`,
   },
-  description: siteConfig.description,
+  description: brandConfig.description,
 };
 
 export const viewport: Viewport = {
@@ -26,7 +26,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      style={createBrandStyle(brandConfig)}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground min-h-screen font-sans antialiased">
         <ThemeProvider>
           <OidcAuthProvider>

@@ -1,0 +1,38 @@
+name: Publish blog theme
+
+on:
+  schedule:
+    - cron: "17 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: vars.BLOG_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./tooling/github/setup
+
+      - name: Validate theme
+        run: |
+          pnpm --filter @acme/blog-theme version:check
+          pnpm --filter @acme/blog-theme content:check
+          pnpm check:placeholders --strict
+
+      - name: Build static theme
+        run: pnpm --filter @acme/blog-theme build
+
+      - name: Trigger Vercel deployment
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          test -n "$VERCEL_DEPLOY_HOOK_URL"
+          curl --fail --silent --show-error --request POST "$VERCEL_DEPLOY_HOOK_URL"

@@ -1,0 +1,39 @@
+{
+  "name": "@acme/blog-theme",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm content:check && next build",
+    "clean": "git clean -xdf .cache .next .turbo node_modules out",
+    "content:check": "node --import tsx scripts/validate-content.ts",
+    "dev": "next dev",
+    "format": "biome format .",
+    "lint": "biome lint .",
+    "preview": "npx --yes serve@14 out",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "version:check": "node --import tsx scripts/validate-theme-version.ts"
+  },
+  "dependencies": {
+    "@acme/ui": "workspace:*",
+    "gray-matter": "^4.0.3",
+    "lucide-react": "catalog:",
+    "next": "^16.2.10",
+    "next-mdx-remote": "^6.0.0",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@acme/tailwind-config": "workspace:*",
+    "@acme/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19",
+    "tailwindcss": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

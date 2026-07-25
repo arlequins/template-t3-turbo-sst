@@ -41,6 +41,7 @@ describe("template:init", () => {
     const paths = pathsToPrune({ preset: "minimal", prune: true });
     assert.ok(paths.includes("apps/batch"));
     assert.ok(paths.includes("packages/auth"));
+    assert.ok(paths.includes("apps/blog"));
     assert.ok(paths.includes("tooling/sst-bootstrap"));
     assert.ok(paths.includes("pnpm-lock.yaml"));
   });
@@ -111,8 +112,8 @@ describe("template:init", () => {
     assert.doesNotMatch(context, /@company\/auth|AuthSession|TRPCAuth/);
 
     const siteConfig = transformContent(
-      "apps/web/src/config/site.ts",
-      'export const siteConfig = { name: "Acme Workspace", shortName: "AW" };\n',
+      "apps/web/src/config/brand.config.ts",
+      'export const brandConfig = { name: "Acme Workspace", shortName: "AW" };\n',
       {
         name: "customer-portal",
         scope: "@company",
@@ -137,7 +138,7 @@ describe("template:init", () => {
       scope: "@company",
       domain: "customer.example.org",
       preset: "full",
-      features: ["auth", "batch", "sst", "example-ui"],
+      features: ["auth", "batch", "sst", "example-ui", "blog-theme"],
     });
 
     const rootPackage = transformContent(

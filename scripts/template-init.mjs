@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 const TEMPLATE_NAME = "template-t3-turbo-sst";
 const TEMPLATE_SCOPE = "@acme";
 const TEMPLATE_DISPLAY_NAME = "Acme Workspace";
-const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui"];
+const BLOG_TEMPLATE_NAME = "Your Studio";
+const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui", "blog-theme"];
 const DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -134,6 +135,14 @@ export function pathsToPrune(options) {
       "scripts/example-crud.mjs",
     );
   }
+  if (!features.has("blog-theme")) {
+    paths.push(
+      ".github/workflows/blog-publish.yml",
+      "apps/blog",
+      "playwright.blog.config.ts",
+      "tests/blog-e2e",
+    );
+  }
 
   return paths.sort();
 }
@@ -155,11 +164,13 @@ function prunePackageJson(relativePath, source, options) {
 
   if (!features.has("auth")) {
     if (relativePath === "package.json") {
-      removeDependencies(packageJson, [
-        "@axe-core/playwright",
-        "@playwright/test",
-      ]);
       removeScripts(packageJson, ["test:e2e", "test:e2e:headed"]);
+      if (!features.has("blog-theme")) {
+        removeDependencies(packageJson, [
+          "@axe-core/playwright",
+          "@playwright/test",
+        ]);
+      }
     }
     if (relativePath === "apps/api/package.json") {
       removeDependencies(packageJson, [`${options.scope}/auth`]);
@@ -173,6 +184,9 @@ function prunePackageJson(relativePath, source, options) {
     if (relativePath === "packages/trpc/package.json") {
       removeDependencies(packageJson, [`${options.scope}/auth`, "drizzle-orm"]);
     }
+  }
+  if (!features.has("blog-theme") && relativePath === "package.json") {
+    removeScripts(packageJson, ["test:e2e:blog"]);
   }
 
   if (!features.has("sst") && relativePath.startsWith("apps/")) {
@@ -245,6 +259,7 @@ export function transformContent(relativePath, source, options) {
   output = output
     .split(TEMPLATE_DISPLAY_NAME)
     .join(resolveDisplayName(options));
+  output = output.split(BLOG_TEMPLATE_NAME).join(resolveDisplayName(options));
   if (options.domain) output = output.split("example.com").join(options.domain);
 
   const appName = new Map([
@@ -456,7 +471,7 @@ export function transformContent(relativePath, source, options) {
       .replace("<AppShell>{props.children}</AppShell>", "{props.children}");
   }
 
-  if (relativePath === "apps/web/src/config/site.ts") {
+  if (relativePath === "apps/web/src/config/brand.config.ts") {
     output = output.replace(
       /shortName: "[A-Z0-9]{1,4}"/,
       `shortName: ${JSON.stringify(displayInitials(resolveDisplayName(options)))}`,
@@ -562,7 +577,7 @@ if (isCli) {
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error(
-      "pnpm template:init -- --name my-app --scope @company [--display-name 'My App'] [--preset full|minimal] [--features auth,batch,sst,example-ui] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
+      "pnpm template:init -- --name my-app --scope @company [--display-name 'My App'] [--preset full|minimal] [--features auth,batch,sst,example-ui,blog-theme] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
     );
     process.exitCode = 1;
   }

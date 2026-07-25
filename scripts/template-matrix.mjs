@@ -8,18 +8,24 @@ import {
   transformContent,
 } from "./template-init.mjs";
 
-export const FeatureNames = ["auth", "batch", "sst", "example-ui"];
+export const FeatureNames = [
+  "auth",
+  "batch",
+  "sst",
+  "example-ui",
+  "blog-theme",
+];
 
-// Orthogonal array OA(8, 4, 2): every pair of feature flags appears in all four states.
+// Orthogonal array OA(8, 5, 2): every pair of feature flags appears in all four states.
 export const PairwiseFeatureMatrix = [
   [],
   ["sst", "example-ui"],
-  ["batch", "example-ui"],
-  ["batch", "sst"],
-  ["auth", "example-ui"],
-  ["auth", "sst"],
+  ["batch", "example-ui", "blog-theme"],
+  ["batch", "sst", "blog-theme"],
+  ["auth", "example-ui", "blog-theme"],
+  ["auth", "sst", "blog-theme"],
   ["auth", "batch"],
-  [...FeatureNames],
+  ["auth", "batch", "sst", "example-ui"],
 ];
 
 export function assertPairwiseCoverage(matrix = PairwiseFeatureMatrix) {
@@ -58,6 +64,10 @@ export function qualifyFeatureMatrix() {
       pruned.includes("apps/web/src/components/blog"),
       !features.includes("example-ui"),
     );
+    assert.equal(
+      pruned.includes("apps/blog"),
+      !features.includes("blog-theme"),
+    );
 
     const manifest = JSON.parse(
       transformContent("template.features.json", "{}", options),
@@ -76,6 +86,7 @@ export function qualifyFeatureMatrix() {
             "sst:ws": "sst",
             test: "test",
             "test:e2e": "e2e",
+            "test:e2e:blog": "blog-e2e",
             "test:e2e:headed": "e2e",
             "test:sst": "sst",
           },
@@ -97,6 +108,10 @@ export function qualifyFeatureMatrix() {
       features.includes("example-ui"),
     );
     assert.equal("test:e2e" in rootPackage.scripts, features.includes("auth"));
+    assert.equal(
+      "test:e2e:blog" in rootPackage.scripts,
+      features.includes("blog-theme"),
+    );
   }
   return PairwiseFeatureMatrix.length;
 }
