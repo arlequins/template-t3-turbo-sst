@@ -12,7 +12,7 @@ export const PlaceholderRules = [
   },
   {
     label: "example social profile",
-    pattern: /(?:github\.com|linkedin\.com\/in)\/(?:example|your-[a-z-]+)/g,
+    find: findExampleSocialProfiles,
   },
 ];
 
@@ -21,13 +21,38 @@ export const DefaultPlaceholderTargets = [
   "apps/blog/src/config/brand.config.ts",
 ];
 
+function findExampleSocialProfiles(source) {
+  return source.split(/["'`]/).flatMap((candidate) => {
+    let url;
+    try {
+      url = new URL(candidate);
+    } catch {
+      return [];
+    }
+
+    const hostname = url.hostname.toLowerCase().replace(/^www\./, "");
+    const isGitHubPlaceholder =
+      hostname === "github.com" &&
+      /^\/(?:example|your-[a-z-]+)\/?$/.test(url.pathname);
+    const isLinkedInPlaceholder =
+      hostname === "linkedin.com" &&
+      /^\/in\/(?:example|your-[a-z-]+)\/?$/.test(url.pathname);
+
+    return isGitHubPlaceholder || isLinkedInPlaceholder ? [candidate] : [];
+  });
+}
+
 export function findPlaceholders(source, rules = PlaceholderRules) {
-  return rules.flatMap(({ label, pattern }) =>
-    [...source.matchAll(pattern)].map((match) => ({
+  return rules.flatMap(({ find, label, pattern }) => {
+    const values = find
+      ? find(source)
+      : [...source.matchAll(pattern)].map((match) => match[0]);
+
+    return values.map((value) => ({
       label,
-      value: match[0],
-    })),
-  );
+      value,
+    }));
+  });
 }
 
 export async function checkPlaceholderFiles(paths, cwd = process.cwd()) {
