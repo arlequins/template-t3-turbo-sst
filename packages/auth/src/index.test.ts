@@ -1,15 +1,16 @@
 import { generateKeyPair, SignJWT } from "jose";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   AppRole,
   hasPermission,
   Permission,
   provisionSessionUser,
 } from "./authorization";
-import type { OidcConfig } from "./index";
+import type { OidcConfig, UserAdministrationPort } from "./index";
 import {
   createJwtAccessTokenVerifier,
   createOidcAuth,
+  createUserAdministration,
   parseBearerToken,
 } from "./index";
 
@@ -169,5 +170,45 @@ describe("application authorization", () => {
     expect(hasPermission(session.user.roles, Permission.POST_WRITE)).toBe(
       false,
     );
+  });
+
+  it("updates user roles through the administration port", async () => {
+    const setRoles = vi.fn(async (userId: string, roles: AppRole[]) => ({
+      createdAt: new Date(),
+      email: "member@example.com",
+      id: userId,
+      lastLoginAt: new Date(),
+      name: "Member",
+      roles,
+    }));
+    const port: UserAdministrationPort = {
+      list: async () => [],
+      setRoles,
+    };
+    const administration = createUserAdministration(port, {
+      actorUserId: "admin-id",
+    });
+
+    await expect(
+      administration.updateRoles("member-id", [AppRole.MEMBER, AppRole.MEMBER]),
+    ).resolves.toMatchObject({ roles: [AppRole.MEMBER] });
+    expect(setRoles).toHaveBeenCalledWith("member-id", [AppRole.MEMBER]);
+  });
+
+  it("prevents empty roles and administrator self-demotion", async () => {
+    const port: UserAdministrationPort = {
+      list: async () => [],
+      setRoles: async () => undefined,
+    };
+    const administration = createUserAdministration(port, {
+      actorUserId: "admin-id",
+    });
+
+    await expect(administration.updateRoles("member-id", [])).rejects.toThrow(
+      "At least one role is required",
+    );
+    await expect(
+      administration.updateRoles("admin-id", [AppRole.MEMBER]),
+    ).rejects.toThrow("cannot remove their own admin role");
   });
 });

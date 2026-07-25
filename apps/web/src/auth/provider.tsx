@@ -8,7 +8,7 @@ import { getUserManager, startLogin, startLogout } from "~/lib/client-auth";
 type AuthContextValue = {
   user: User | null;
   isLoading: boolean;
-  login: () => Promise<void>;
+  login: (returnTo?: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -45,7 +45,7 @@ export function OidcAuthProvider(props: { children: React.ReactNode }) {
     () => ({
       user,
       isLoading,
-      login: () => startLogin(),
+      login: (returnTo) => startLogin(returnTo),
       logout: startLogout,
     }),
     [isLoading, user],

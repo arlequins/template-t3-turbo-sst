@@ -1,4 +1,8 @@
-import type { ContentListInput } from "../../domain/content";
+import type {
+  ContentInput,
+  ContentListInput,
+  NormalizedContentListInput,
+} from "../../domain/content";
 import { ResourceConflictError, ResourceNotFoundError } from "../errors";
 import type { ApplicationLogger } from "../ports/application-logger";
 import type { ContentRepository } from "../ports/content-repository";
@@ -12,7 +16,7 @@ export function createContentService(deps: {
 }) {
   return {
     listContent(input: ContentListInput = {}) {
-      const normalized: Required<ContentListInput> = {
+      const normalized: NormalizedContentListInput = {
         direction: input.direction ?? "desc",
         page: Math.max(1, input.page ?? 1),
         pageSize: Math.min(
@@ -21,6 +25,8 @@ export function createContentService(deps: {
         ),
         query: input.query?.trim() ?? "",
         sort: input.sort ?? "createdAt",
+        status: input.status,
+        locale: input.locale,
       };
       deps.logger.debug("content.list", normalized);
       return deps.repository.list(normalized);
@@ -33,15 +39,12 @@ export function createContentService(deps: {
       return content;
     },
 
-    createContent(input: { content: string; title: string }) {
+    createContent(input: ContentInput) {
       deps.logger.info("content.create");
       return deps.repository.create(input);
     },
 
-    async updateContent(
-      id: string,
-      input: { content: string; title: string; version: number },
-    ) {
+    async updateContent(id: string, input: ContentInput & { version: number }) {
       deps.logger.info("content.update", { contentId: id });
       const { version, ...changes } = input;
       const result = await deps.repository.update(id, changes, version);

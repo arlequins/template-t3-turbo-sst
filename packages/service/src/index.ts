@@ -43,7 +43,14 @@ export { createIdempotencyService } from "./application/use-cases/idempotency";
 export type { FileUploadService } from "./application/use-cases/request-file-upload";
 export { createFileUploadService } from "./application/use-cases/request-file-upload";
 export type {
+  ContentInput,
   ContentListInput,
   ContentPage,
   ContentRecord,
+  NormalizedContentListInput,
+} from "./domain/content";
+export {
+  ContentCategory,
+  ContentLocale,
+  ContentStatus,
 } from "./domain/content";

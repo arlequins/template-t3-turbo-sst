@@ -1,4 +1,4 @@
-import type { ContentListInput, ContentRepository } from "@acme/service";
+import type { ContentRepository } from "@acme/service";
 import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 
 import type { Database } from "./client";
@@ -8,13 +8,19 @@ export function createDrizzlePostRepository(
   database: Database,
 ): ContentRepository {
   return {
-    async list(input: Required<ContentListInput>) {
-      const filter = input.query
-        ? or(
-            ilike(Post.title, `%${input.query}%`),
-            ilike(Post.content, `%${input.query}%`),
-          )
-        : undefined;
+    async list(input) {
+      const filter = and(
+        input.query
+          ? or(
+              ilike(Post.title, `%${input.query}%`),
+              ilike(Post.content, `%${input.query}%`),
+              ilike(Post.description, `%${input.query}%`),
+              ilike(Post.translationKey, `%${input.query}%`),
+            )
+          : undefined,
+        input.status ? eq(Post.status, input.status) : undefined,
+        input.locale ? eq(Post.locale, input.locale) : undefined,
+      );
       const orderColumn = input.sort === "title" ? Post.title : Post.createdAt;
       const orderBy =
         input.direction === "asc" ? asc(orderColumn) : desc(orderColumn);

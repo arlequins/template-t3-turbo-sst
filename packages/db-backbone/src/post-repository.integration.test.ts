@@ -9,6 +9,21 @@ import { createDrizzleIdempotencyStore } from "./idempotency-store";
 import { createDrizzlePostRepository } from "./post-repository";
 import * as schema from "./schema";
 
+const contentInput = {
+  category: "engineering",
+  content: "Integration testing with an isolated database",
+  description: "Content used to verify the PostgreSQL repository lifecycle.",
+  featured: false,
+  image: "/blog/editorial-workspace.jpg",
+  imageAlt: "Editorial workspace",
+  locale: "en",
+  publishedAt: null,
+  slug: "container-backed-content",
+  status: "draft",
+  title: "Container-backed content",
+  translationKey: "container-backed-content",
+} as const;
+
 describe("Drizzle post repository integration", () => {
   let container: Awaited<ReturnType<PostgreSqlContainer["start"]>>;
   let sql: ReturnType<typeof postgres>;
@@ -49,10 +64,7 @@ describe("Drizzle post repository integration", () => {
   });
 
   it("runs a complete repository lifecycle against migrated PostgreSQL", async () => {
-    const created = await repository.create({
-      content: "Integration testing with an isolated database",
-      title: "Container-backed content",
-    });
+    const created = await repository.create(contentInput);
     await expect(repository.findById(created.id)).resolves.toMatchObject({
       id: created.id,
       title: "Container-backed content",
@@ -64,12 +76,18 @@ describe("Drizzle post repository integration", () => {
         pageSize: 10,
         query: "isolated",
         sort: "title",
+        locale: undefined,
+        status: undefined,
       }),
     ).resolves.toMatchObject({ total: 1 });
     await expect(
       repository.update(
         created.id,
-        { content: "Updated body", title: "Updated title" },
+        {
+          ...contentInput,
+          content: "Updated body",
+          title: "Updated title",
+        },
         created.version,
       ),
     ).resolves.toMatchObject({
@@ -79,7 +97,7 @@ describe("Drizzle post repository integration", () => {
     await expect(
       repository.update(
         created.id,
-        { content: "Stale", title: "Stale" },
+        { ...contentInput, content: "Stale", title: "Stale" },
         created.version,
       ),
     ).resolves.toEqual({ status: "conflict" });

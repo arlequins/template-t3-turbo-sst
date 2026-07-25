@@ -29,6 +29,8 @@ its related code, tests, environment variables, and documentation.
   permission-aware actions.
 - [x] Provider-neutral file upload port with an optional S3 adapter.
 - [x] Exact OIDC identity based initial-administrator bootstrap.
+- [x] Authenticated content studio with localized metadata, preview, draft
+  recovery, and static-theme MDX export.
 
 ## Operations and Security
 
@@ -49,6 +51,7 @@ its related code, tests, environment variables, and documentation.
 - [x] Application-user provisioning by stable issuer and subject.
 - [x] Dependency-injected role and permission checks.
 - [x] Multi-provider issuer configuration and authentication audit logs.
+- [x] Database-backed user administration with self-demotion protection.
 - [x] Expiry, renewal failure, logout propagation, and end-to-end sign-out
   coverage.
 

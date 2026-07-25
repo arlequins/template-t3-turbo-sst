@@ -18,14 +18,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { AuthStatus } from "~/auth/status";
+import {
+  Permission,
+  PermissionGate,
+} from "~/components/authorization/permission-gate";
 import { brandConfig } from "~/config/brand.config";
 
 const navigation = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/posts/", icon: FileText, label: "Content" },
-  { href: "/editor/", icon: PenLine, label: "Editor" },
-  { href: "/users/", icon: Users, label: "Users" },
-  { href: "/admin/", icon: ShieldCheck, label: "Admin" },
+  {
+    href: "/editor/",
+    icon: PenLine,
+    label: "Editor",
+    permission: Permission.POST_WRITE,
+  },
+  {
+    href: "/users/",
+    icon: Users,
+    label: "Users",
+    permission: Permission.USER_ADMIN,
+  },
+  {
+    href: "/admin/",
+    icon: ShieldCheck,
+    label: "Admin",
+    permission: Permission.USER_ADMIN,
+  },
 ] as const;
 
 function Sidebar(props: { onNavigate?: () => void }) {
@@ -61,7 +80,7 @@ function Sidebar(props: { onNavigate?: () => void }) {
               ? pathname === "/"
               : pathname.startsWith(item.href.replace(/\/$/, ""));
           const Icon = item.icon;
-          return (
+          const link = (
             <Link
               key={item.href}
               href={item.href}
@@ -75,24 +94,31 @@ function Sidebar(props: { onNavigate?: () => void }) {
               {item.label}
             </Link>
           );
+          return "permission" in item ? (
+            <PermissionGate key={item.href} permission={item.permission}>
+              {link}
+            </PermissionGate>
+          ) : (
+            link
+          );
         })}
       </nav>
 
       <div className="border-t p-3">
         <Link
-          href="/admin/"
+          href="/login/"
           onClick={props.onNavigate}
           className="hover:bg-muted flex items-center gap-3 rounded-md px-3 py-2"
         >
-          <span className="bg-foreground text-background flex size-8 items-center justify-center rounded-full text-xs font-semibold">
-            {brandConfig.user.initials}
+          <span className="bg-primary/10 text-primary flex size-8 items-center justify-center rounded-md">
+            <ShieldCheck aria-hidden="true" className="size-4" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">
-              {brandConfig.user.name}
+              Admin access
             </span>
             <span className="text-muted-foreground block truncate text-xs">
-              {brandConfig.user.role}
+              OpenID Connect
             </span>
           </span>
           <Settings
@@ -114,7 +140,8 @@ function isActive(pathname: string, href: string) {
 export function AppShell(props: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/auth/")) return props.children;
+  if (pathname.startsWith("/auth/") || pathname.startsWith("/login"))
+    return props.children;
 
   return (
     <div className="bg-muted/30 min-h-screen">
@@ -167,16 +194,16 @@ export function AppShell(props: { children: React.ReactNode }) {
 
       <nav
         aria-label="Mobile navigation"
-        className="bg-background/95 fixed inset-x-0 bottom-0 z-40 grid h-20 grid-cols-5 border-t px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+        className="bg-background/95 fixed inset-x-0 bottom-0 z-40 flex h-20 border-t px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
         {navigation.map((item) => {
           const Icon = item.icon;
           const active = isActive(pathname, item.href);
-          return (
+          const link = (
             <Link
               aria-current={active ? "page" : undefined}
               className={cn(
-                "text-muted-foreground relative flex min-w-0 flex-col items-center justify-center gap-1 text-[11px] font-medium",
+                "text-muted-foreground relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium",
                 active && "text-foreground",
               )}
               href={item.href}
@@ -192,6 +219,13 @@ export function AppShell(props: { children: React.ReactNode }) {
               </span>
               <span className="truncate">{item.label}</span>
             </Link>
+          );
+          return "permission" in item ? (
+            <PermissionGate key={item.href} permission={item.permission}>
+              {link}
+            </PermissionGate>
+          ) : (
+            link
           );
         })}
       </nav>

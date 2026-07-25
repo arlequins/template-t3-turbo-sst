@@ -28,7 +28,7 @@ export const brandConfig = {
   collaborator: null,
   colors: {
     accentDark: "oklch(0.7 0.16 264)",
-    accentLight: "oklch(0.55 0.21 264)",
+    accentLight: "oklch(0.52 0.21 264)",
   },
   description:
     "A reusable application workspace built with Next.js, Hono, and tRPC.",

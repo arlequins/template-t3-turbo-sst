@@ -69,6 +69,15 @@ weekly schedule. Set the repository variable `BLOG_PUBLISH_ENABLED` to `true`
 and add the `VERCEL_DEPLOY_HOOK_URL` secret to enable deployment. Keeping the
 variable unset leaves the template workflow safely disabled.
 
-The local MDX workflow remains the canonical authoring path. A content editor
-UI is deliberately deferred until a project needs non-developer authors,
-preview state, or external content storage.
+## Optional Content Studio
+
+The full preset includes an authenticated content studio at `/editor/` in
+`apps/web`. It stores drafts and editorial metadata through tRPC and PostgreSQL,
+supports preview and translation coverage, restores unsaved browser drafts, and
+exports a locale-specific MDX file.
+
+The checked-in files under `apps/blog/content` remain the publication source of
+truth. Review an exported file before adding it there; the web application does
+not write into the repository or deploy the static theme. Projects that need
+automatic publication should add a repository or CMS adapter behind an
+application port rather than coupling the editor directly to the filesystem.

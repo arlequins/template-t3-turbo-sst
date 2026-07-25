@@ -1,17 +1,18 @@
 import type {
-  ContentListInput,
+  ContentInput,
   ContentPage,
   ContentRecord,
+  NormalizedContentListInput,
 } from "../../domain/content";
 
 export type ContentRepository = {
-  create(input: { content: string; title: string }): Promise<ContentRecord>;
+  create(input: ContentInput): Promise<ContentRecord>;
   delete(id: string): Promise<boolean>;
   findById(id: string): Promise<ContentRecord | undefined>;
-  list(input: Required<ContentListInput>): Promise<ContentPage>;
+  list(input: NormalizedContentListInput): Promise<ContentPage>;
   update(
     id: string,
-    input: { content: string; title: string },
+    input: ContentInput,
     expectedVersion: number,
   ): Promise<
     | { status: "conflict" }

@@ -40,12 +40,13 @@ specific business domain:
 | `/` | Dashboard metrics, activity chart, publishing queue, and recent content |
 | `/posts/` | Searchable and filterable data list |
 | `/posts/[slug]/` | Static detail page with article content and performance data |
-| `/editor/` | Stateful form with draft, publish, and preview actions |
-| `/users/` | Role filtering, status display, and invitation dialog |
-| `/admin/` | Tabbed publication, workflow, and security settings |
+| `/login/` | Dedicated OIDC administrator entry and role verification |
+| `/editor/` | Authenticated localized editor, preview, recovery, and MDX export |
+| `/users/` | Application-owned role management for provisioned OIDC users |
+| `/admin/` | Content health, translation coverage, and security overview |
 
 Shared application components live in `apps/web/src/components/blog`, while
-sample content is isolated in `apps/web/src/lib/blog-data.ts`. Replace the data
-module with tRPC queries when adapting the example to a real application. The
-minimal preset removes the complete example, its images, and its UI-only
-dependencies.
+static detail-page sample content is isolated in `apps/web/src/lib/blog-data.ts`.
+The content list, editor, administration metrics, and users use tRPC-backed
+application services. The minimal preset removes the complete example, its
+images, and its UI-only dependencies.

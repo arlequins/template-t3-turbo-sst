@@ -2,6 +2,7 @@
 
 import { Button } from "@acme/ui/button";
 import { useQuery } from "@tanstack/react-query";
+import { ShieldCheck } from "lucide-react";
 
 import { useTRPC } from "~/trpc/react";
 import { useAuth } from "./provider";
@@ -14,11 +15,23 @@ export function AuthStatus(props: { compact?: boolean }) {
   );
 
   if (isLoading) {
-    return <Button disabled>Checking session</Button>;
+    return (
+      <Button className="transition-none" disabled>
+        Checking session
+      </Button>
+    );
   }
 
   if (!user) {
-    return <Button onClick={() => void login()}>Sign in</Button>;
+    return (
+      <Button
+        className="transition-none"
+        onClick={() => void login()}
+        variant="secondary"
+      >
+        Sign in
+      </Button>
+    );
   }
 
   const displayName =
@@ -34,18 +47,30 @@ export function AuthStatus(props: { compact?: boolean }) {
         {displayName ?? user.profile.sub}
       </span>
       {session.data && (
-        <span
-          className={
-            props.compact ? "sr-only" : "text-muted-foreground text-sm"
-          }
-          data-testid="api-session"
-        >
-          API session: {session.data.name ?? session.data.id}
-        </span>
+        <>
+          <span
+            className={
+              props.compact ? "sr-only" : "text-muted-foreground text-sm"
+            }
+            data-testid="api-session"
+          >
+            API session: {session.data.name ?? session.data.id}
+          </span>
+          {session.data.roles.includes("admin") && (
+            <span
+              className="bg-primary/10 text-primary hidden items-center gap-1 rounded-md px-2 py-1 text-xs font-medium sm:inline-flex"
+              title="Administrator"
+            >
+              <ShieldCheck className="size-3" />
+              Admin
+            </span>
+          )}
+        </>
       )}
       <Button
+        className="transition-none"
         size={props.compact ? "sm" : "default"}
-        variant="outline"
+        variant="secondary"
         onClick={() => void logout()}
       >
         Sign out

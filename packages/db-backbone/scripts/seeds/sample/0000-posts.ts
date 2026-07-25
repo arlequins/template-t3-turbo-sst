@@ -12,7 +12,22 @@ export default async function seed({
 }: SeedContext<SeedTx>): Promise<void> {
   assertSampleSeedAllowed(stage, true);
   await tx.insert(Post).values([
-    { title: "Seeded post", content: "Hello from pnpm seed" },
-    { title: "Second seed", content: "Add more rows here" },
+    {
+      category: "engineering",
+      content: "Hello from the sample content seed.",
+      description: "A sample entry for validating local content workflows.",
+      imageAlt: "A sample editorial workspace",
+      slug: "seeded-post",
+      title: "Seeded post",
+      translationKey: "seeded-post",
+    },
+    {
+      content: "Add more rows here as the template grows.",
+      description: "A second sample entry for list and pagination checks.",
+      imageAlt: "A second sample editorial workspace",
+      slug: "second-seed",
+      title: "Second seed",
+      translationKey: "second-seed",
+    },
   ]);
 }

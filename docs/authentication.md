@@ -86,4 +86,16 @@ After token verification, the API provisions an application user by the stable `
 
 Use `permissionProcedure(Permission.X)` for protected tRPC operations. The default policy provides `viewer`, `member`, and `admin` roles through a dependency-injected provisioning port. Authentication success and authorization denial are emitted as structured audit events without tokens.
 
+The full example application provides a dedicated `/login/` administrator
+entry point. `/admin/` and `/users/` require `user:admin`; `/editor/` requires
+`post:write`. The user management screen changes application-owned roles through
+the user-administration port and prevents an administrator from removing their
+own administrator role.
+
+For the first administrator, set
+`AUTH_BOOTSTRAP_ADMIN_IDENTITIES=issuer|subject` (comma-separated for multiple
+identities). Use exact values, complete the first login, verify the stored role,
+then remove the bootstrap value when ongoing automatic assignment is not
+required.
+
 For multiple identity providers, set `OIDC_PROVIDERS_JSON` to a JSON array of named configurations. The unverified issuer is used only to select a configuration; signature, issuer, audience, expiry, algorithm, and subject are then verified against that configuration.

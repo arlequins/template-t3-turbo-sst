@@ -17,7 +17,9 @@ test("supports the generic content lifecycle without horizontal overflow", async
   const updatedTitle = `Updated ${suffix}`;
 
   await page.goto("/posts/");
-  await expect(page.getByRole("heading", { name: "Content" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { exact: true, name: "Content" }),
+  ).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -28,9 +30,12 @@ test("supports the generic content lifecycle without horizontal overflow", async
   await page.getByRole("link", { name: "New item" }).click();
   await page.getByRole("textbox", { name: "Title" }).fill(initialTitle);
   await page
+    .getByRole("textbox", { name: "Description" })
+    .fill("A reusable content entry created by the browser test.");
+  await page
     .getByRole("textbox", { name: "Body" })
     .fill("Reusable application content");
-  await page.getByRole("button", { name: "Save item" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page).toHaveURL("http://localhost:3100/posts/");
 
   await page.getByRole("textbox", { name: "Search content" }).fill(suffix);
@@ -40,7 +45,7 @@ test("supports the generic content lifecycle without horizontal overflow", async
     initialTitle,
   );
   await page.getByRole("textbox", { name: "Title" }).fill(updatedTitle);
-  await page.getByRole("button", { name: "Save item" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page).toHaveURL("http://localhost:3100/posts/");
 
   await page.getByRole("textbox", { name: "Search content" }).fill(suffix);
