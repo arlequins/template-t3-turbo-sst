@@ -4,6 +4,11 @@
 
 CloudWatch alarms cover server errors and sustained average latency. The dashboard includes requests, errors, latency, and Lambda cold starts. Set `ALERT_TOPIC_ARN` to route alarms to an owned notification channel.
 
+The hourly `Production availability monitor` checks the configured public site
+and API health endpoints. It opens one issue per incident until an operator
+closes or resolves the existing issue; inspect the linked run before changing
+infrastructure.
+
 1. Acknowledge the alert and name an incident owner.
 2. Check deployment events, stage, request IDs, error rate, latency, readiness, and external dependency status.
 3. Use structured request and tRPC logs to follow a request ID. Tokens and secret-shaped fields are redacted.

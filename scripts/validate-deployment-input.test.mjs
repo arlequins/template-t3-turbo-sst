@@ -14,6 +14,10 @@ describe("deployment input validation", () => {
   it("accepts supported deployment values", () => {
     assert.deepEqual(validateDeploymentInput(validInput), validInput);
     assert.equal(
+      validateDeploymentInput({ ...validInput, operation: "diff" }).operation,
+      "diff",
+    );
+    assert.equal(
       validateDeploymentInput({ ...validInput, stage: "pr-46" }).stage,
       "pr-46",
     );
