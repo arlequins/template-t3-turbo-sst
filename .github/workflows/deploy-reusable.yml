@@ -12,7 +12,7 @@ on:
         required: true
         type: string
       operation:
-        description: deploy or remove
+        description: diff, deploy, or remove
         required: true
         type: string
       role_arn:
@@ -76,6 +76,21 @@ jobs:
           DEPLOY_APPLICATION: ${{ inputs.application }}
           DEPLOY_OPERATION: ${{ inputs.operation }}
           DEPLOY_STAGE: ${{ inputs.environment }}
-        run: >-
-          pnpm sst:ws "$DEPLOY_APPLICATION" "$DEPLOY_OPERATION"
-          -- --stage "$DEPLOY_STAGE"
+        run: |
+          set -euo pipefail
+          if test "$DEPLOY_OPERATION" = diff; then
+            pnpm sst:ws "$DEPLOY_APPLICATION" diff \
+              -- --stage "$DEPLOY_STAGE" --print-logs \
+              | tee "$RUNNER_TEMP/sst-diff.txt"
+          else
+            pnpm sst:ws "$DEPLOY_APPLICATION" "$DEPLOY_OPERATION" \
+              -- --stage "$DEPLOY_STAGE" --print-logs
+          fi
+
+      - name: Save reviewed SST diff
+        if: inputs.operation == 'diff'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sst-diff-${{ inputs.application }}-${{ github.sha }}
+          path: ${{ runner.temp }}/sst-diff.txt
+          if-no-files-found: error

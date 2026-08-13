@@ -46,6 +46,8 @@ local application; the pages below explain design decisions and ongoing work.
   protected environments, security checks, and response headers.
 - [Incident runbook](incident-runbook.md): triage, mitigation, recovery, and
   observability integration points.
+- [Production Lambda diagnostics](production-runtime-diagnostics.md): protected,
+  redacted CloudWatch troubleshooting for failed deployments.
 - [Semantic versioning](semantic-versioning.md): release impact and repository
   version policy.
 

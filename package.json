@@ -51,7 +51,7 @@
     "test": "pnpm test:runtime && pnpm test:automation && pnpm test:template-init && pnpm architecture:check && turbo run test",
     "test:automation": "node --test scripts/check-placeholders.test.mjs scripts/validate-deployment-input.test.mjs",
     "test:sst": "node scripts/test-sst.mjs",
-    "test:runtime": "node --test scripts/check-runtime.test.mjs",
+    "test:runtime": "node --test scripts/check-runtime.test.mjs scripts/print-lambda-runtime-diagnostics.test.mjs",
     "test:template-init": "node --test scripts/template-init.test.mjs scripts/template-doctor.test.mjs",
     "test:template-matrix": "node --test scripts/template-matrix.test.mjs && node scripts/template-matrix.mjs",
     "test:template-output": "node scripts/test-template-output.mjs",

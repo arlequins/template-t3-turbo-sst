@@ -36,8 +36,13 @@ export default $config({
   },
   async run() {
     type HandlerKey = keyof typeof HandlerMap;
-    const { vpcFromEnv, Stage, resolveDeployStage, LambdaEnvironment } =
-      await import("@acme/env");
+    const {
+      serverEnv,
+      vpcFromEnv,
+      Stage,
+      resolveDeployStage,
+      LambdaEnvironment,
+    } = await import("@acme/env");
     const { RegisteredManifests } = await import("./config");
     const { HandlerMap } = await import("./config/handler");
     const { batchTaskRetryPolicyForDeployStage } = await import("./shared");
@@ -105,6 +110,16 @@ export default $config({
       retention: deployStage === Stage.PRODUCTION ? "13 months" : "2 weeks",
       ...(vpc ? { vpc } : {}),
       environment,
+      ...(serverEnv.ALERT_TOPIC_ARN
+        ? {
+            permissions: [
+              {
+                actions: ["sns:Publish"],
+                resources: [serverEnv.ALERT_TOPIC_ARN],
+              },
+            ],
+          }
+        : {}),
     });
 
     for (const manifest of RegisteredManifests) {

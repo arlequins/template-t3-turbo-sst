@@ -67,6 +67,9 @@ export const LambdaEnvironment = {
   API_RATE_LIMIT_WINDOW_SECONDS: String(
     serverEnv.API_RATE_LIMIT_WINDOW_SECONDS ?? 60,
   ),
+  ...(serverEnv.ALERT_TOPIC_ARN
+    ? { ALERT_TOPIC_ARN: serverEnv.ALERT_TOPIC_ARN }
+    : {}),
 
   NEXT_PUBLIC_SITE_URL: clientEnv.NEXT_PUBLIC_SITE_URL,
   NEXT_PUBLIC_API_URL: clientEnv.NEXT_PUBLIC_API_URL,

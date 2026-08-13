@@ -34,3 +34,15 @@ OTEL_SERVICE_NAME=api
 ```
 
 Unset the endpoint to return to the dependency-free local mode.
+
+## Batch failure alerts
+
+The shared Step Functions failure path publishes a small, allowlisted summary to
+`ALERT_TOPIC_ARN` after configured retries are exhausted. The batch Lambda gets
+`sns:Publish` only on that exact topic ARN and never logs the original
+Step Functions input, which may contain application content or credentials.
+
+Configure the topic ARN in the protected deployment environment and subscribe
+the topic to the operator's preferred channel (email, incident tooling, or an
+HTTPS endpoint). Leaving it unset keeps the failure path operational while
+logging an explicit disabled-alert message for local and qualification runs.
