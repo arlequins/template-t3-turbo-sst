@@ -19,7 +19,7 @@ const env = {
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     env,
-    stdio: "inherit",
+    stdio: options.input ? ["pipe", "inherit", "inherit"] : "inherit",
     ...options,
   });
   if (result.error) throw result.error;
@@ -48,6 +48,24 @@ try {
     ],
     { input: readFileSync("packages/db-backbone/drizzle/0000_init.sql") },
   );
+  run("docker", [
+    ...compose,
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-h",
+    "127.0.0.1",
+    "-U",
+    "postgres",
+    "-d",
+    "app",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-c",
+    `insert into sample.post (title, content)
+      values ('Legacy one', 'First legacy row'), ('Legacy two', 'Second legacy row')`,
+  ]);
   const initialMigration = readFileSync(
     "packages/db-backbone/drizzle/0000_init.sql",
     "utf8",
@@ -112,6 +130,8 @@ insert into drizzle.__drizzle_migrations (hash, created_at) values ('${migration
       if to_regclass('auth.app_user') is null then raise exception 'auth.app_user is missing'; end if;
       if to_regclass('sample.idempotency_record') is null then raise exception 'idempotency table is missing'; end if;
       if not exists (select 1 from information_schema.columns where table_schema = 'sample' and table_name = 'post' and column_name = 'version') then raise exception 'post.version is missing'; end if;
+      if (select count(distinct slug) from sample.post) <> 2 then raise exception 'legacy post slugs were not made unique'; end if;
+      if exists (select 1 from sample.post where slug = 'untitled') then raise exception 'legacy placeholder slug remains'; end if;
     end $$`,
   ]);
 } finally {

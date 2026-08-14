@@ -3,6 +3,22 @@ import { describe, expect, it, vi } from "vitest";
 import type { ApplicationLogger } from "./application/ports/application-logger";
 import type { ContentRepository } from "./application/ports/content-repository";
 import { createContentService } from "./application/use-cases/content";
+import type { ContentInput } from "./domain/content";
+
+const contentInput = {
+  category: "notes",
+  content: "Body",
+  description: "A sufficiently detailed content description.",
+  featured: false,
+  image: "/blog/editorial-workspace.jpg",
+  imageAlt: "Editorial workspace",
+  locale: "en",
+  publishedAt: null,
+  slug: "title",
+  status: "draft",
+  title: "Title",
+  translationKey: "title",
+} satisfies ContentInput;
 
 function createDependencies() {
   const repository: ContentRepository = {
@@ -40,10 +56,9 @@ describe("createContentService", () => {
     vi.mocked(deps.repository.update).mockResolvedValue({
       status: "updated",
       value: {
-        content: "Body",
+        ...contentInput,
         createdAt: new Date(0),
         id: "content-1",
-        title: "Title",
         updatedAt: new Date(1),
         version: 2,
       },
@@ -51,14 +66,13 @@ describe("createContentService", () => {
     vi.mocked(deps.repository.delete).mockResolvedValue(true);
     const service = createContentService(deps);
     await service.updateContent("content-1", {
-      content: "Body",
-      title: "Title",
+      ...contentInput,
       version: 1,
     });
     await service.deleteContent("content-1");
     expect(deps.repository.update).toHaveBeenCalledWith(
       "content-1",
-      { content: "Body", title: "Title" },
+      contentInput,
       1,
     );
     expect(deps.repository.delete).toHaveBeenCalledWith("content-1");
@@ -69,8 +83,7 @@ describe("createContentService", () => {
     vi.mocked(deps.repository.update).mockResolvedValue({ status: "conflict" });
     await expect(
       createContentService(deps).updateContent("content-1", {
-        content: "Body",
-        title: "Title",
+        ...contentInput,
         version: 1,
       }),
     ).rejects.toThrow("updated by another request");

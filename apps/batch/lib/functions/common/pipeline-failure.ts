@@ -3,9 +3,11 @@
  * Path in `sst.config.ts`; payload fields `batchId` / `stepFunctionsInput`.
  * Alert implementation: `lib/usecases/pipeline-failure/`.
  */
-import type { Handler } from "aws-lambda";
 
-import { notifyPipelineFailureAlert } from "../../usecases/pipeline-failure";
+import { serverEnv } from "@acme/env";
+import type { Handler } from "aws-lambda";
+import { createSnsPipelineAlert } from "../../adaptors/sns-pipeline-alert";
+import { createPipelineFailureNotifier } from "../../usecases/pipeline-failure";
 
 export type PipelineFailureHandlerEvent = {
   batchId: string;
@@ -23,8 +25,12 @@ function requireBatchId(event: PipelineFailureHandlerEvent): string {
   return id;
 }
 
-export const handler: Handler<PipelineFailureHandlerEvent> = (event) => {
-  notifyPipelineFailureAlert({
+export const handler: Handler<PipelineFailureHandlerEvent> = async (event) => {
+  const notify = createPipelineFailureNotifier({
+    client: createSnsPipelineAlert(),
+    topicArn: serverEnv.ALERT_TOPIC_ARN,
+  });
+  await notify({
     batchId: requireBatchId(event),
     errorEvent: event.stepFunctionsInput ?? event,
   });

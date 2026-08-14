@@ -4,5 +4,5 @@
   "scope": "@acme",
   "domain": "example.com",
   "preset": "full",
-  "features": ["auth", "batch", "sst", "example-ui"]
+  "features": ["auth", "batch", "sst", "example-ui", "blog-theme"]
 }

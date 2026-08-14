@@ -263,6 +263,9 @@ jobs:
       - name: Test browser authentication
         run: pnpm test:e2e
 
+      - name: Test blog theme
+        run: pnpm test:e2e:blog
+
       - name: Upload browser diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -272,4 +275,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            apps/blog/.next/
           retention-days: 7

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 
 const APPLICATIONS = new Set(["api", "batch", "web"]);
-const OPERATIONS = new Set(["deploy", "remove"]);
+const OPERATIONS = new Set(["diff", "deploy", "remove"]);
 const STAGE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?$/;
 const ROLE_ARN_PATTERN =
   /^arn:(?:aws|aws-cn|aws-us-gov):iam::\d{12}:role\/[A-Za-z0-9+=,.@_/-]+$/;
@@ -22,7 +22,7 @@ export function validateDeploymentInput(input) {
     throw new Error("application must be api, batch, or web");
   }
   if (!OPERATIONS.has(operation)) {
-    throw new Error("operation must be deploy or remove");
+    throw new Error("operation must be diff, deploy, or remove");
   }
   if (!STAGE_PATTERN.test(stage)) {
     throw new Error(

@@ -6,7 +6,8 @@ import { fileURLToPath } from "node:url";
 const TEMPLATE_NAME = "template-t3-turbo-sst";
 const TEMPLATE_SCOPE = "@acme";
 const TEMPLATE_DISPLAY_NAME = "Acme Workspace";
-const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui"];
+const BLOG_TEMPLATE_NAME = "Your Studio";
+const OPTIONAL_FEATURES = ["auth", "batch", "sst", "example-ui", "blog-theme"];
 const DEPENDENCY_FIELDS = [
   "dependencies",
   "devDependencies",
@@ -90,14 +91,17 @@ export function pathsToPrune(options) {
   if (!features.has("auth")) {
     paths.push(
       "apps/web/src/app/auth",
+      "apps/web/src/app/login",
       "apps/web/src/auth/provider.tsx",
       "apps/web/src/auth/status.tsx",
+      "apps/web/src/components/authorization/admin-login.tsx",
       "apps/web/src/lib/client-auth.ts",
       "packages/auth",
       "packages/db-backbone/drizzle/0001_auth-users.sql",
       "packages/db-backbone/drizzle/meta/0001_snapshot.json",
       "packages/db-backbone/src/schemas/auth.ts",
       "packages/trpc/src/adaptors/auth-user.ts",
+      "packages/trpc/src/adaptors/user-administration.ts",
       "packages/trpc/src/router/auth.ts",
       "playwright.config.ts",
       "tests/e2e/accessibility.test.ts",
@@ -134,6 +138,14 @@ export function pathsToPrune(options) {
       "scripts/example-crud.mjs",
     );
   }
+  if (!features.has("blog-theme")) {
+    paths.push(
+      ".github/workflows/blog-publish.yml",
+      "apps/blog",
+      "playwright.blog.config.ts",
+      "tests/blog-e2e",
+    );
+  }
 
   return paths.sort();
 }
@@ -155,11 +167,13 @@ function prunePackageJson(relativePath, source, options) {
 
   if (!features.has("auth")) {
     if (relativePath === "package.json") {
-      removeDependencies(packageJson, [
-        "@axe-core/playwright",
-        "@playwright/test",
-      ]);
       removeScripts(packageJson, ["test:e2e", "test:e2e:headed"]);
+      if (!features.has("blog-theme")) {
+        removeDependencies(packageJson, [
+          "@axe-core/playwright",
+          "@playwright/test",
+        ]);
+      }
     }
     if (relativePath === "apps/api/package.json") {
       removeDependencies(packageJson, [`${options.scope}/auth`]);
@@ -173,6 +187,9 @@ function prunePackageJson(relativePath, source, options) {
     if (relativePath === "packages/trpc/package.json") {
       removeDependencies(packageJson, [`${options.scope}/auth`, "drizzle-orm"]);
     }
+  }
+  if (!features.has("blog-theme") && relativePath === "package.json") {
+    removeScripts(packageJson, ["test:e2e:blog"]);
   }
 
   if (!features.has("sst") && relativePath.startsWith("apps/")) {
@@ -245,6 +262,7 @@ export function transformContent(relativePath, source, options) {
   output = output
     .split(TEMPLATE_DISPLAY_NAME)
     .join(resolveDisplayName(options));
+  output = output.split(BLOG_TEMPLATE_NAME).join(resolveDisplayName(options));
   if (options.domain) output = output.split("example.com").join(options.domain);
 
   const appName = new Map([
@@ -291,21 +309,20 @@ export function transformContent(relativePath, source, options) {
     }
     if (relativePath === "packages/trpc/src/context.ts") {
       output = output
-        .replace(
-          /import type \{ AuthSession, TRPCAuth \} from "[^"]+\/auth";\n/,
-          "",
-        )
+        .replace(/import type \{[\s\S]*?\} from "[^"]+\/auth";\n/, "")
+        .replace("  userAdministration?: UserAdministration;\n", "")
         .replace("  authApi: TRPCAuth;\n", "")
         .replace("  session: AuthSession | null;\n", "");
     }
     if (relativePath === "packages/trpc/src/composition/create-context.ts") {
       output = output
+        .replace(/import \{[\s\S]*?\} from "[^"]+\/auth";\n/, "")
         .replace(
-          /import \{ authApi, provisionSessionUser \} from "[^"]+\/auth";\n/,
+          /import \{ createDatabaseUserProvisioning \} from "\.\.\/adaptors\/auth-user";\n/,
           "",
         )
         .replace(
-          /import \{ createDatabaseUserProvisioning \} from "\.\.\/adaptors\/auth-user";\n/,
+          /import \{ createDatabaseUserAdministration \} from "\.\.\/adaptors\/user-administration";\n/,
           "",
         )
         .replace(
@@ -317,7 +334,11 @@ export function transformContent(relativePath, source, options) {
           "",
         )
         .replace("    authApi,\n", "")
-        .replace("    session,\n", "");
+        .replace("    session,\n", "")
+        .replace(
+          / {6}userAdministration: session[\s\S]*? {10}\}\)\n {8}: undefined,\n/,
+          "",
+        );
     }
     if (relativePath === "packages/trpc/src/root.ts") {
       output = output
@@ -328,7 +349,7 @@ export function transformContent(relativePath, source, options) {
       output = output
         .replace('["auth", "file", "post"]', '["file", "post"]')
         .replace(
-          '    expect(procedureNames(AppRouter._def.record.auth)).toEqual(["me"]);\n',
+          / {4}expect\(procedureNames\(AppRouter\._def\.record\.auth\)\)\.toEqual\(\[[\s\S]*? {4}\]\);\n/,
           "",
         );
     }
@@ -376,10 +397,27 @@ export function transformContent(relativePath, source, options) {
         .replace('import { AuthStatus } from "~/auth/status";\n', "")
         .replace("        <AuthStatus />\n", "");
     }
+    if (
+      [
+        "apps/web/src/app/admin/page.tsx",
+        "apps/web/src/app/editor/page.tsx",
+        "apps/web/src/app/users/page.tsx",
+      ].includes(relativePath)
+    ) {
+      output = output
+        .replace(
+          /import \{ Permission \} from "[^"]+\/auth\/authorization";\n/,
+          "",
+        )
+        .replace(/ permission=\{Permission\.[A-Z_]+\}/, "");
+    }
     if (relativePath === "apps/web/src/components/blog/app-shell.tsx") {
       output = output
         .replace('import { AuthStatus } from "~/auth/status";\n', "")
-        .replace("            <AuthStatus compact />\n", "");
+        .replace("            <AuthStatus compact />\n", "")
+        .replace('href="/login/"', 'href="/admin/"')
+        .replace("Admin access", "Administration")
+        .replace("OpenID Connect", "Local template");
     }
     if (relativePath === "apps/web/src/auth/status.tsx") {
       output = "export function AuthStatus() {\n  return null;\n}\n";
@@ -389,6 +427,13 @@ export function transformContent(relativePath, source, options) {
       "apps/web/src/components/authorization/permission-gate.tsx"
     ) {
       output = `export const Permission = { POST_WRITE: "post:write" } as const;\n\nexport function PermissionGate(props: { children: React.ReactNode; fallback?: React.ReactNode; permission?: unknown }) {\n  return props.children;\n}\n`;
+    }
+    if (
+      relativePath ===
+      "apps/web/src/components/authorization/access-boundary.tsx"
+    ) {
+      output =
+        "export function AccessBoundary(props: { children: React.ReactNode; permission?: unknown }) {\n  return props.children;\n}\n";
     }
     if (relativePath === "apps/web/src/trpc/react.tsx") {
       output = output
@@ -456,7 +501,7 @@ export function transformContent(relativePath, source, options) {
       .replace("<AppShell>{props.children}</AppShell>", "{props.children}");
   }
 
-  if (relativePath === "apps/web/src/config/site.ts") {
+  if (relativePath === "apps/web/src/config/brand.config.ts") {
     output = output.replace(
       /shortName: "[A-Z0-9]{1,4}"/,
       `shortName: ${JSON.stringify(displayInitials(resolveDisplayName(options)))}`,
@@ -562,7 +607,7 @@ if (isCli) {
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     console.error(
-      "pnpm template:init -- --name my-app --scope @company [--display-name 'My App'] [--preset full|minimal] [--features auth,batch,sst,example-ui] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
+      "pnpm template:init -- --name my-app --scope @company [--display-name 'My App'] [--preset full|minimal] [--features auth,batch,sst,example-ui,blog-theme] [--prune] [--description text] [--domain example.org] [--dry-run] [--force]",
     );
     process.exitCode = 1;
   }

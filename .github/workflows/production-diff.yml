@@ -1,0 +1,25 @@
+name: Production infrastructure diff
+
+on:
+  workflow_dispatch:
+    inputs:
+      application:
+        description: Application to diff from main
+        required: true
+        type: choice
+        options: [api, batch, web]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  diff:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/deploy-reusable.yml
+    with:
+      application: ${{ inputs.application }}
+      environment: production
+      operation: diff
+      role_arn: ${{ vars.AWS_PRODUCTION_ROLE_ARN }}
+      secret_name: ${{ vars.AWS_PRODUCTION_SECRET_NAME }}

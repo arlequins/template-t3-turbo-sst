@@ -1,10 +1,15 @@
-import { authApi, provisionSessionUser } from "@acme/auth";
+import {
+  authApi,
+  createUserAdministration,
+  provisionSessionUser,
+} from "@acme/auth";
 import { db } from "@acme/db-backbone/client";
 import { serverEnv } from "@acme/env";
 import { createContentService, createFileUploadService } from "@acme/service";
 import { createDatabaseUserProvisioning } from "../adaptors/auth-user";
 import { createDrizzlePostRepository } from "../adaptors/post-repository";
 import { createS3FileUploadAdapter } from "../adaptors/s3-file-upload";
+import { createDatabaseUserAdministration } from "../adaptors/user-administration";
 import { getPostCache } from "../cache";
 import type { CreateTRPCContextOptions, TRPCContext } from "../context";
 
@@ -58,6 +63,11 @@ export async function createTRPCContext(
               bucket: serverEnv.S3_UPLOAD_BUCKET,
               prefix: serverEnv.S3_UPLOAD_PREFIX,
             }),
+          })
+        : undefined,
+      userAdministration: session
+        ? createUserAdministration(createDatabaseUserAdministration(db), {
+            actorUserId: session.user.id,
           })
         : undefined,
     },

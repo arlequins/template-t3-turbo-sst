@@ -20,7 +20,14 @@ import { Select } from "@acme/ui/select";
 import { Skeleton } from "@acme/ui/skeleton";
 import { toast } from "@acme/ui/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Pencil, Search, Trash2 } from "lucide-react";
+import {
+  CalendarClock,
+  FileText,
+  Languages,
+  Pencil,
+  Search,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -41,14 +48,24 @@ function ContentRow(props: { item: PostItem; onDelete: (id: string) => void }) {
       <div className="min-w-0 flex-1">
         <h2 className="truncate text-sm font-semibold">{props.item.title}</h2>
         <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-          {props.item.content}
+          {props.item.description}
         </p>
-        <p className="text-muted-foreground mt-2 text-xs">
-          Updated{" "}
-          {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(
-            props.item.updatedAt ?? props.item.createdAt,
-          )}
-        </p>
+        <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-3 text-xs">
+          <span className="bg-muted text-foreground rounded px-1.5 py-0.5 font-medium">
+            {props.item.status}
+          </span>
+          <span className="flex items-center gap-1">
+            <Languages className="size-3" />
+            {props.item.locale.toUpperCase()}
+          </span>
+          <span>{props.item.category}</span>
+          <span className="flex items-center gap-1">
+            <CalendarClock className="size-3" />
+            {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(
+              props.item.updatedAt ?? props.item.createdAt,
+            )}
+          </span>
+        </div>
       </div>
       <PermissionGate permission={Permission.POST_WRITE}>
         <div className="flex shrink-0">
@@ -83,7 +100,19 @@ export function ContentList() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string>();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"createdAt" | "title">("createdAt");
-  const input = { direction: "desc" as const, page, pageSize: 10, query, sort };
+  const [locale, setLocale] = useState<"" | "en" | "ja" | "ko">("");
+  const [status, setStatus] = useState<"" | "approved" | "draft" | "in-review">(
+    "",
+  );
+  const input = {
+    direction: "desc" as const,
+    page,
+    pageSize: 10,
+    query,
+    sort,
+    ...(locale ? { locale } : {}),
+    ...(status ? { status } : {}),
+  };
   const posts = useQuery(trpc.post.all.queryOptions(input));
   const deletePost = useMutation(
     trpc.post.delete.mutationOptions({
@@ -121,6 +150,34 @@ export function ContentList() {
         >
           <option value="createdAt">Recently updated</option>
           <option value="title">Title</option>
+        </Select>
+        <Select
+          aria-label="Filter by language"
+          className="sm:w-32"
+          onChange={(event) => {
+            setPage(1);
+            setLocale(event.target.value as typeof locale);
+          }}
+          value={locale}
+        >
+          <option value="">All languages</option>
+          <option value="en">English</option>
+          <option value="ja">日本語</option>
+          <option value="ko">한국어</option>
+        </Select>
+        <Select
+          aria-label="Filter by review status"
+          className="sm:w-36"
+          onChange={(event) => {
+            setPage(1);
+            setStatus(event.target.value as typeof status);
+          }}
+          value={status}
+        >
+          <option value="">All statuses</option>
+          <option value="draft">Draft</option>
+          <option value="in-review">In review</option>
+          <option value="approved">Approved</option>
         </Select>
       </div>
       {posts.isPending && (

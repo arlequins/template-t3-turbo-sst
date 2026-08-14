@@ -25,7 +25,11 @@ describe("public tRPC contract", () => {
   });
 
   it("keeps example procedures stable", () => {
-    expect(procedureNames(AppRouter._def.record.auth)).toEqual(["me"]);
+    expect(procedureNames(AppRouter._def.record.auth)).toEqual([
+      "me",
+      "updateUserRoles",
+      "users",
+    ]);
     expect(procedureNames(AppRouter._def.record.post)).toEqual([
       "all",
       "byId",

@@ -12,9 +12,11 @@ release automation. Security policy and AWS trust configuration remain in
 | `PR title` | pull request title changes | Conventional Commit validation for squash merges |
 | `Security` | pull requests, merge queue, `main`, `develop`, weekly | Dependency review, CodeQL, secret scanning, license policy, and SBOM |
 | `Preview deployment` | same-repository pull requests | Deploy or remove isolated `pr-NUMBER` API and web stages |
+| `Production infrastructure diff` | manual from `main` | Review the SST plan for one application through the protected `production` environment |
 | `Production deployment` | manual | Deploy one application through the protected `production` environment |
 | `Release` | `main`, manual | Maintain the Release Please PR and create tags and GitHub Releases |
 | `AWS sandbox smoke` | manual, weekly | Exercise Function URL and API Gateway sandbox endpoints |
+| `Production availability monitor` | hourly, manual | Check configured public HTTPS site and API health endpoints; open one GitHub issue on failure |
 | `Quickstart deployment qualification` | manual | Rename, validate, deploy, and remove a fresh full template |
 | `Baseline load test` | manual | Run the k6 baseline against an approved HTTPS target |
 
@@ -48,6 +50,8 @@ Set these repository variables when the associated workflow is enabled:
 | `AWS_QUICKSTART_ROLE_ARN` | Generated-template cloud qualification |
 | `AWS_SMOKE_FUNCTION_URL` | Scheduled Function URL smoke test |
 | `AWS_SMOKE_GATEWAY_URL` | Scheduled API Gateway smoke test |
+| `PRODUCTION_SITE_URL` | Production availability monitor |
+| `PRODUCTION_API_URL` | Production availability monitor |
 | `LOAD_TEST_API_URL` | k6 baseline |
 | `DEPENDENCY_REVIEW_ENABLED` | Makes dependency-review findings blocking when set to `true` |
 
@@ -76,6 +80,12 @@ Preview deployment is skipped for forks and when either preview variable is
 missing. Production deployment always passes through the protected
 `production` GitHub Environment. Configure required reviewers and prevent
 self-review there.
+
+Production infrastructure changes must first pass through
+`Production infrastructure diff`. Review its uploaded `sst-diff-*` artifact
+and approve the matching production deployment only after the plan is
+understood. The diff workflow runs only from `main` and uses the protected
+production environment.
 
 Production application deployment is intentionally manual and separate from
 Release Please. A generic template cannot know the target database network,

@@ -54,9 +54,14 @@ pnpm install
 ```
 
 The minimal preset keeps `web + api + trpc + db`. Use `--features` to select
-`auth`, `batch`, `sst`, or `example-ui`. `--prune` physically removes omitted
-modules and the lockfile; the next install creates a lockfile for the selected
-composition.
+`auth`, `batch`, `sst`, `example-ui`, or the independently versioned
+`blog-theme`. `--prune` physically removes omitted modules and the lockfile; the
+next install creates a lockfile for the selected composition.
+
+The blog theme is a static multilingual portfolio with localized MDX, content
+schema validation, canonical metadata, and light/dark theme support. See
+[Versioned Blog Theme](./docs/blog-theme.md) and
+[Static Portfolio Deployment](./docs/static-portfolio.md).
 
 ## Local Quickstart
 
@@ -96,6 +101,7 @@ for provider configuration.
 | `pnpm typecheck` | Typecheck every workspace. |
 | `pnpm test` | Run unit and contract tests. |
 | `pnpm test:e2e` | Run isolated PostgreSQL and browser end-to-end tests. |
+| `pnpm test:e2e:blog` | Verify blog locale, SEO, theme persistence, and responsive layout. |
 | `pnpm db:setup` | Apply committed migrations and pending seeds. |
 | `pnpm turbo gen` | Generate an application, package, or tRPC domain. |
 | `pnpm gen:feature` | Generate a clean-architecture command or query slice. |

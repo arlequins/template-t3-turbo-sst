@@ -1,0 +1,52 @@
+name: Production availability monitor
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: template-production-availability-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: vars.PRODUCTION_SITE_URL != '' && vars.PRODUCTION_API_URL != ''
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      PRODUCTION_SITE_URL: ${{ vars.PRODUCTION_SITE_URL }}
+      PRODUCTION_API_URL: ${{ vars.PRODUCTION_API_URL }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: ./tooling/github/setup
+      - name: Validate HTTPS endpoints
+        run: |
+          node -e 'for (const value of process.argv.slice(1)) { const url = new URL(value); if (url.protocol !== "https:") throw new Error("Production endpoint must use HTTPS"); }' \
+            "$PRODUCTION_SITE_URL" "$PRODUCTION_API_URL"
+      - name: Check public website
+        run: curl --fail --silent --show-error --location --retry 2 "$PRODUCTION_SITE_URL"
+      - name: Check public API
+        run: node scripts/smoke-api.mjs "$PRODUCTION_API_URL"
+
+  report-failure:
+    needs: check
+    if: needs.check.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open one actionable GitHub issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: "Production availability monitor failed"
+        run: |
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number')"
+          if test -z "$existing"; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body "The hourly production monitor could not reach a configured public endpoint. Review the failed run: $RUN_URL"
+          fi
