@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.2...v1.2.0) (2026-08-14)
+
+
+### Features
+
+* **template:** add versioned blog theme and content studio ([5ad609b](https://github.com/arlequins/template-t3-turbo-sst/commit/5ad609b005b9e06c9e338031c2efc604a57f03b7))
+
 ## [1.1.2](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.1...v1.1.2) (2026-07-23)
 
 
