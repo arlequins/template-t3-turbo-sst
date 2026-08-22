@@ -46,3 +46,6 @@ a time.
 3. Move provider code under `infrastructure/` and wire it in composition.
 4. Keep route and page modules thin, then run `pnpm check`, `pnpm typecheck`,
    and `pnpm architecture:check`.
+
+Treat compatibility barrels as temporary seams: remove one only after an
+import search is empty and the slice's boundary test is in place.
