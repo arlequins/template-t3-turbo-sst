@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.2.0...v1.2.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* preserve architecture migration guidance ([#59](https://github.com/arlequins/template-t3-turbo-sst/issues/59)) ([040a5e7](https://github.com/arlequins/template-t3-turbo-sst/commit/040a5e7e5cc11214a4c7350daae1a2409371f831))
+
 ## [1.2.0](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.1.2...v1.2.0) (2026-08-14)
 
 
