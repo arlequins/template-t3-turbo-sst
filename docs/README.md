@@ -8,11 +8,13 @@ local application; the pages below explain design decisions and ongoing work.
 
 1. [Application architecture](architecture.md) explains workspace boundaries
    and the browser-to-database request flow.
-2. [Developer experience](developer-experience.md) covers generators, fast
+2. [Feature-sliced architecture guide](architecture-migration.md) defines the
+   server and web layer boundaries.
+3. [Developer experience](developer-experience.md) covers generators, fast
    feedback commands, and template qualification.
-3. [Template readiness](template-readiness.md) lists the capabilities to retain
+4. [Template readiness](template-readiness.md) lists the capabilities to retain
    or deliberately remove when adapting the template.
-4. [Generic application baseline](generic-application.md) explains the reusable
+5. [Generic application baseline](generic-application.md) explains the reusable
    CRUD, authorization, upload, and Clean Architecture example.
 
 ## Development
