@@ -49,3 +49,5 @@ a time.
 
 Treat compatibility barrels as temporary seams: remove one only after an
 import search is empty and the slice's boundary test is in place.
+Record that cleanup as a separate conventional change so release notes retain
+the migration step.
