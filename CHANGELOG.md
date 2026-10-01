@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.2](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.2.1...v1.2.2) (2026-10-01)
+
+
+### Bug Fixes
+
+* skip sandbox smoke when endpoints are unconfigured ([#61](https://github.com/arlequins/template-t3-turbo-sst/issues/61)) ([bad42ec](https://github.com/arlequins/template-t3-turbo-sst/commit/bad42ecabc8d5c34253da58701d0a2359257161f))
+
 ## [1.2.1](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.2.0...v1.2.1) (2026-08-22)
 
 
