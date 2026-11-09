@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.3](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.2.2...v1.2.3) (2026-11-09)
+
+
+### Bug Fixes
+
+* preserve cache results and the saved blog theme ([#63](https://github.com/arlequins/template-t3-turbo-sst/issues/63)) ([29f9d6b](https://github.com/arlequins/template-t3-turbo-sst/commit/29f9d6b549e7f99840b51b3297d4faa3bbf2d50c))
+
 ## [1.2.2](https://github.com/arlequins/template-t3-turbo-sst/compare/v1.2.1...v1.2.2) (2026-10-01)
 
 
