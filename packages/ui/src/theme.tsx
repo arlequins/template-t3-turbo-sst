@@ -105,14 +105,21 @@ const ThemeContext = React.createContext<ThemeContextProps | undefined>(
 );
 
 export function ThemeProvider({ children }: React.PropsWithChildren) {
-  const [themeMode, setThemeMode] = React.useState(getStoredThemeMode);
+  const [themeMode, setThemeMode] = React.useState<ThemeMode | null>(null);
+
+  React.useEffect(() => {
+    const storedTheme = getStoredThemeMode();
+    setThemeMode(storedTheme);
+    updateThemeClass(storedTheme);
+  }, []);
 
   React.useEffect(() => {
     if (themeMode !== "auto") return;
     return setupPreferredListener();
   }, [themeMode]);
 
-  const resolvedTheme = themeMode === "auto" ? getSystemTheme() : themeMode;
+  const resolvedTheme =
+    themeMode === "auto" ? getSystemTheme() : (themeMode ?? "light");
 
   const setTheme = (newTheme: ThemeMode) => {
     setThemeMode(newTheme);
@@ -121,13 +128,13 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
   };
 
   const toggleMode = () => {
-    setTheme(getNextTheme(themeMode));
+    setTheme(getNextTheme(themeMode ?? "auto"));
   };
 
   return (
     <ThemeContext
       value={{
-        themeMode,
+        themeMode: themeMode ?? "auto",
         resolvedTheme,
         setTheme,
         toggleMode,
